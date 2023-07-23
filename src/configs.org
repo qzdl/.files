@@ -3599,14 +3599,13 @@ annoying! cannot fathom why this doesn't work
 :PROPERTIES:
 :ID:       d2fc9152-8683-46c1-9ef2-4ca84510bb49
 :CREATED:  [2022-09-28 Wed 16:14]
-:UPDATED:  [2023-07-04 Tue 19:40]
+:UPDATED:  [2023-07-23 Sun 10:42]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme :noweb-ref main
 (feature-emacs
  ;;#:emacs (@ (declantsien packages emacs) emacs-next-wr)
- #:auto-clean-space? #f
  #:emacs (@ (rde packages emacs) emacs-next-pgtk-latest)
 
  #:extra-init-el
