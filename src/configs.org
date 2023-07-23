@@ -1,4 +1,7 @@
 :PROPERTIES:
+:UPDATED:  [2023-07-23 Sun 11:44]
+:END:
+:PROPERTIES:
 :CREATED:  [2022-08-30 Tue 11:12]
 :ID:       12f7748c-7095-4969-8261-94ad0169a24c
 
@@ -119,445 +122,11 @@ all the host/user specific things.
 #+end_src
 
 
-* etc
-:PROPERTIES:
-:ID:       88c5af73-609a-4019-ba2f-543528a7b6e2
-:CREATED:  [2022-09-28 Wed 14:29]
-:UPDATED:  [2022-09-28 Wed 14:29]
-:ROAM_EXCLUDE: t
-:END:
-
-** external resources
-:PROPERTIES:
-:ID:       e5794fcd-5a9a-420b-b286-9451cff72f06
-:CREATED:  [2022-08-01 Mon 17:42]
-:UPDATED:  [2022-09-28 Wed 16:41]
-:ROAM_EXCLUDE: t
-:END:
-
-*** rofi theme: base16-dark
-:PROPERTIES:
-:ID:       2669cfa7-4f1b-460c-acde-711d8f49a90f
-:CREATED:  [2022-09-28 Wed 14:29]
-:UPDATED:  [2022-09-28 Wed 14:29]
-:ROAM_EXCLUDE: t
-:END:
-#+begin_src shell
-p="$HOME/git/sys/rde/rde/examples/abcdw/config/rofi/themes"
-mkdir -p $p
-
-curl https://raw.githubusercontent.com/qzdl/rde/qzdl/rde/examples/abcdw/config/rofi/themes/base16-default-dark.rasi \
-     -o $p/base16-default-dark.rasi
-#+end_src
-
-#+RESULTS:
-
-** test
-:PROPERTIES:
-:ID:       cdeb56a4-5c09-4531-bba6-0c0c31bbdd55
-:CREATED:  [2022-08-01 Mon 12:27]
-:UPDATED:  [2022-08-01 Mon 12:27]
-:ROAM_EXCLUDE: t
-:END:
-
-*** e2e: make ixy-home
-:PROPERTIES:
-:ID:       b72fea65-890d-44b4-b746-2f13a8cba015
-:CREATED:  [2022-09-28 Wed 16:41]
-:UPDATED:  [2022-09-28 Wed 16:41]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src shell :results drawer
-make ixy-home >&/tmp/o
-
-cat /tmp/o
-#+end_src
-
-#+RESULTS:
-:results:
-GUILE_LOAD_PATH=../../../ RDE_TARGET=%-home \
-guix home reconfigure ./configs.scm
-"pre-%user-features"
-"pre-%main-features"
-rde/examples/abcdw/configs.scm:1032:1: missing closing parenthesis
-make: *** [Makefile:14: %-home-reconfigure] Error 1
-:end:
-
-*** describe: file hashes
-:PROPERTIES:
-:ID:       c7eb4b3e-4413-4759-b9b2-7bb0b2893f02
-:CREATED:  [2022-09-28 Wed 16:42]
-:UPDATED:  [2022-09-28 Wed 16:42]
-:ROAM_EXCLUDE: t
-:END:
-
-** concerns                                                                    :task:
-:PROPERTIES:
-:ID:       b5ed68eb-64ff-4878-9f79-9baddfd6e45c
-:CREATED:  [2022-09-28 Wed 16:40]
-:UPDATED:  [2022-09-28 Wed 16:40]
-:ROAM_EXCLUDE: t
-:END:
-*** emacs                                                                     :emacs:
-:PROPERTIES:
-:ID:       15c5b396-318c-4de7-ba73-0cb446b4b40a
-:CREATED:  [2022-09-28 Wed 16:40]
-:UPDATED:  [2022-09-28 Wed 16:40]
-:ROAM_EXCLUDE: t
-:END:
-**** TODO investigate completion interface; /why does ~C-k~ not work in ~{M-s l}~ / consult commands?/ (vertico?)
-:PROPERTIES:
-:ID:       9b2e7d9f-4feb-4229-b74f-ba52bef11176
-:CREATED:  [2022-09-28 Wed 16:44]
-:UPDATED:  [2022-09-28 Wed 16:44]
-:ROAM_EXCLUDE: t
-:END:
-
-{M-s l abc C-a C-k}
-**** TODO fix hyperbole loading
-:PROPERTIES:
-:ID:       dafa5eec-e33b-47a8-bd20-a6d9c1eb6378
-:CREATED:  [2022-09-28 Wed 16:45]
-:UPDATED:  [2022-09-28 Wed 16:45]
-:ROAM_EXCLUDE: t
-:END:
-
-as of [2022-09-28 Wed 16:45] (and for the last few weeks) loading hypb yields error for ~klink~;
-
-eval
-
-(require 'hyperbole)
-
-and observe the following
-#+begin_example
-Debugger entered--Lisp error: (file-missing "Cannot open load file" "No such file or directory" "klink")
-  load("klink")
-  byte-code("\300\301\302\"\210\303\304\305\306#\210\307\310!\210\311\312!\207" [setplist ibtypes::man-apropos (definition-name man-apropos quote (to-p nil style nil)) symset:add man-apropos ibtypes symbols run-hooks htype-create-hook load "klink"] 4)
-  require(hibtypes)
-  mapc(require (hvar hui-menu hui-mouse hypb hui hui-mini hbmap hibtypes))
-  byte-code("\300\301\302\"\210\303\304!\204\20\0\305\304\306\"\210\300\207" [mapc require (hvar hui-menu hui-mouse hypb hui hui-mini hbmap hibtypes) fboundp br-in-browser defalias #f(compiled-function () #<bytecode 0x1d8376ab5ddfaff0>)] 3)
-  require(hinit)
-  require(hyperbole)
-  eval((require 'hyperbole) t)
-  eval-expression((require 'hyperbole) nil nil 127)
-  funcall-interactively(eval-expression (require 'hyperbole) nil nil 127)
-  call-interactively(eval-expression nil nil)
-  command-execute(eval-expression)
-
-#+end_example
-**** org
-:PROPERTIES:
-:ID:       7c716491-ce73-4f8c-8fac-4286ce637e88
-:CREATED:  [2022-09-28 Wed 16:48]
-:UPDATED:  [2023-04-15 Sat 13:42]
-:ROAM_EXCLUDE: t
-:HEADER-ARGS: :noweb-ref org
-:END:
-***** TODO port CREATED/UPDATED from file stat info from git
-:PROPERTIES:
-:ID:       5262d510-7a89-4a2c-bf78-143c11404444
-:CREATED:  [2022-09-28 Wed 16:48]
-:UPDATED:  [2022-10-05 Wed 19:29]
-:ROAM_EXCLUDE: t
-:END:
-****** attribute created from headline, using [[id:5367ec4f-24d6-4416-a8d9-18df8cb1c0c2][created && updated]]
-:PROPERTIES:
-:ID:       c0f96018-5457-458c-908c-05fcddc9d052
-:CREATED:  [2022-09-28 Wed 16:49]
-:UPDATED:  [2022-09-28 Wed 16:49]
-:ROAM_EXCLUDE: t
-:END:
-
-***** TODO fix dispatch stuff ([[id:f31ab35b-59e7-4d2c-a123-5957a7da14c8][node-dispatch]])
-:PROPERTIES:
-:ID:       0e8868c1-c243-42fb-bd7c-5bbb8a21ddce
-:CREATED:  [2022-09-28 Wed 11:43]
-:UPDATED:  [2022-09-28 Wed 17:43]
-:ROAM_EXCLUDE: t
-:END:
-****** TODO [#A] elisp parser in RDE
-:PROPERTIES:
-:ID:       d4870719-33ce-4433-98ef-3867e1698969
-:CREATED:  [2022-09-28 Wed 14:12]
-:UPDATED:  [2023-06-01 Thu 23:31]
-:ROAM_EXCLUDE: t
-:END:
-
-******* problems
-:PROPERTIES:
-:ID:       0415f739-d3a7-42bb-b0b0-90eb2ee2c6f7
-:CREATED:  [2023-05-03 Wed 18:06]
-:UPDATED:  [2023-05-03 Wed 18:06]
-:ROAM_EXCLUDE: t
-:END:
-******** clobbers vectors
-:PROPERTIES:
-:ID:       72e5eb23-331e-445a-8004-86637ccf88ad
-:CREATED:  [2023-05-03 Wed 18:06]
-:UPDATED:  [2023-05-03 Wed 18:06]
-:ROAM_EXCLUDE: t
-:END:
-******** clobbers symbols beginning with numbers =44:= -> ~#{44:}~ :: =1+= -> ~#{1+}~
-:PROPERTIES:
-:ID:       3bc8f3bd-3c9d-49d0-8ec8-659b95458f81
-:CREATED:  [2023-05-03 Wed 18:06]
-:UPDATED:  [2023-05-03 Wed 18:06]
-:ROAM_EXCLUDE: t
-:END:
-******** unquote literals =,=  become literal =unquote=
-:PROPERTIES:
-:ID:       6cdd496b-c4ef-4998-9d48-5bf40f0b1246
-:CREATED:  [2023-06-01 Thu 23:31]
-:UPDATED:  [2023-06-01 Thu 23:31]
-:ROAM_EXCLUDE: t
-:END:
-
-
-#+DOWNLOADED: screenshot @ 2023-06-01 23:31:00
-[[file:etc/2023-06-01_23-31-00_screenshot.png]]
-
-******* TODO update rde
-:PROPERTIES:
-:ID:       3c4ea3e2-da0d-4265-911a-0a1e8c272e01
-:CREATED:  [2022-09-28 Wed 15:30]
-:UPDATED:  [2022-09-28 Wed 17:44]
-:ROAM_EXCLUDE: t
-:END:
-******** DONE rebase rde
-CLOSED: [2022-09-28 Wed 14:39]
-:PROPERTIES:
-:ID:       b94f35eb-0413-466f-8b3b-18b57047a7f7
-:CREATED:  [2022-09-28 Wed 14:12]
-:UPDATED:  [2022-09-28 Wed 14:13]
-:ROAM_EXCLUDE: t
-:END:
-:LOGBOOK:
-- CLOSING NOTE [2022-09-28 Wed 14:39] \\
-  just trash configs.scm lol
-CLOCK: [2022-09-28 Wed 14:13]--[2022-09-28 Wed 14:39] =>  0:26
-:END:
-
-******** DONE pull guix
-CLOSED: [2022-09-28 Wed 15:28]
-:PROPERTIES:
-:ID:       758f97f0-c6e3-448b-9679-689495d6e5a9
-:CREATED:  [2022-09-28 Wed 14:39]
-:UPDATED:  [2022-09-28 Wed 14:39]
-:ROAM_EXCLUDE: t
-:END:
-:LOGBOOK:
-CLOCK: [2022-09-28 Wed 14:39]--[2022-09-28 Wed 14:45] =>  0:06
-:END:
-
-hello
-
-******** DONE fix (unrelated errors) elisp config
-CLOSED: [2022-09-28 Wed 15:28]
-:PROPERTIES:
-:ID:       699d3ef0-e0db-4bfc-879e-ccbbbdbb0824
-:CREATED:  [2022-09-28 Wed 15:28]
-:UPDATED:  [2022-09-28 Wed 15:29]
-:ROAM_EXCLUDE: t
-:END:
-:LOGBOOK:
-- CLOSING NOTE [2022-09-28 Wed 15:28] \\
-  :PROPERTIES:
-  :UPDATED:  [2022-09-28 Wed 15:29]
-:END:
-
-tangle -> validate -> continue
-
-extra paren check needed for all tangled files
-CLOCK: [2022-09-28 Wed 14:45]--[2022-09-28 Wed 15:28] =>  0:43
-:END:
-
-******** TODO fix rde config
-:PROPERTIES:
-:ID:       b18f6878-1081-4ced-a467-f54ee66fb1ac
-:CREATED:  [2022-09-28 Wed 15:30]
-:UPDATED:  [2022-09-28 Wed 17:29]
-:ROAM_EXCLUDE: t
-:END:
-:LOGBOOK:
-CLOCK: [2022-09-28 Wed 15:28]--[2022-09-28 Wed 17:29] =>  2:01
-:END:
-
-********* DONE =rde/examples/abcdw/configs.scm:813:5: error: feature-emacs-appearance: unbound variable=
-:PROPERTIES:
-:ID:       97722b28-eb97-44b7-9769-a2bbdcabdf9e
-:CREATED:  [2022-09-28 Wed 15:30]
-:UPDATED:  [2022-09-28 Wed 17:44]
-:ROAM_EXCLUDE: t
-:END:
-******* TODO test elisp parser for vector support
-:PROPERTIES:
-:ID:       e3a0accc-135d-43dd-81be-e6e3e3aeb5db
-:CREATED:  [2022-09-28 Wed 14:12]
-:UPDATED:  [2022-11-08 Tue 12:22]
-:ROAM_EXCLUDE: t
-:END:
-
-***** TODO fix org stuff
-:PROPERTIES:
-:ID:       7f5afdfa-fc3b-47ae-a804-f2c01f215fc0
-:CREATED:  [2022-09-28 Wed 14:13]
-:UPDATED:  [2022-09-28 Wed 17:38]
-:ROAM_EXCLUDE: t
-:END:
-**** keyword / sequence to include NEXT
-:PROPERTIES:
-:ID:       64a44bf1-71f7-491c-95c0-562189180635
-:CREATED:  [2022-09-28 Wed 14:13]
-:UPDATED:  [2022-09-28 Wed 14:13]
-:ROAM_EXCLUDE: t
-:END:
-***** TODO ... search in RDE
-:PROPERTIES:
-:ID:       cb7d58f5-4c44-44cd-bdbd-221cddaae481
-:CREATED:  [2022-09-28 Wed 14:13]
-:UPDATED:  [2022-09-28 Wed 14:13]
-:ROAM_EXCLUDE: t
-:END:
-*** guix                                                                       :guix:
-:PROPERTIES:
-:ID:       2d285252-67e4-4455-a4bc-5a486ebc7718
-:CREATED:  [2022-09-28 Wed 16:40]
-:UPDATED:  [2022-09-28 Wed 16:40]
-:ROAM_EXCLUDE: t
-:END:
-**** TODO upstream [[id:1bca3f7a-3f6b-4ffa-bf10-0856b0eb8a01][emacs-sql-indent]]
-:PROPERTIES:
-:ID:       fd3d9257-d718-4b7b-8ceb-b2d27da0b32b
-:CREATED:  [2022-09-28 Wed 16:40]
-:UPDATED:  [2022-09-28 Wed 16:40]
-:ROAM_EXCLUDE: t
-:END:
-**** TODO upstream [[id:58790647-3625-4145-87d8-2a5baa335b0f][emacs-ob-go]]
-:PROPERTIES:
-:ID:       2e30d804-96c8-448b-8cc8-8f41c570086c
-:CREATED:  [2022-09-28 Wed 16:40]
-:UPDATED:  [2022-09-28 Wed 16:41]
-:ROAM_EXCLUDE: t
-:END:
-*** rde                                                                         :rde:
-:PROPERTIES:
-:ID:       31909571-94cc-4718-a971-558ac7074120
-:CREATED:  [2022-08-15 Mon 12:01]
-:UPDATED:  [2022-09-28 Wed 16:41]
-:ROAM_EXCLUDE: t
-:END:
-
-**** TODO org heading binds =C-M-=
-:PROPERTIES:
-:ID:       86921d8a-358e-4383-bbb2-3d0b47602315
-:CREATED:  [2022-08-15 Mon 12:01]
-:UPDATED:  [2022-08-15 Mon 12:01]
-:ROAM_EXCLUDE: t
-:END:
-
-**** TODO org agenda exports
-:PROPERTIES:
-:ID:       bd9f9bf3-e5e9-4f43-adc6-a30b64378c66
-:CREATED:  [2022-08-15 Mon 12:01]
-:UPDATED:  [2022-08-29 Mon 16:40]
-:ROAM_EXCLUDE: t
-:END:
-:LOGBOOK:
-CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
-:END:
-
-- made commit 7e655baad683b49c53a2683012576b7fb35dafa1
-
-**** TODO system-wide media status
-:PROPERTIES:
-:ID:       5923dc5e-4e2f-473a-9145-d0858d5d811d
-:CREATED:  [2022-08-26 Fri 11:49]
-:UPDATED:  [2022-08-26 Fri 11:49]
-:ROAM_EXCLUDE: t
-:END:
-
-***** feature: respect play / pause / skip from media controls (airpods)
-:PROPERTIES:
-:ID:       bbee3792-cbb4-4064-b9c8-7dcb742031a5
-:CREATED:  [2022-08-26 Fri 11:49]
-:UPDATED:  [2022-08-26 Fri 11:49]
-:ROAM_EXCLUDE: t
-:END:
-
-**** TODO kde-connect
-:PROPERTIES:
-:ID:       1548dc33-dceb-4e69-8326-32f9559e4e21
-:CREATED:  [2022-08-26 Fri 11:49]
-:UPDATED:  [2022-08-26 Fri 11:49]
-:ROAM_EXCLUDE: t
-:END:
-
-**** TODO investigate elisp-serializer clobbering vectors ~[:select abc ...]~ as paren'd functions
-:PROPERTIES:
-:ID:       d1fc1e48-c5e9-4f02-a718-3419f61f81a0
-:CREATED:  [2022-09-28 Wed 16:46]
-:UPDATED:  [2022-09-28 Wed 16:46]
-:ROAM_EXCLUDE: t
-:END:
-
-**** TODO emacs popups
-:PROPERTIES:
-:ID:       3f1f675d-00f4-4f31-93dc-10beed905999
-:CREATED:  [2022-09-28 Wed 16:47]
-:UPDATED:  [2022-09-28 Wed 16:47]
-:ROAM_EXCLUDE: t
-:END:
-
-***** calendar
-:PROPERTIES:
-:ID:       3b5d8aed-2122-4e86-b438-e0e306c26536
-:CREATED:  [2022-09-28 Wed 16:47]
-:UPDATED:  [2022-09-28 Wed 16:47]
-:ROAM_EXCLUDE: t
-:END:
-
-***** password-store
-:PROPERTIES:
-:ID:       6a28ec41-45ed-430c-abc9-89c7faed2e24
-:CREATED:  [2022-09-28 Wed 16:47]
-:UPDATED:  [2022-09-28 Wed 16:47]
-:ROAM_EXCLUDE: t
-:END:
-***** org-capture
-:PROPERTIES:
-:ID:       79feb294-8327-47d1-b583-f9ed9475855c
-:CREATED:  [2022-09-28 Wed 16:47]
-:UPDATED:  [2022-09-28 Wed 16:47]
-:ROAM_EXCLUDE: t
-:END:
-****** protocol (inbox, node)
-:PROPERTIES:
-:ID:       7fbfe5c7-7196-4861-b306-20bd50774e2b
-:CREATED:  [2022-09-28 Wed 16:47]
-:UPDATED:  [2022-09-28 Wed 16:47]
-:ROAM_EXCLUDE: t
-:END:
-****** daily
-:PROPERTIES:
-:ID:       ed8adb71-72ab-4156-bab8-4fe2f4712812
-:CREATED:  [2022-09-28 Wed 16:47]
-:UPDATED:  [2022-09-28 Wed 16:47]
-:ROAM_EXCLUDE: t
-:END:
-***** gpg pinentry
-:PROPERTIES:
-:ID:       e605cc8f-8cc4-48c4-b874-e5a67007de83
-:CREATED:  [2022-09-28 Wed 16:47]
-:UPDATED:  [2022-09-28 Wed 16:47]
-:ROAM_EXCLUDE: t
-:END:
-
 * configs
 :PROPERTIES:
 :ID:       7c9c9408-15b7-4d3e-be98-9b2bda19e7d5
 :CREATED:  [2022-09-28 Wed 16:24]
-:UPDATED:  [2022-10-05 Wed 15:59]
+:UPDATED:  [2023-07-23 Sun 11:43]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -569,7 +138,43 @@ CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
 :ROAM_EXCLUDE: t
 :END:
 
-*** AAA tangle rde
+*** summary
+:PROPERTIES:
+:ID:       e6d22953-49ae-49f2-9e31-5c6a976a95bc
+:CREATED:  [2023-07-23 Sun 11:33]
+:UPDATED:  [2023-07-23 Sun 11:33]
+:ROAM_EXCLUDE: t
+:END:
+
+features
+home / os
+hosts
+
+*** src
+:PROPERTIES:
+:ID:       66e59079-22ae-40d6-baf3-2f6ee70f5f0e
+:CREATED:  [2023-07-23 Sun 11:43]
+:UPDATED:  [2023-07-23 Sun 11:43]
+:ROAM_EXCLUDE: t
+:END:
+
+**** header
+:PROPERTIES:
+:ID:       53756386-28a4-4f37-b819-4ce10572406c
+:CREATED:  [2023-07-23 Sun 11:33]
+:UPDATED:  [2023-07-23 Sun 11:33]
+:ROAM_EXCLUDE: t
+:END:
+
+**** boiler
+:PROPERTIES:
+:ID:       70c315de-8a81-4ce7-b5aa-9a5b679859c2
+:CREATED:  [2023-07-23 Sun 11:33]
+:UPDATED:  [2023-07-23 Sun 11:33]
+:ROAM_EXCLUDE: t
+:END:
+
+***** AAA tangle rde
 :PROPERTIES:
 :ID:       98f42608-b5c0-455d-bb02-9a326af8bc42
 :CREATED:  [2022-08-01 Mon 09:49]
@@ -581,7 +186,7 @@ CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
 <<conf-rde>>
 #+end_src
 
-*** defmodule
+***** defmodule
 :PROPERTIES:
 :ID:       6bb15998-32c1-4674-890a-85180a89d66a
 :CREATED:  [2022-07-29 Fri 18:22]
@@ -671,7 +276,7 @@ CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
   #:use-module (srfi srfi-1))
 #+end_src
 
-*** user features
+***** user features
 :PROPERTIES:
 :ID:       738d1f19-afd3-4497-b2ba-2434fc090789
 :CREATED:  [2022-07-29 Fri 17:48]
@@ -687,7 +292,7 @@ CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
 ;; (display (crypt "hi" "$6$abc"))
 #+end_src
 
-*** helpers
+***** helpers
 :PROPERTIES:
 :ID:       b76849d3-0686-46d0-b40d-f590c7f15ed0
 :CREATED:  [2022-08-08 Mon 11:38]
@@ -695,7 +300,7 @@ CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
 :ROAM_EXCLUDE: t
 :END:
 
-**** mailing list
+******* mailing list
 :PROPERTIES:
 :ID:       74689f33-9e2f-4cf1-bbdf-317a29e66572
 :CREATED:  [2022-07-29 Fri 17:48]
@@ -714,7 +319,7 @@ CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
             (urls urls)))))
 #+end_src
 
-**** mail serializer (bravehost | gmail-tls)
+******* mail serializer (bravehost | gmail-tls)
 :PROPERTIES:
 :ID:       fb637534-e1ae-493b-bf5e-0cdc5ec1cc2f
 :CREATED:  [2022-08-29 Mon 17:06]
@@ -759,7 +364,8 @@ CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
 :ROAM_EXCLUDE: t
 :END:
 
-**** keyboard
+
+******** keyboard
 :PROPERTIES:
 :ID:       2ff244bf-5916-4a3b-afa6-6b2e34cb7e21
 :CREATED:  [2022-07-29 Fri 17:48]
@@ -767,7 +373,7 @@ CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
 :ROAM_EXCLUDE: t
 :END:
 
-***** thinkpad
+********** thinkpad
 :PROPERTIES:
 :ID:       f0d98fbe-0033-47e3-81c3-c592f70c0b8a
 :CREATED:  [2022-07-29 Fri 17:48]
@@ -783,7 +389,22 @@ CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
    #:options '("ctrl:nocaps")))
 #+end_src
 
-*** zshrc
+**** state
+:PROPERTIES:
+:ID:       bb13a7c7-56b3-42cb-9716-6b56cef8968c
+:CREATED:  [2023-07-23 Sun 11:33]
+:UPDATED:  [2023-07-23 Sun 11:33]
+:ROAM_EXCLUDE: t
+:END:
+
+***** shell
+:PROPERTIES:
+:ID:       5dadad59-f7c7-425c-8108-f486062baeb0
+:CREATED:  [2023-07-23 Sun 11:33]
+:UPDATED:  [2023-07-23 Sun 11:33]
+:ROAM_EXCLUDE: t
+:END:
+****** zshrc
 :PROPERTIES:
 :ID:       a95216e5-aecd-4a61-b0c3-3bf266189a6d
 :CREATED:  [2022-07-29 Fri 17:48]
@@ -817,7 +438,7 @@ CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
    ))
 #+end_src
 
-*** org dirs
+***** org dirs
 :PROPERTIES:
 :ID:       844e60fb-8235-4249-8aa8-27c8348c5dcb
 :CREATED:  [2022-07-29 Fri 17:48]
@@ -830,7 +451,7 @@ CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
   (string-append my-org-directory "/roam"))
 #+end_src
 
-*** flag: gaming?
+***** flag: gaming?
 :PROPERTIES:
 :ID:       a5883df9-7c45-442b-82a4-fe57ac98f7f8
 :CREATED:  [2022-07-29 Fri 17:48]
@@ -841,272 +462,14 @@ CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
 (define gaming? #f)
 #+end_src
 
-*** features
-:PROPERTIES:
-:ID:       be090096-e0cd-43f2-a24a-cff37457f33a
-:CREATED:  [2022-07-29 Fri 18:24]
-:UPDATED:  [2022-07-29 Fri 18:24]
-:ROAM_EXCLUDE: t
-:END:
-
-**** my features
-:PROPERTIES:
-:ID:       b290c986-542c-46ef-9729-defbd20da2ea
-:CREATED:  [2022-08-29 Mon 17:10]
-:UPDATED:  [2022-08-29 Mon 17:10]
-:ROAM_EXCLUDE: t
-:END:
-
-***** bluetooth
-:PROPERTIES:
-:ID:       a65bf448-712a-4f32-840c-b7524c7a7120
-:CREATED:  [2022-08-29 Mon 17:10]
-:UPDATED:  [2023-03-23 Thu 15:48]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src scheme :noweb-ref null
-;; (define-module (rde features bluetooth)
-;;   #:use-module (rde features)
-;;   #:use-module (rde features predicates)
-;;   ;#:use-module (gnu home-services bluetooth) ;; TODO implement as 'fork' (in rde), then upstream to guix home proper
-;;   #:use-module (gnu services)
-;;   #:use-module (gnu services desktop)
-;;   #:export (feature-bluetooth)
-;;   ;;#:re-export (home-bluetooth-configuration) ;; ^^ as above
-;;   )
-
-(use-modules ;;(rde features bluetooth)
- (rde features)
- (rde features predicates)
- (gnu services)
- (gnu services desktop))
-
-;; TODO ensure group "lp" exists and is applicable for USER
-(define* (feature-bluetooth
-          #:key
-          ;;(bluetooth-configuration (home-bluetooth-configuration))
-          (dual-mode #f)
-          (auto-enable? #t)) ;; XXX should this stick to guix defaults, or tailor to ease for users?
-  "Setup and configure Bluetooth."
-  ;;(ensure-pred home-bluetooth-configuration? bluetooth-configuration)
-
-  (define (bluetooth-home-services config)
-    "Returns home services related to bluetooth."
-    (list ;;(service bluetooth-service-type bluetooth-configuration)
-     (bluetooth-service #:auto-enable? auto-enable?)))
-
-  (feature
-   (name 'bluetooth)
-   (values '((bluetooth . #t)))
-   ;; TODO port etc-service reference to make home-service > system-service
-   (system-services-getter bluetooth-home-services)))
-#+end_src
-
-***** TODO redshift
-:PROPERTIES:
-:ID:       2fb33148-9ba8-4a2c-9d81-df60039c8267
-:CREATED:  [2023-04-26 Wed 20:39]
-:UPDATED:  [2023-04-26 Wed 20:39]
-:ROAM_EXCLUDE: t
-:END:
-
-****** feature
-:PROPERTIES:
-:ID:       a8f7a40d-54a1-4b3f-ba76-396bf25c6d82
-:CREATED:  [2023-04-26 Wed 21:22]
-:UPDATED:  [2023-04-26 Wed 21:22]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src scheme :noweb-ref null
-(use-modules (gnu services configuration)
-             (gnu home-services-utils)
-             (gnu home services shepherd)
-             (gnu packages xdisorg)
-             (rde serializers ini))
-
-(define* (feature-redshift
-          #:key
-          (redshift redshift-wayland)
-          (extra-config '()))
-  "Configure redshift."
-  (ensure-pred file-like? redshift)
-
-  (define (get-home-services config)
-    (list
-     (service
-      home-redshift-service-type
-      (home-redshift-configuration
-       (redshift redshift)
-       (config
-        `(,@extra-config))))))
-
-  (feature
-   (name 'redshift)
-   (values `((redshift . ,redshift)))
-   (home-services-getter get-home-services)))
-
-#+end_src
-
-****** TODO home-redshift-service
-:PROPERTIES:
-:ID:       92ae8438-7458-4873-b290-470630f04d67
-:CREATED:  [2023-04-26 Wed 20:39]
-:UPDATED:  [2023-04-26 Wed 21:22]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src scheme :noweb-ref null
-
-;;;
-;;; redshift.
-;;;
-
-(define-configuration home-redshift-configuration
-  (redshift
-    (file-like redshift)
-    "redshift package to use.")
-  (config
-   (ini-config
-    ;; `(redshift . ((transition . 1)
-    ;;               (temp-day . 5500K)
-    ;;               (temp-night . 1000K)
-    ;;               (brightness-day . 0.8)
-    ;;               (brightness-night . 0.4)))
-    `())
-   "A basic INI-style config.  See http://jonls.dk/redshift/#configuration-file for more details.
-
-@lisp
-()
-@end lisp"))
-
-(define (add-redshift-packages config)
-  (list (home-redshift-configuration-redshift config)))
-
-(define (add-redshift-configuration config)
-  `(("redshift/config"
-     ,(apply
-       mixed-text-file
-       "redshift-config"
-       (generic-serialize-ini-config
-        (home-redshift-configuration-config config))))))
-
-(define (home-redshift-shepherd-service config)
-  (let ((redshift (home-redshift-configuration-redshift config)))
-    (list
-     (shepherd-service
-      (provision '(redshift))
-      (start #~(make-forkexec-constructor
-                (list #$(file-append redshift "/bin/redshift"))
-                #:log-file (string-append
-                            (or (getenv "XDG_LOG_HOME")
-                                (string-append
-                                 (getenv "HOME")
-                                 "/.local/var/log"))
-                            "/redshift.log")))
-      (stop #~(make-kill-destructor))
-      (documentation "Run Redshift")))))
-
-(define (home-redshift-extensions cfg extensions)
-  (home-redshift-configuration
-   (inherit cfg)
-   (config
-    (append (home-redshift-configuration-config cfg)
-            (append-map identity (reverse extensions))))))
-
-(define home-redshift-service-type
-  (service-type (name 'home-redshift)
-                (extensions
-                 (list (service-extension
-                        home-profile-service-type
-                        add-redshift-packages)
-                       (service-extension
-                        home-shepherd-service-type
-                        home-redshift-shepherd-service)
-                       (service-extension
-                        home-xdg-configuration-files-service-type
-                        add-redshift-configuration)))
-                (compose identity)
-                (extend home-redshift-extensions)
-                (default-value (home-redshift-configuration))
-                (description "\
-Install and configure redshift, an adaptive light-temperature controller.")))
-#+end_src
-
-**** debug; pre features
-:PROPERTIES:
-:ID:       36dc9e54-a5c8-43c8-a464-6349186edd50
-:CREATED:  [2022-07-29 Fri 17:48]
-:UPDATED:  [2022-07-29 Fri 18:23]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src scheme
-(pretty-print "pre-%user-features")
-#+end_src
-
-**** abcdw features
-:PROPERTIES:
-:ID:       1532c6ba-0d0c-499e-bddd-ae1caa1dc778
-:CREATED:  [2022-07-29 Fri 17:48]
-:UPDATED:  [2023-07-05 Wed 12:32]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src scheme
-(define %user-features
-  (remove
-   unspecified?
-   (list
-    my-feature-user-info
-    my-feature-gnupg
-    (feature-password-store)
-    my-feature-mail-settings
-
-    (feature-keyboard
-     ;; To get all available options, layouts and variants run:
-     ;; cat `guix build xkeyboard-config`/share/X11/xkb/rules/evdev.lst
-     #:keyboard-layout %thinkpad-layout))))
-#+end_src
-
-***** debug: print features
-:PROPERTIES:
-:ID:       4d60cafe-ff70-4540-a5ed-2e9b1a7b4b3e
-:CREATED:  [2022-07-29 Fri 17:48]
-:UPDATED:  [2022-07-29 Fri 17:48]
-:ROAM_EXCLUDE: t
-:END:
-#+begin_src scheme
-;;(map pretty-print %user-features)
-#+end_src
-
-***** TODO future features
-:PROPERTIES:
-:ID:       ad67e350-c601-49f4-ba21-ca6486ed96fb
-:CREATED:  [2022-07-29 Fri 17:48]
-:UPDATED:  [2022-08-22 Mon 17:34]
-:ROAM_EXCLUDE: t
-:END:
-#+begin_src scheme
-;;; TODO: feature-wallpapers https://wallhaven.cc/
-;;; TODO: feature-icecat
-;; PipeWire/iwd:
-;; https://github.com/J-Lentz/iwgtk
-;; https://github.com/krevedkokun/guix-config/blob/master/system/yggdrasil.scm
-;; https://github.com/werman/noise-suppression-for-voice#pipewire
-#+end_src
-
-#+RESULTS:
-
-*** packages
+**** packages
 :PROPERTIES:
 :ID:       5508a976-f9ad-457c-b4bb-46dbf3b73fb0
 :CREATED:  [2022-07-29 Fri 17:36]
-:UPDATED:  [2023-07-13 Thu 09:46]
+:UPDATED:  [2023-07-23 Sun 11:33]
 :END:
 
-**** pkgs, pkgs-vanilla                                                        :func:
+***** pkgs, pkgs-vanilla                                                       :func:
 :PROPERTIES:
 :ID:       5fb5abba-de52-453a-8cfb-875f6d6897ba
 :CREATED:  [2022-08-08 Mon 11:41]
@@ -1136,7 +499,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
   (map get-inferior-pkg lst))
 #+end_src
 
-**** my packages
+***** my packages
 :PROPERTIES:
 :ID:       98d207f1-31fa-40cb-9deb-c39e0026ef22
 :CREATED:  [2022-08-08 Mon 11:38]
@@ -1144,7 +507,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 :ROAM_EXCLUDE: t
 :END:
 
-***** imports
+****** imports
 :PROPERTIES:
 :ID:       7cdd0670-d06b-4310-9239-e39c1e938624
 :CREATED:  [2022-08-08 Mon 11:39]
@@ -1169,7 +532,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 
 #+end_src
 
-***** emacs-sql-indent
+****** emacs-sql-indent
 :PROPERTIES:
 :ID:       1bca3f7a-3f6b-4ffa-bf10-0856b0eb8a01
 :CREATED:  [2022-08-08 Mon 11:39]
@@ -1207,7 +570,7 @@ statements, see `sqlind-align-rules'.")
    (license license:gpl3+)))
 #+end_src
 
-***** emacs-org-ml
+****** emacs-org-ml
 :PROPERTIES:
 :ID:       91194ee1-6cf0-46ff-8685-efc0a076697a
 :CREATED:  [2022-10-04 Tue 15:52]
@@ -1254,7 +617,7 @@ https://github.com/ndwarshuis/org-ml")
    (license license:gpl3+)))
 #+end_src
 
-***** emacs-moldable-emacs
+****** emacs-moldable-emacs
 :PROPERTIES:
 :ID:       3c32dec6-4f12-4aa0-ad00-98b433c966e8
 :CREATED:  [2022-10-05 Wed 19:07]
@@ -1323,7 +686,7 @@ https://github.com/ndwarshuis/org-ml")
     (license license:gpl3+)))
 #+end_src
 
-***** emacs-ob-go
+****** emacs-ob-go
 :PROPERTIES:
 :ID:       58790647-3625-4145-87d8-2a5baa335b0f
 :CREATED:  [2022-08-08 Mon 16:45]
@@ -1360,7 +723,7 @@ declared.")
    (license license:gpl3+)))
 #+end_src
 
-***** emacs-ox-jira
+****** emacs-ox-jira
 :PROPERTIES:
 :ID:       f8bac9c3-36b2-4c70-a8e1-3bc6d3c981a4
 :CREATED:  [2022-10-04 Tue 16:09]
@@ -1395,7 +758,7 @@ JIRA issues.")
    (license license:gpl3+)))
 #+end_src
 
-***** emacs-kubernetes
+****** emacs-kubernetes
 :PROPERTIES:
 :ID:       584e9a93-0058-4bf5-8573-69b35b93e8c0
 :CREATED:  [2022-10-12 Wed 13:27]
@@ -1444,7 +807,7 @@ Kubernetes clusters within Emacs.")
    (license license:gpl3+)))
 #+end_src
 
-***** python-pylsp-mypy
+****** python-pylsp-mypy
 :PROPERTIES:
 :ID:       6c17b978-44b6-412a-bf36-ea7854089c96
 :CREATED:  [2022-10-13 Thu 13:17]
@@ -1484,7 +847,7 @@ Kubernetes clusters within Emacs.")
    (license license:gpl3+)))
 #+end_src
 
-***** python-keyring-pass
+****** python-keyring-pass
 :PROPERTIES:
 :ID:       6637fa51-4274-4ac9-b19f-8632f14ae5be
 :CREATED:  [2023-03-12 Sun 12:39]
@@ -1553,7 +916,7 @@ Kubernetes clusters within Emacs.")
 ;;   (license license:expat)))
 #+end_src
 
-***** emacs-ox-slack
+****** emacs-ox-slack
 :PROPERTIES:
 :ID:       a24f5f97-483b-440b-adb7-a1cd7732a212
 :UPDATED:  [2022-11-08 Tue 12:36]
@@ -1582,7 +945,7 @@ and `gfm back-ends.")
    (license license:gpl3+)))
 #+end_src
 
-***** emacs-svg-clock
+****** emacs-svg-clock
 :PROPERTIES:
 :ID:       9765acda-2dc5-45ea-9196-5abfb1ae29da
 :CREATED:  [2022-11-21 Mon 18:22]
@@ -1619,7 +982,7 @@ independently.  Clock instances ared updated automatically.  Their resources
    (license license:gpl3+)))
 #+end_src
 
-***** emacs-consult-recoll
+****** emacs-consult-recoll
 :PROPERTIES:
 :ID:       bfd3fa1e-935b-4c03-9b16-0bb232ddcfce
 :CREATED:  [2023-03-04 Sat 12:33]
@@ -1648,7 +1011,7 @@ independently.  Clock instances ared updated automatically.  Their resources
     (license license:gpl3+)))
     #+end_src
 
-***** emacs-bigquery-mode
+****** emacs-bigquery-mode
 :PROPERTIES:
 :ID:       47bf4150-8113-438f-9b56-87bc6e24744c
 :CREATED:  [2023-04-03 Mon 12:17]
@@ -1696,7 +1059,7 @@ independently.  Clock instances ared updated automatically.  Their resources
 
 #+end_src
 
-***** emacs-dogears
+****** emacs-dogears
 :PROPERTIES:
 :ID:       11e33a8f-f5e3-4081-a337-23fe0ed7733c
 :CREATED:  [2023-04-03 Mon 16:45]
@@ -1743,7 +1106,7 @@ bookmarks-alist) to save and restore places with mode-specific functionality.")
 
 #+RESULTS:
 
-****** dogears-remember
+******** dogears-remember
 :PROPERTIES:
 :ID:       74f332b7-de08-4ca7-b1bb-3e8d017d579c
 :CREATED:  [2023-07-15 Sat 17:30]
@@ -1804,7 +1167,7 @@ bookmarks-alist) to save and restore places with mode-specific functionality.")
 #+RESULTS:
 : dogears-remember
 
-****** dogears-list-mode
+******** dogears-list-mode
 :PROPERTIES:
 :ID:       343eccdc-82d5-460b-b1b4-f7d083aee729
 :UPDATED:  [2023-07-15 Sat 17:38]
@@ -1895,7 +1258,7 @@ bookmarks-alist) to save and restore places with mode-specific functionality.")
 #+RESULTS:
 : qz/dogears--format-record-list
 
-***** emacs-chatgpt-shell
+****** emacs-chatgpt-shell
 :PROPERTIES:
 :ID:       9809acde-26e3-4bc8-bb47-a43759be7568
 :CREATED:  [2023-04-21 Fri 16:13]
@@ -1926,7 +1289,7 @@ bookmarks-alist) to save and restore places with mode-specific functionality.")
     (license license:gpl3+)))
 #+end_src
 
-***** emacs-ytdl-next
+****** emacs-ytdl-next
 :PROPERTIES:
 :ID:       24f69dd9-3e91-4743-88fa-6efd43a4ca8d
 :CREATED:  [2023-04-24 Mon 15:41]
@@ -1964,7 +1327,7 @@ found in the documentation online.")
 
 #+RESULTS:
 
-****** import from melpa
+******** import from melpa
 :PROPERTIES:
 :ID:       d6821367-61d5-4369-bb81-66aab6b424f8
 :CREATED:  [2023-04-24 Mon 15:42]
@@ -1975,7 +1338,7 @@ found in the documentation online.")
 guix import elpa -a melpa ytdl
 #+end_src
 
-***** emacs-selectric-mode
+****** emacs-selectric-mode
 :PROPERTIES:
 :ID:       8befc63a-afad-4c84-bf58-1e4c3e071896
 :CREATED:  [2023-06-30 Fri 23:04]
@@ -1983,7 +1346,7 @@ guix import elpa -a melpa ytdl
 :ROAM_EXCLUDE: t
 :END:
 
-****** src
+******** src
 :PROPERTIES:
 :ID:       fe050d49-8d00-476c-8af7-35ab189596a5
 :CREATED:  [2023-06-30 Fri 23:04]
@@ -2023,7 +1386,7 @@ guix import elpa -a melpa ytdl
     (license license:gpl3+)))
 #+end_src
 
-****** import from melpa
+******** import from melpa
 :PROPERTIES:
 :ID:       e8fd13f6-029f-4867-986f-07524f194a65
 :CREATED:  [2023-06-30 Fri 23:04]
@@ -2068,7 +1431,7 @@ guix import elpa -a melpa selectric-mode
    (license #f)))
 :end:
 
-***** perl-graph-easy
+****** perl-graph-easy
 :PROPERTIES:
 :ID:       a54f3430-07b8-4ba6-8ae6-faef3b53ad6b
 :CREATED:  [2023-05-04 Thu 14:37]
@@ -2141,7 +1504,7 @@ guix import elpa -a melpa selectric-mode
     (license license:gpl1)))
 #+end_src
 
-****** guix import
+******* guix import
 :PROPERTIES:
 :ID:       f9fde913-acc6-4e7b-a5ba-2781a52027fd
 :CREATED:  [2023-05-04 Thu 14:45]
@@ -2229,22 +1592,265 @@ done
 
 
 :end:
-
-*** imports
+**** features
 :PROPERTIES:
-:ID:       065c4d90-4d84-4969-8221-44f5008a9502
-:CREATED:  [2022-07-29 Fri 17:53]
-:UPDATED:  [2022-07-29 Fri 17:53]
+:ID:       be090096-e0cd-43f2-a24a-cff37457f33a
+:CREATED:  [2022-07-29 Fri 18:24]
+:UPDATED:  [2022-07-29 Fri 18:24]
+:ROAM_EXCLUDE: t
+:END:
+
+***** my features
+:PROPERTIES:
+:ID:       b290c986-542c-46ef-9729-defbd20da2ea
+:CREATED:  [2022-08-29 Mon 17:10]
+:UPDATED:  [2022-08-29 Mon 17:10]
+:ROAM_EXCLUDE: t
+:END:
+
+******* bluetooth
+:PROPERTIES:
+:ID:       a65bf448-712a-4f32-840c-b7524c7a7120
+:CREATED:  [2022-08-29 Mon 17:10]
+:UPDATED:  [2023-03-23 Thu 15:48]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme :noweb-ref null
+;; (define-module (rde features bluetooth)
+;;   #:use-module (rde features)
+;;   #:use-module (rde features predicates)
+;;   ;#:use-module (gnu home-services bluetooth) ;; TODO implement as 'fork' (in rde), then upstream to guix home proper
+;;   #:use-module (gnu services)
+;;   #:use-module (gnu services desktop)
+;;   #:export (feature-bluetooth)
+;;   ;;#:re-export (home-bluetooth-configuration) ;; ^^ as above
+;;   )
+
+(use-modules ;;(rde features bluetooth)
+ (rde features)
+ (rde features predicates)
+ (gnu services)
+ (gnu services desktop))
+
+;; TODO ensure group "lp" exists and is applicable for USER
+(define* (feature-bluetooth
+          #:key
+          ;;(bluetooth-configuration (home-bluetooth-configuration))
+          (dual-mode #f)
+          (auto-enable? #t)) ;; XXX should this stick to guix defaults, or tailor to ease for users?
+  "Setup and configure Bluetooth."
+  ;;(ensure-pred home-bluetooth-configuration? bluetooth-configuration)
+
+  (define (bluetooth-home-services config)
+    "Returns home services related to bluetooth."
+    (list ;;(service bluetooth-service-type bluetooth-configuration)
+     (bluetooth-service #:auto-enable? auto-enable?)))
+
+  (feature
+   (name 'bluetooth)
+   (values '((bluetooth . #t)))
+   ;; TODO port etc-service reference to make home-service > system-service
+   (system-services-getter bluetooth-home-services)))
+#+end_src
+
+******* TODO redshift
+:PROPERTIES:
+:ID:       2fb33148-9ba8-4a2c-9d81-df60039c8267
+:CREATED:  [2023-04-26 Wed 20:39]
+:UPDATED:  [2023-04-26 Wed 20:39]
+:ROAM_EXCLUDE: t
+:END:
+
+********* feature
+:PROPERTIES:
+:ID:       a8f7a40d-54a1-4b3f-ba76-396bf25c6d82
+:CREATED:  [2023-04-26 Wed 21:22]
+:UPDATED:  [2023-04-26 Wed 21:22]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme :noweb-ref null
+(use-modules (gnu services configuration)
+             (gnu home-services-utils)
+             (gnu home services shepherd)
+             (gnu packages xdisorg)
+             (rde serializers ini))
+
+(define* (feature-redshift
+          #:key
+          (redshift redshift-wayland)
+          (extra-config '()))
+  "Configure redshift."
+  (ensure-pred file-like? redshift)
+
+  (define (get-home-services config)
+    (list
+     (service
+      home-redshift-service-type
+      (home-redshift-configuration
+       (redshift redshift)
+       (config
+        `(,@extra-config))))))
+
+  (feature
+   (name 'redshift)
+   (values `((redshift . ,redshift)))
+   (home-services-getter get-home-services)))
+
+#+end_src
+
+********* TODO home-redshift-service
+:PROPERTIES:
+:ID:       92ae8438-7458-4873-b290-470630f04d67
+:CREATED:  [2023-04-26 Wed 20:39]
+:UPDATED:  [2023-04-26 Wed 21:22]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme :noweb-ref null
+
+;;;
+;;; redshift.
+;;;
+
+(define-configuration home-redshift-configuration
+  (redshift
+    (file-like redshift)
+    "redshift package to use.")
+  (config
+   (ini-config
+    ;; `(redshift . ((transition . 1)
+    ;;               (temp-day . 5500K)
+    ;;               (temp-night . 1000K)
+    ;;               (brightness-day . 0.8)
+    ;;               (brightness-night . 0.4)))
+    `())
+   "A basic INI-style config.  See http://jonls.dk/redshift/#configuration-file for more details.
+
+@lisp
+()
+@end lisp"))
+
+(define (add-redshift-packages config)
+  (list (home-redshift-configuration-redshift config)))
+
+(define (add-redshift-configuration config)
+  `(("redshift/config"
+     ,(apply
+       mixed-text-file
+       "redshift-config"
+       (generic-serialize-ini-config
+        (home-redshift-configuration-config config))))))
+
+(define (home-redshift-shepherd-service config)
+  (let ((redshift (home-redshift-configuration-redshift config)))
+    (list
+     (shepherd-service
+      (provision '(redshift))
+      (start #~(make-forkexec-constructor
+                (list #$(file-append redshift "/bin/redshift"))
+                #:log-file (string-append
+                            (or (getenv "XDG_LOG_HOME")
+                                (string-append
+                                 (getenv "HOME")
+                                 "/.local/var/log"))
+                            "/redshift.log")))
+      (stop #~(make-kill-destructor))
+      (documentation "Run Redshift")))))
+
+(define (home-redshift-extensions cfg extensions)
+  (home-redshift-configuration
+   (inherit cfg)
+   (config
+    (append (home-redshift-configuration-config cfg)
+            (append-map identity (reverse extensions))))))
+
+(define home-redshift-service-type
+  (service-type (name 'home-redshift)
+                (extensions
+                 (list (service-extension
+                        home-profile-service-type
+                        add-redshift-packages)
+                       (service-extension
+                        home-shepherd-service-type
+                        home-redshift-shepherd-service)
+                       (service-extension
+                        home-xdg-configuration-files-service-type
+                        add-redshift-configuration)))
+                (compose identity)
+                (extend home-redshift-extensions)
+                (default-value (home-redshift-configuration))
+                (description "\
+Install and configure redshift, an adaptive light-temperature controller.")))
+#+end_src
+
+****** COMMENT debug; pre features
+:PROPERTIES:
+:ID:       36dc9e54-a5c8-43c8-a464-6349186edd50
+:CREATED:  [2022-07-29 Fri 17:48]
+:UPDATED:  [2023-07-23 Sun 11:42]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme
-(use-modules (gnu services)
-             (gnu services databases)
-             (gnu services desktop))
+(pretty-print "pre-%user-features")
 #+end_src
 
-*** debug: pre main-features
+***** abcdw features
+:PROPERTIES:
+:ID:       1532c6ba-0d0c-499e-bddd-ae1caa1dc778
+:CREATED:  [2022-07-29 Fri 17:48]
+:UPDATED:  [2023-07-05 Wed 12:32]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme
+(define %user-features
+  (remove
+   unspecified?
+   (list
+    my-feature-user-info
+    my-feature-gnupg
+    (feature-password-store)
+    my-feature-mail-settings
+
+    (feature-keyboard
+     ;; To get all available options, layouts and variants run:
+     ;; cat `guix build xkeyboard-config`/share/X11/xkb/rules/evdev.lst
+     #:keyboard-layout %thinkpad-layout))))
+#+end_src
+
+******* debug: print features
+:PROPERTIES:
+:ID:       4d60cafe-ff70-4540-a5ed-2e9b1a7b4b3e
+:CREATED:  [2022-07-29 Fri 17:48]
+:UPDATED:  [2022-07-29 Fri 17:48]
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme
+;;(map pretty-print %user-features)
+#+end_src
+
+******* TODO future features
+:PROPERTIES:
+:ID:       ad67e350-c601-49f4-ba21-ca6486ed96fb
+:CREATED:  [2022-07-29 Fri 17:48]
+:UPDATED:  [2022-08-22 Mon 17:34]
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme
+;;; TODO: feature-wallpapers https://wallhaven.cc/
+;;; TODO: feature-icecat
+;; PipeWire/iwd:
+;; https://github.com/J-Lentz/iwgtk
+;; https://github.com/krevedkokun/guix-config/blob/master/system/yggdrasil.scm
+;; https://github.com/werman/noise-suppression-for-voice#pipewire
+#+end_src
+
+#+RESULTS:
+
+****** COMMENT debug: pre main-features
 :PROPERTIES:
 :ID:       152578fa-8848-40dc-a0e3-a1a51825a5f7
 :CREATED:  [2022-07-29 Fri 18:24]
@@ -2254,7 +1860,8 @@ done
 #+begin_src scheme
 (pretty-print "pre-%main-features")
 #+end_src
-*** %main-features
+
+***** %main-features
 :PROPERTIES:
 :ID:       3455e06a-0a2b-4ca9-aca6-2ee2fa05f16f
 :CREATED:  [2022-07-29 Fri 17:53]
@@ -2278,7 +1885,7 @@ done
 
 #+end_src
 
-**** features
+***** features
 :PROPERTIES:
 :ID:       ba479dce-2f41-467e-b177-b38d2379f1a7
 :CREATED:  [2022-08-01 Mon 11:05]
@@ -2287,7 +1894,14 @@ done
 :END:
 
 
-***** custom-services
+******* services
+:PROPERTIES:
+:ID:       476030a6-84df-46c8-931d-03b86769879d
+:CREATED:  [2023-07-23 Sun 11:33]
+:UPDATED:  [2023-07-23 Sun 11:33]
+:ROAM_EXCLUDE: t
+:END:
+********* custom-services
 :PROPERTIES:
 :ID:       52dbdae7-459f-4950-9961-c2a9cd035844
 :CREATED:  [2022-08-09 Tue 12:44]
@@ -2315,7 +1929,7 @@ done
            ))))
 #+end_src
 
-****** services-home
+********* services-home
 :PROPERTIES:
 :ID:       32e2ffde-ff51-4a10-9256-e032d58629bf
 :CREATED:  [2022-09-28 Wed 15:48]
@@ -2323,7 +1937,7 @@ done
 :ROAM_EXCLUDE: t
 :END:
 
-******* envars
+*********** envars
 :PROPERTIES:
 :ID:       5b5d963a-b70c-4867-87b8-8beb1633fa02
 :CREATED:  [2022-09-28 Wed 15:47]
@@ -2430,7 +2044,7 @@ done
                ":"))))
 #+end_src
 
-******* zsh : profile, *rc
+*********** zsh : profile, *rc
 :PROPERTIES:
 :ID:       533771da-9686-48f0-85ed-e24da7b726d6
 :CREATED:  [2022-09-28 Wed 15:41]
@@ -2457,7 +2071,7 @@ done
 ;;      #$(file-append (@ (gnu packages base) coreutils) "/bin/ls"))))
 #+end_src
 
-******* mcron                                                                  :jobs:
+*********** mcron                                                              :jobs:
 :PROPERTIES:
 :ID:       c3c092d2-4cee-48eb-abc8-e76e393b5967
 :CREATED:  [2022-09-28 Wed 15:42]
@@ -2480,7 +2094,7 @@ done
  )
 #+end_src
 
-******** notes-commit                                                          :1min:
+*********** notes-commit                                                       :1min:
 :PROPERTIES:
 :ID:       c8903598-d72e-4539-884b-a60096be7fbe
 :CREATED:  [2022-09-28 Wed 15:42]
@@ -2531,7 +2145,7 @@ done
 ;;    port)))
 #+end_src
 
-******** fulltext index (recoll)                                                 :1h:
+*********** fulltext index (recoll)                                              :1h:
 :PROPERTIES:
 :ID:       ccd773a9-5a5e-41da-b050-6fa461c9a427
 :CREATED:  [2022-09-28 Wed 15:42]
@@ -2550,7 +2164,7 @@ done
        #:user #$my-user)
 #+end_src
 
-******** generate source tags                                                   :12h:
+*********** generate source tags                                                :12h:
 :PROPERTIES:
 :ID:       0681c613-5415-46d7-a079-e940c503941c
 :CREATED:  [2022-09-28 Wed 15:43]
@@ -2569,7 +2183,7 @@ done
        #:user #$my-user)
 #+end_src
 
-******** hourly reminder
+*********** hourly reminder
 :PROPERTIES:
 :ID:       fe0efa12-ae27-4652-aa9a-89b0f31b6615
 :CREATED:  [2023-04-15 Sat 12:53]
@@ -2577,7 +2191,7 @@ done
 :ROAM_EXCLUDE: t
 :END:
 
-********* things about which to be reminded
+************* things about which to be reminded
 :PROPERTIES:
 :ID:       2bc6f2f3-19b0-452b-9655-ecd09611c5a9
 :CREATED:  [2023-04-15 Sat 14:00]
@@ -2592,7 +2206,7 @@ breathe.  do some dips
 breathe.  do some hangboarding
 #+end_src
 
-********** job
+************* job
 :PROPERTIES:
 :ID:       170786cc-da2d-4add-be2a-038b7dc23af4
 :CREATED:  [2023-04-15 Sat 14:00]
@@ -2609,7 +2223,7 @@ breathe.  do some hangboarding
        #:user #$my-user)
 #+end_src
 
-******** external data; updates
+*********** external data; updates
 :PROPERTIES:
 :ID:       17e87570-2fa4-4f2e-95df-ef229c8ec1aa
 :CREATED:  [2022-10-04 Tue 16:19]
@@ -2617,7 +2231,7 @@ breathe.  do some hangboarding
 :ROAM_EXCLUDE: t
 :END:
 
-********* TODO forge-pull
+************* TODO forge-pull
 :PROPERTIES:
 :ID:       454cd7fc-d86d-4f4c-a685-6f9d13963db7
 :CREATED:  [2022-10-04 Tue 16:19]
@@ -2652,7 +2266,7 @@ breathe.  do some hangboarding
 #+RESULTS:
 : qz/job/forge-pull
 
-********* TODO jira-pull
+************* TODO jira-pull
 :PROPERTIES:
 :ID:       e1bfd63f-ae9c-4043-a2e2-629ffdfa23d5
 :CREATED:  [2022-10-04 Tue 16:19]
@@ -2660,14 +2274,14 @@ breathe.  do some hangboarding
 :ROAM_EXCLUDE: t
 :END:
 
-********* TODO magit-pull
+************* TODO magit-pull
 :PROPERTIES:
 :ID:       2e315ba6-5aa8-40bb-b497-55808aea22e5
 :CREATED:  [2023-07-13 Thu 09:50]
 :UPDATED: [2023-07-13 Thu 09:50]
 :END:
 
-********* TODO org-roam-indirect-link-cache
+************* TODO org-roam-indirect-link-cache
 :PROPERTIES:
 :ID:       9728dd0c-2a6b-4fe0-8307-7cb5bdbd4091
 :CREATED:  [2023-07-13 Thu 09:50]
@@ -2675,7 +2289,7 @@ breathe.  do some hangboarding
 :ROAM_EXCLUDE: t
 :END:
 
-********* TODO org-id-locations
+************* TODO org-id-locations
 :PROPERTIES:
 :ID:       2dafc686-0a0c-4360-987a-d254df07e00a
 :CREATED:  [2023-07-14 Fri 18:35]
@@ -2712,7 +2326,7 @@ wc /tmp/id-locations-files
   3738   3738 231641 /tmp/id-locations-files
 :end:
 
-******* TODO xdg-desktop-portal-wlr :: screencast with slurpy
+*********** TODO xdg-desktop-portal-wlr :: screencast with slurpy
 :PROPERTIES:
 :ID:       7d5b1d90-1d2b-4a25-b7d1-f28376cb1f3d
 :CREATED:  [2023-07-05 Wed 12:41]
@@ -2747,8 +2361,7 @@ chooser_type=simple"
                 "303030AA"))
 #+end_src
 
-
-****** services-sys
+********* services-sys
 :PROPERTIES:
 :ID:       c2ee7fa1-59a9-4aa5-9049-28949a17c807
 :CREATED:  [2022-09-28 Wed 15:47]
@@ -2756,7 +2369,7 @@ chooser_type=simple"
 :ROAM_EXCLUDE: t
 :END:
 
-******* prometheus-node-exporter :metrics:
+*********** prometheus-node-exporter                                        :metrics:
 :PROPERTIES:
 :ID:       e14e8d70-c704-415d-88ac-62f72ee03df9
 :CREATED:  [2022-09-28 Wed 15:47]
@@ -2771,7 +2384,7 @@ chooser_type=simple"
 
 #+end_src
 
-******* mcron                                                                  :jobs:
+*********** mcron                                                              :jobs:
 :PROPERTIES:
 :ID:       b83cdd83-78d4-464f-bb8f-74a481713984
 :CREATED:  [2022-09-28 Wed 15:47]
@@ -2790,7 +2403,7 @@ chooser_type=simple"
   ))
 #+end_src
 
-******** locate
+*********** locate
 :PROPERTIES:
 :ID:       f52c8582-7b64-4dc0-a111-ea259eb5a3d9
 :CREATED:  [2022-09-28 Wed 15:51]
@@ -2810,7 +2423,7 @@ chooser_type=simple"
        "updatedb")
 #+end_src
 
-******* OLD udev-nvidia                                                    :inactive:
+*********** OLD udev-nvidia                                                :inactive:
 :PROPERTIES:
 :ID:       e005dec1-7261-4fcd-84b6-49209ea7d7b0
 :CREATED:  [2022-09-28 Wed 15:52]
@@ -2826,7 +2439,7 @@ chooser_type=simple"
    (list nvidia-driver)))
 #+end_src
 
-******* NEW nvidia-service
+*********** NEW nvidia-service
 :PROPERTIES:
 :ID:       90f44378-4708-46cb-9a88-a5ef957fca5c
 :CREATED:  [2023-05-28 Sun 15:03]
@@ -2839,14 +2452,14 @@ chooser_type=simple"
 ;;(service nvidia-service-type)
 #+end_src
 
-******* udev-sdmount
+*********** udev-sdmount
 :PROPERTIES:
 :ID:       c3963cdf-a521-4647-b76c-4128b42457ce
 :CREATED:  [2023-03-14 Tue 17:49]
 :UPDATED:  [2023-03-14 Tue 18:21]
 :END:
 
-******** exposition
+*********** exposition
 :PROPERTIES:
 :ID:       b665d4a3-0e73-45fb-acf1-747ee64d49ce
 :CREATED:  [2023-03-14 Tue 18:18]
@@ -2865,7 +2478,7 @@ questions:
   cannot dedupe, but protects against residual corrupted data from the SD
   card.
 
-********* shell example
+************* shell example
 :PROPERTIES:
 :ID:       fb07c83c-8e9d-417a-9f85-4d8cd4a8184c
 :CREATED:  [2023-03-14 Tue 18:18]
@@ -2890,7 +2503,7 @@ rsync \
     "${o}"
 
 #+end_src
-******** src
+*********** src
 :PROPERTIES:
 :ID:       941f6f6c-707f-4419-b655-3dfa484d17ef
 :CREATED:  [2023-03-14 Tue 18:18]
@@ -2909,7 +2522,7 @@ rsync \
         "GROUP=\"input\", OPTIONS+=\"static_node=uinput\"")))
 
 #+end_src
-******* OLD X11 gdm with nvidia                                            :inactive:
+*********** OLD X11 gdm with nvidia                                        :inactive:
 :PROPERTIES:
 :ID:       a91bb43f-465e-4a4a-99fa-a8b4a5ba03e6
 :CREATED:  [2022-09-28 Wed 15:52]
@@ -2930,7 +2543,7 @@ rsync \
                          (drivers (list "nvidia")))))))
 #+end_src
 
-******* postgresql (v10)
+*********** postgresql (v10)
 :PROPERTIES:
 :ID:       f3e1e339-0500-410e-87b2-ed61fc47f9a0
 :CREATED:  [2023-07-17 Mon 10:10]
@@ -2961,7 +2574,7 @@ host	all	all	0.0.0.0/0       md5
             (postgresql (@ (gnu packages databases) postgresql-10)))))
 #+end_src
 
-******* postgresql: timescaledb                                            :inactive:
+*********** postgresql: timescaledb                                        :inactive:
 :PROPERTIES:
 :ID:       54345225-6b45-4465-9646-6bdc81ac41a1
 :CREATED:  [2022-09-28 Wed 15:54]
@@ -2981,7 +2594,7 @@ host	all	all	0.0.0.0/0       md5
 ;;             (postgresql (@ (gnu packages databases) postgresql-14)))))
 #+end_src
 
-******* postgresql: roles
+*********** postgresql: roles
 :PROPERTIES:
 :ID:       4af4ec02-7bd3-416f-a4a3-e311cd752192
 :CREATED:  [2022-09-28 Wed 15:54]
@@ -3007,7 +2620,7 @@ host	all	all	0.0.0.0/0       md5
                           (create-database? #t)))))))
 #+end_src
 
-******* openssh server
+*********** openssh server
 :PROPERTIES:
 :ID:       1cda9c5a-ef77-4735-aac7-b732054413c3
 :CREATED:  [2022-09-28 Wed 15:54]
@@ -3027,7 +2640,7 @@ host	all	all	0.0.0.0/0       md5
           ))
 #+end_src
 
-***** base-services
+********* base-services
 :PROPERTIES:
 :ID:       8f7a4a2a-c195-4d06-8d76-25a5671ad941
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3052,7 +2665,7 @@ host	all	all	0.0.0.0/0       md5
 "))))
 #+end_src
 
-***** desktop-services
+********* desktop-services
 :PROPERTIES:
 :ID:       f2840489-2e7e-483b-960c-3bc8e3b41412
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3063,7 +2676,7 @@ host	all	all	0.0.0.0/0       md5
 (unless gaming? (feature-desktop-services))
 #+end_src
 
-***** docker
+******* docker
 :PROPERTIES:
 :ID:       07f0f4f4-500d-488f-b678-88865aa775e0
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3074,7 +2687,7 @@ host	all	all	0.0.0.0/0       md5
 #+begin_src scheme :noweb-ref main
 (feature-docker)
 #+end_src
-***** qemu
+******* qemu
 :PROPERTIES:
 :ID:       92a2bcf9-b388-4331-85c3-14a24657f0b4
 :CREATED:  [2022-09-29 Thu 11:37]
@@ -3084,7 +2697,7 @@ host	all	all	0.0.0.0/0       md5
 #+begin_src scheme :noweb-ref main
 (feature-qemu)
 #+end_src
-***** backlight
+******* backlight
 :PROPERTIES:
 :ID:       10a02289-4033-4be5-a364-555a29d77849
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3095,7 +2708,7 @@ host	all	all	0.0.0.0/0       md5
 (feature-backlight #:step 5)
 #+end_src
 
-***** pipewire
+******* pipewire
 :PROPERTIES:
 :ID:       9a824aa7-0fed-4f84-a076-f2a5efc8f1b9
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3106,7 +2719,7 @@ host	all	all	0.0.0.0/0       md5
 (unless gaming? (feature-pipewire))
 #+end_src
 
-***** fonts
+******* fonts
 :PROPERTIES:
 :ID:       e4de9c1d-4566-4a53-b77b-6e2ad7662d58
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3124,7 +2737,7 @@ host	all	all	0.0.0.0/0       md5
   (weight 'regular)))
 #+end_src
 
-***** shell
+******* shell
 :PROPERTIES:
 :ID:       d6f26fbc-df9f-4a1f-8875-78fd654ecb64
 :CREATED:  [2022-09-28 Wed 15:41]
@@ -3132,7 +2745,7 @@ host	all	all	0.0.0.0/0       md5
 :ROAM_EXCLUDE: t
 :END:
 
-****** vterm
+******* vterm
 :PROPERTIES:
 :ID:       8bd59de0-c2f4-42fb-9f31-4c8890e9e68a
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3143,7 +2756,7 @@ host	all	all	0.0.0.0/0       md5
 (feature-vterm)
 #+end_src
 
-****** bash
+******* bash
 :PROPERTIES:
 :ID:       c5e6bc9f-9c77-46b2-a41e-883d81ae1fc5
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3154,7 +2767,7 @@ host	all	all	0.0.0.0/0       md5
 (feature-bash)
 #+end_src
 
-****** direnv
+******* direnv
 :PROPERTIES:
 :ID:       4ce3bb66-ccbb-4cf3-b92d-2e3bda91adf7
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3165,7 +2778,7 @@ host	all	all	0.0.0.0/0       md5
 (feature-direnv)
 #+end_src
 
-****** zsh
+******* zsh
 :PROPERTIES:
 :ID:       62082caa-8650-4eca-b90d-be7f82439d55
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3177,7 +2790,7 @@ host	all	all	0.0.0.0/0       md5
  #:enable-zsh-autosuggestions? #t)
 #+end_src
 
-****** ssh
+******* ssh
 :PROPERTIES:
 :ID:       855bb3df-f74b-4fff-9122-7c334a878dcc
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3227,7 +2840,7 @@ host	all	all	0.0.0.0/0       md5
 #+end_src
 
 
-***** git
+******* git
 :PROPERTIES:
 :ID:       dcd3cd89-5c4d-41e3-9ed5-324a48dc3546
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3249,7 +2862,7 @@ host	all	all	0.0.0.0/0       md5
    ))
 #+end_src
 
-******* config_work
+********* config_work
 :PROPERTIES:
 :ID:       1f073518-b77a-460c-abc8-bc265c4f9e6c
 :CREATED:  [2022-11-03 Thu 15:18]
@@ -3264,14 +2877,14 @@ host	all	all	0.0.0.0/0       md5
         email = "sculpepper@newstore.com"
 #+end_src
 
-***** network
+******* network
 :PROPERTIES:
 :ID:       d9d8aa24-494b-4906-b5ab-0dd56c0bf070
 :CREATED:  [2022-09-28 Wed 15:41]
 :UPDATED:  [2023-03-30 Thu 10:40]
 :ROAM_EXCLUDE: t
 :END:
-****** bluetooth
+******* bluetooth
 :PROPERTIES:
 :ID:       4f2da545-1b08-4465-9e3e-060a5dcbc4c5
 :CREATED:  [2022-08-26 Fri 11:49]
@@ -3281,7 +2894,7 @@ host	all	all	0.0.0.0/0       md5
 #+begin_src scheme :noweb-ref main
 (feature-bluetooth)
 #+end_src
-****** sshsocks
+******* sshsocks
 :PROPERTIES:
 :ID:       a94c429f-77eb-4e96-b1d3-1019071e6f6e
 :CREATED:  [2022-08-01 Mon 09:49]
@@ -3294,7 +2907,7 @@ host	all	all	0.0.0.0/0       md5
 ;; #:host "204:cbf:3e07:e67a:424f:93bc:fc5c:b3dc")
 #+end_src
 
-****** ip2d
+******* ip2d
 :PROPERTIES:
 :ID:       73a80c20-ac38-4929-abc1-171090b6c4dd
 :CREATED:  [2022-08-01 Mon 10:41]
@@ -3309,7 +2922,7 @@ host	all	all	0.0.0.0/0       md5
 ;; #:less-anonymous? #t)
 #+end_src
 
-****** transmission
+******* transmission
 :PROPERTIES:
 :ID:       6357a61f-0d61-4e62-9b8b-b4442b6923d6
 :CREATED:  [2022-08-01 Mon 10:55]
@@ -3321,14 +2934,14 @@ host	all	all	0.0.0.0/0       md5
 (feature-transmission #:auto-start? #f)
 #+end_src
 
-***** wm
+******* wm
 :PROPERTIES:
 :ID:       ffb41d6f-7d79-4bee-8f4a-809240572cf9
 :CREATED:  [2022-09-28 Wed 15:41]
 :UPDATED:  [2022-09-28 Wed 15:41]
 :ROAM_EXCLUDE: t
 :END:
-****** swaywm
+******* swaywm
 :PROPERTIES:
 :ID:       6b5b3a48-ad8a-4fa9-af06-325fd71530a0
 :CREATED:  [2022-09-28 Wed 15:41]
@@ -3336,7 +2949,7 @@ host	all	all	0.0.0.0/0       md5
 :ROAM_EXCLUDE: t
 :END:
 
-******* sway
+********* sway
 :PROPERTIES:
 :ID:       05be317e-8f65-4a14-a83f-db104b19788f
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3391,7 +3004,7 @@ host	all	all	0.0.0.0/0       md5
 
 #+RESULTS:
 
-******* sway-run-on-tty
+********* sway-run-on-tty
 :PROPERTIES:
 :ID:       1a67a54c-b9c9-4957-8bb7-24633e88c432
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3407,7 +3020,7 @@ host	all	all	0.0.0.0/0       md5
 
 #+end_src
 
-******* TODO sway-tessen
+********* TODO sway-tessen
 :PROPERTIES:
 :ID:       3649e55b-e0c1-4e97-a561-1c48f55a6c90
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3422,7 +3035,7 @@ host	all	all	0.0.0.0/0       md5
 ;;    #:menu-package rofi-wayland))
 #+end_src
 
-******* sway-screenshot
+********* sway-screenshot
 :PROPERTIES:
 :ID:       af8a8d1a-38ce-4e25-9c34-f1f0c8518394
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3434,7 +3047,7 @@ host	all	all	0.0.0.0/0       md5
 (unless gaming? (feature-sway-screenshot))
 #+end_src
 
-******* waybar
+********* waybar
 :PROPERTIES:
 :ID:       ddc53ffa-d988-47ee-b8cf-0ced515be0a8
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3459,7 +3072,7 @@ host	all	all	0.0.0.0/0       md5
     (waybar-clock))))
 #+end_src
 
-******* swayidle
+********* swayidle
 :PROPERTIES:
 :ID:       95052943-1d47-455f-903f-a40a1b8e086c
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3474,7 +3087,7 @@ host	all	all	0.0.0.0/0       md5
   (feature-swayidle))
 #+end_src
 
-******* swaylock
+********* swaylock
 :PROPERTIES:
 :ID:       3f203601-b2fa-4e25-802a-65a539120fc7
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3495,7 +3108,7 @@ host	all	all	0.0.0.0/0       md5
                     (clock))))
 #+end_src
 
-******* rofi
+********* rofi
 :PROPERTIES:
 :ID:       3edaad94-3afa-47cf-8317-dadea891c9cf
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3509,7 +3122,7 @@ host	all	all	0.0.0.0/0       md5
    #:theme (local-file "config/rofi/themes/base16-default-dark.rasi")))
 #+end_src
 
-******* swaywm
+********* swaywm
 :PROPERTIES:
 :ID:       59028f88-810e-467f-9c66-ea94f494e42c
 :CREATED:  [2022-09-28 Wed 15:41]
@@ -3517,7 +3130,7 @@ host	all	all	0.0.0.0/0       md5
 :ROAM_EXCLUDE: t
 :END:
 
-****** kanshi
+******* kanshi
 :PROPERTIES:
 :ID:       e9a4d259-45cc-43e9-89e5-69319a169928
 :CREATED:  [2022-10-28 Fri 12:09]
@@ -3546,7 +3159,7 @@ host	all	all	0.0.0.0/0       md5
                   (output HDMI-1 enable)))))
 #+end_src
 
-****** TODO redshift
+******* TODO redshift
 :PROPERTIES:
 :ID:       43d6b991-b37e-4d1c-86e5-36fd0a0e5cdf
 :CREATED:  [2023-04-26 Wed 21:11]
@@ -3561,7 +3174,7 @@ annoying! cannot fathom why this doesn't work
 ;;  #:redshift redshift-wayland)
 #+end_src
 
-****** i3
+******* i3
 :PROPERTIES:
 :ID:       4a57548b-2784-4807-befb-a02d27a02012
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3580,14 +3193,14 @@ annoying! cannot fathom why this doesn't work
 ;;     ;;  )
 #+end_src
 
-***** dev
+******* dev
 :PROPERTIES:
 :ID:       6ec8a5e5-2620-4d95-98a1-f7e382e497ed
 :CREATED:  [2022-09-28 Wed 15:59]
 :UPDATED:  [2022-09-28 Wed 15:59]
 :ROAM_EXCLUDE: t
 :END:
-****** emacs stuff
+******* emacs stuff
 :PROPERTIES:
 :ID:       c0924a65-73cc-4693-ba65-6abd6c6634dd
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3595,7 +3208,7 @@ annoying! cannot fathom why this doesn't work
 :ROAM_EXCLUDE: t
 :END:
 
-******* emacs
+********* emacs
 :PROPERTIES:
 :ID:       d2fc9152-8683-46c1-9ef2-4ca84510bb49
 :CREATED:  [2022-09-28 Wed 16:14]
@@ -3644,7 +3257,7 @@ annoying! cannot fathom why this doesn't work
  )
 #+end_src
 
-******** packages                                                               :pkg:
+********* packages                                                              :pkg:
 :PROPERTIES:
 :ID:       5f892275-23ad-429c-9651-f48f5e8576ec
 :CREATED:  [2022-09-28 Wed 16:14]
@@ -3719,7 +3332,7 @@ annoying! cannot fathom why this doesn't work
 ;; "emacs-org-autotangle"
 #+end_src
 
-******* TODO emacs-appearance
+********* TODO emacs-appearance
 :PROPERTIES:
 :ID:       e7344b77-dfd0-4bc5-aade-cd6b92dc58da
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3741,7 +3354,7 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs-appearance)
 #+end_src
 
-******* TODO emacs .. etc
+********* TODO emacs .. etc
 :PROPERTIES:
 :ID:       480434ca-5147-45f6-9b00-e47b87345dc2
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3769,7 +3382,7 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs-message)
 #+end_src
 
-******* emacs-smartparens
+********* emacs-smartparens
 :PROPERTIES:
 :ID:       01e9df44-bbc7-483d-b17a-0932d54be330
 :CREATED:  [2022-09-28 Wed 15:37]
@@ -3784,7 +3397,7 @@ annoying! cannot fathom why this doesn't work
 
 #+RESULTS:
 
-******* emacs-eglot
+********* emacs-eglot
 :PROPERTIES:
 :ID:       74c844c2-55fa-4ac3-b394-6c53488e5cf7
 :CREATED:  [2022-09-28 Wed 16:23]
@@ -3792,7 +3405,7 @@ annoying! cannot fathom why this doesn't work
 :ROAM_EXCLUDE: t
 :END:
 
-******* emacs-corfu
+********* emacs-corfu
 :PROPERTIES:
 :ID:       2a3598dc-be14-4f8c-ae66-100d8d3f9552
 :CREATED:  [2022-09-28 Wed 15:36]
@@ -3805,7 +3418,7 @@ annoying! cannot fathom why this doesn't work
  #:corfu-doc-auto #f)
 #+end_src
 
-******* emacs-helpful
+********* emacs-helpful
 :PROPERTIES:
 :ID:       d652de96-8917-4689-bf94-426a509c1a98
 :CREATED:  [2023-04-16 Sun 15:45]
@@ -3817,7 +3430,7 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs-help)
 #+end_src
 
-******* emacs-info
+********* emacs-info
 :PROPERTIES:
 :ID:       96b6b673-2ef5-4981-809e-e48234ee7f5f
 :CREATED:  [2023-04-16 Sun 15:45]
@@ -3829,7 +3442,7 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs-info)
 #+end_src
 
-******* emacs-tempel
+********* emacs-tempel
 :PROPERTIES:
 :ID:       37e931d1-9093-484c-80ad-c7b30f20aa45
 :CREATED:  [2022-09-28 Wed 15:38]
@@ -3846,7 +3459,7 @@ annoying! cannot fathom why this doesn't work
                (ielisp (elisp "src_emacs-lisp{ " r> " }"))))
 #+end_src
 
-******* emacs-erc
+********* emacs-erc
 :PROPERTIES:
 :ID:       1019ae2e-1221-4883-bb1e-35270a6fb25d
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3887,14 +3500,14 @@ annoying! cannot fathom why this doesn't work
      (erc-tls :server "chat.sr.ht" :nick rde-bouncer-nick))))
 #+end_src
 
-******** TODO ... fix import
+********* TODO ... fix import
 :PROPERTIES:
 :ID:       3c8534d1-8a84-4f8f-85d5-0cd6d257b8b9
 :CREATED:  [2023-03-02 Thu 17:58]
 :UPDATED:  [2023-03-02 Thu 17:58]
 :ROAM_EXCLUDE: t
 :END:
-******* emacs-elpher
+********* emacs-elpher
 :PROPERTIES:
 :ID:       7e6b37b2-717b-4be7-9dcc-f0dbe1cfe043
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3906,7 +3519,7 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs-elpher)
 #+end_src
 
-******* emacs-ement
+********* emacs-ement
 :PROPERTIES:
 :ID:       18bb85c9-07d5-4b46-8719-5aac67d10670
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3919,7 +3532,7 @@ annoying! cannot fathom why this doesn't work
 #+end_src
 
 
-******* emacs-pdf-tools
+********* emacs-pdf-tools
 :PROPERTIES:
 :ID:       c1f0a657-91fc-4a27-b33b-df85bfaa9ff1
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3931,7 +3544,7 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs-pdf-tools)
 #+end_src
 
-******* emacs-nov-el
+********* emacs-nov-el
 :PROPERTIES:
 :ID:       1103af98-4018-4f7d-b59d-89e4b844ce2e
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3943,7 +3556,7 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs-nov-el)
 #+end_src
 
-******* emacs-git
+********* emacs-git
 :PROPERTIES:
 :ID:       81f4c2b3-136b-4a37-a40b-3c3b44163bbe
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3956,7 +3569,7 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs-git)
 #+end_src
 
-******* org stuff
+********* org stuff
 :PROPERTIES:
 :ID:       b3d5483b-2e0a-4075-baea-6c0a65e04d8f
 :CREATED:  [2022-09-28 Wed 16:15]
@@ -3964,7 +3577,7 @@ annoying! cannot fathom why this doesn't work
 :ROAM_EXCLUDE: t
 :END:
 
-******** TODO org
+********* TODO org
 :PROPERTIES:
 :ID:       7fca8716-000f-4794-b174-2ed192d51c26
 :CREATED:  [2022-08-01 Mon 12:46]
@@ -3980,7 +3593,7 @@ annoying! cannot fathom why this doesn't work
  )
 #+end_src
 
-******** org-agenda
+********* org-agenda
 :PROPERTIES:
 :ID:       20c53b2d-bf63-48b9-ad00-ab417b2d9742
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3993,7 +3606,7 @@ annoying! cannot fathom why this doesn't work
  #:org-agenda-files '("~/life/roam/inbox.org"))
 #+end_src
 
-******** TODO org-roam
+********* TODO org-roam
 :PROPERTIES:
 :ID:       af1f484c-1958-426b-8377-9a1087079086
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -4011,7 +3624,7 @@ annoying! cannot fathom why this doesn't work
  )
 #+end_src
 
-******** TODO org-roam-ui
+********* TODO org-roam-ui
 :PROPERTIES:
 :ID:       12eeeff3-fc57-497a-b344-c34824553904
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -4024,7 +3637,7 @@ annoying! cannot fathom why this doesn't work
 ;; (feature-emacs-org-roam-ui)
 #+end_src
 
-******** TODO emacs-ref
+********* TODO emacs-ref
 :PROPERTIES:
 :ID:       a122ca1d-751b-4af2-8abd-6980bb1a761b
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -4043,7 +3656,7 @@ annoying! cannot fathom why this doesn't work
 ;;       #:bibliography-directory my-notes-directory)
 #+end_src
 
-******* TODO emacs-es/rest
+********* TODO emacs-es/rest
 :PROPERTIES:
 :ID:       d5965300-1774-44b2-bfc4-f8201622b065
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -4059,7 +3672,7 @@ annoying! cannot fathom why this doesn't work
 ;;     ;;  #:package-ob emacs-ob-restclient-latest)
 #+end_src
 
-****** clojure
+******* clojure
 :PROPERTIES:
 :ID:       d2a0b255-bfd5-44d4-8a22-817ec9d19769
 :CREATED:  [2022-10-28 Fri 12:16]
@@ -4071,7 +3684,7 @@ annoying! cannot fathom why this doesn't work
 ;;(feature-clojure)
 #+end_src
 
-***** mpv
+******* mpv
 :PROPERTIES:
 :ID:       dc8200af-d1cd-4911-8c42-0b01e9361da2
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -4083,14 +3696,14 @@ annoying! cannot fathom why this doesn't work
 (feature-mpv)
 #+end_src
 
-***** mail
+******* mail
 :PROPERTIES:
 :ID:       ecb39921-a2d6-4001-8f7c-1a8826ed4b67
 :CREATED:  [2022-09-28 Wed 15:41]
 :UPDATED:  [2022-09-28 Wed 15:41]
 :ROAM_EXCLUDE: t
 :END:
-****** TODO isync                                                              :mail:
+******* TODO isync                                                             :mail:
 :PROPERTIES:
 :ID:       5f12520a-369e-43bf-ab36-64a44c5bfb98
 :CREATED:  [2022-08-01 Mon 10:55]
@@ -4107,7 +3720,7 @@ annoying! cannot fathom why this doesn't work
            (gmail-tls . ,gmail-tls-isync-settings))))
 #+end_src
 
-****** l2md                                                                    :mail:
+******* l2md                                                                   :mail:
 :PROPERTIES:
 :ID:       bd9b236d-db39-449b-8314-77a79ce89fe1
 :CREATED:  [2022-08-01 Mon 10:55]
@@ -4119,7 +3732,7 @@ annoying! cannot fathom why this doesn't work
 (feature-l2md)
 #+end_src
 
-****** msmtp                                                                   :mail:
+******* msmtp                                                                  :mail:
 :PROPERTIES:
 :ID:       c5548269-6010-4a9c-b92f-83b27a722b76
 :CREATED:  [2022-08-01 Mon 10:55]
@@ -4140,7 +3753,7 @@ annoying! cannot fathom why this doesn't work
                   (tls_starttls . off))))))
 #+end_src
 
-****** notmuch                                                                 :mail:
+******* notmuch                                                                :mail:
 :PROPERTIES:
 :ID:       3b57f1e4-e156-4505-8d82-085ef082408c
 :CREATED:  [2022-08-01 Mon 10:55]
@@ -4171,7 +3784,7 @@ annoying! cannot fathom why this doesn't work
   %rde-notmuch-saved-searches))
 #+end_src
 
-***** xdg
+******* xdg
 :PROPERTIES:
 :ID:       2a190f7d-8013-42f2-ab78-49d4f61dd180
 :CREATED:  [2022-08-01 Mon 10:55]
@@ -4193,7 +3806,7 @@ annoying! cannot fathom why this doesn't work
   (templates "$HOME")))
 #+end_src
 
-***** base packages                                                             :pkg:
+******* base packages                                                           :pkg:
 :PROPERTIES:
 :ID:       9490f8c2-7074-4a89-a62e-f82b6bfc2f2b
 :CREATED:  [2022-08-01 Mon 10:55]
@@ -4278,7 +3891,7 @@ annoying! cannot fathom why this doesn't work
 
 #+RESULTS:
 
-***** TODO unsorted
+******* TODO unsorted
 :PROPERTIES:
 :ID:       72ecbbb1-860b-471e-a2e8-d96cf8c3dac3
 :CREATED:  [2023-03-30 Thu 12:47]
@@ -4316,7 +3929,7 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs-spelling)
 #+end_src
 
-****** pending
+******* pending
 :PROPERTIES:
 :ID:       5bbe74bc-777b-4dfe-ad73-8650e9ee9ec2
 :CREATED:  [2023-07-04 Tue 10:59]
@@ -4343,7 +3956,7 @@ annoying! cannot fathom why this doesn't work
 (feature-ungoogled-chromium)
 #+end_src
 
-*** debug: post-%main-features
+****** COMMENT debug: post-%main-features
 :PROPERTIES:
 :ID:       6a9522fb-fabc-4f94-97e4-2ab8d73905a1
 :CREATED:  [2022-07-29 Fri 17:53]
@@ -4357,15 +3970,14 @@ annoying! cannot fathom why this doesn't work
 
 #+end_src
 
-*** hw/host features
+***** hw/host features
 :PROPERTIES:
 :ID:       b34224fa-7b5c-4292-9a0d-27439812a042
 :CREATED:  [2022-07-29 Fri 17:53]
 :UPDATED:  [2022-07-29 Fri 17:53]
 :ROAM_EXCLUDE: t
 :END:
-
-**** future
+******** COMMENT future
 :PROPERTIES:
 :ID:       23664f9a-bd24-460b-8537-22f9efd3d298
 :CREATED:  [2022-07-29 Fri 18:22]
@@ -4373,7 +3985,7 @@ annoying! cannot fathom why this doesn't work
 :ROAM_EXCLUDE: t
 :END:
 
-***** TODO Switch from UUIDs to partition labels For better reproducibilty and easier setup.
+********** TODO Switch from UUIDs to partition labels For better reproducibilty and easier setup.
 :PROPERTIES:
 :ID:       8983d989-12c3-4e1b-8645-e346571cddcd
 :CREATED:  [2022-07-29 Fri 18:22]
@@ -4381,7 +3993,7 @@ annoying! cannot fathom why this doesn't work
 :ROAM_EXCLUDE: t
 :END:
 
-***** TODO Grub doesn't support luks2 yet.
+********** TODO Grub doesn't support luks2 yet.
 :PROPERTIES:
 :ID:       ea1aa05f-0279-4d55-a733-f40322f3c8f5
 :CREATED:  [2022-07-29 Fri 18:22]
@@ -4389,14 +4001,14 @@ annoying! cannot fathom why this doesn't work
 :ROAM_EXCLUDE: t
 :END:
 
-**** ixy                                                                   :host:ixy:
+******** ixy                                                               :host:ixy:
 :PROPERTIES:
 :ID:       ffec3337-a453-4b25-8919-bdacb6c93562
 :CREATED:  [2022-07-29 Fri 17:53]
 :UPDATED:  [2022-07-29 Fri 17:53]
 :ROAM_EXCLUDE: t
 :END:
-***** mapped devices                                                       :untangle:
+********** mapped devices                                                  :untangle:
 :PROPERTIES:
 :ID:       602eb92a-7d29-4c3a-8ca4-d6e9d61f0e4b
 :CREATED:  [2022-07-29 Fri 17:53]
@@ -4411,7 +4023,7 @@ annoying! cannot fathom why this doesn't work
          (target "sys-root")
          (type luks-device-mapping))))
 #+end_src
-***** file systems                                                         :untangle:
+********** file systems                                                    :untangle:
 :PROPERTIES:
 :ID:       40a378fb-a7a1-456a-b5e8-f15f2f7c7dd3
 :CREATED:  [2022-07-29 Fri 17:53]
@@ -4429,12 +4041,11 @@ annoying! cannot fathom why this doesn't work
         (file-system
           (device "/dev/nvme0n1p1")
           (mount-point "/boot/efi")
-          (type "vfat"))
-        ))
+          (type "vfat"))))
 #+end_src
 
 
-****** file systems (from andrew)
+********** file systems (from andrew)
 :PROPERTIES:
 :ID:       4228ac9b-1665-4978-9ded-bfa6e174961c
 :CREATED:  [2022-07-29 Fri 17:53]
@@ -4465,7 +4076,7 @@ annoying! cannot fathom why this doesn't work
 ;;       (device (uuid "8C99-0704" 'fat32))))))
 #+end_src
 
-***** imports
+********** imports
 :PROPERTIES:
 :ID:       5b8720fd-bc7e-4a8d-bbf7-3030b057d1b7
 :CREATED:  [2022-07-29 Fri 17:53]
@@ -4479,11 +4090,11 @@ annoying! cannot fathom why this doesn't work
  ((nongnu system linux-initrd) #:prefix nongnu-sys:))
 #+end_src
 
-***** features                                                             :untangle:
+********** features                                                        :untangle:
 :PROPERTIES:
 :ID:       3e09d87e-4895-4ab0-9109-4693e44ecb2d
 :CREATED:  [2022-07-29 Fri 17:53]
-:UPDATED:  [2023-07-12 Wed 21:18]
+:UPDATED:  [2023-07-23 Sun 11:24]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -4517,23 +4128,21 @@ annoying! cannot fathom why this doesn't work
       )
     ;; removed "modprobe.blacklist=snd_hda_intel,snd_soc_skl"
     #:firmware (list nongnu:linux-firmware
-                     nongnu:sof-firmware
-
-                     )
+                     nongnu:sof-firmware)
     #:initrd nongnu-sys:microcode-initrd
     #:kernel-loadable-modules (list v4l2loopback-linux-module
                                     ;;nvidia-module
                                     ))
    (feature-file-systems
     #:mapped-devices ixy-mapped-devices
-    #:file-systems   ixy-file-systems)
+    #:file-systems ixy-file-systems)
    ;;(feature-hidpi)
    (feature-networking)))
 
 (pretty-print "post-%ixy-features")
 #+end_src
 
-***** config
+********** config
 :PROPERTIES:
 :ID:       797b1544-85d0-4a89-b0fe-be6ba45ab847
 :CREATED:  [2022-07-29 Fri 17:53]
@@ -4556,7 +4165,7 @@ annoying! cannot fathom why this doesn't work
      ))))
 #+end_src
 
-****** debug: config args (features)
+********** debug: config args (features)
 :PROPERTIES:
 :ID:       49cef365-d12e-41eb-9e29-b04123e4db0a
 :CREATED:  [2022-07-29 Fri 18:04]
@@ -4571,7 +4180,7 @@ annoying! cannot fathom why this doesn't work
 ;;              %ixy-features))
 #+end_src
 
-***** os
+********** os
 :PROPERTIES:
 :ID:       9fa5b517-515a-4ce0-8b08-3717080553da
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4584,7 +4193,7 @@ annoying! cannot fathom why this doesn't work
   (rde-config-operating-system ixy-config))
 #+end_src
 
-****** debug: os
+********** debug: os
 :PROPERTIES:
 :ID:       24fc8fe1-79e9-45c9-a8b8-8e89db1161c5
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4595,7 +4204,7 @@ annoying! cannot fathom why this doesn't work
 (pretty-print "post-ixy-os")
 #+end_src
 
-***** home-environment
+********** home-environment
 :PROPERTIES:
 :ID:       a8b0c3bc-c2f6-4460-8a67-9519d36f204c
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4607,7 +4216,7 @@ annoying! cannot fathom why this doesn't work
   (rde-config-home-environment ixy-config))
 #+end_src
 
-****** debug: post-he
+********** debug: post-he
 :PROPERTIES:
 :ID:       58a97450-1bec-4243-b9b0-938862431fbf
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4618,7 +4227,7 @@ annoying! cannot fathom why this doesn't work
 (pretty-print "post-ixy-he")
 #+end_src
 
-**** TODO live                                                            :host:live:
+******** TODO live                                                        :host:live:
 :PROPERTIES:
 :ID:       f0223612-a7d9-4a9e-a6c9-993ac3cadcb2
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4626,7 +4235,7 @@ annoying! cannot fathom why this doesn't work
 :ROAM_EXCLUDE: t
 :END:
 
-***** filesystem
+********** filesystem
 :PROPERTIES:
 :ID:       fca68375-9c08-4e3d-96e0-7856e9d13268
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4663,7 +4272,7 @@ annoying! cannot fathom why this doesn't work
         ))
 #+end_src
 
-***** config
+********** config
 :PROPERTIES:
 :ID:       6f2c9531-48c8-4bed-b843-e271888e207c
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4707,7 +4316,7 @@ annoying! cannot fathom why this doesn't work
         )))))))
 #+end_src
 
-***** os
+********** os
 :PROPERTIES:
 :ID:       2c7c2f23-a1bd-4db4-8218-72035ff32495
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4719,7 +4328,7 @@ annoying! cannot fathom why this doesn't work
   (rde-config-operating-system live-config))
 #+end_src
 
-***** debug: post live
+********** debug: post live
 :PROPERTIES:
 :ID:       735d9883-dafd-4b64-bca8-ba5559995532
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4730,11 +4339,11 @@ annoying! cannot fathom why this doesn't work
 (pretty-print "post-live-config")
 #+end_src
 
-*** dispatcher
+**** dispatcher
 :PROPERTIES:
 :ID:       a607e231-867a-4f99-b24d-afc9324611e2
 :CREATED:  [2022-07-29 Fri 18:19]
-:UPDATED:  [2022-07-29 Fri 18:19]
+:UPDATED:  [2023-07-23 Sun 11:22]
 :ROAM_EXCLUDE: t
 :END:
 #+begin_src scheme
@@ -4743,11 +4352,13 @@ annoying! cannot fathom why this doesn't work
     (match rde-target
       ("ixy-home" ixy-he)
       ("ixy-system" ixy-os)
+      ("bogg-home" bogg-he)
+      ("bogg-system" bogg-os)
       ("live-system" live-os)
       (_ ixy-he))))
 #+end_src
 
-**** debug: total
+****** COMMENT debug: total
 :PROPERTIES:
 :ID:       0ec86b5a-f300-4373-bb1e-ccd6c7327776
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4768,7 +4379,7 @@ annoying! cannot fathom why this doesn't work
 ;;  (map feature-name (rde-config-features ixy-config)))
 #+end_src
 
-**** debug: pre dispatch
+****** COMMENT debug: pre dispatch
 :PROPERTIES:
 :ID:       3ec71f5a-394c-42e9-8f7e-cd40908fe5bd
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4780,7 +4391,7 @@ annoying! cannot fathom why this doesn't work
 (pretty-print "pre-dispatch")
 #+end_src
 
-*** dispatch
+***** dispatch
 :PROPERTIES:
 :ID:       305b2df4-7b0c-4dc5-9c40-3f50e5d289f8
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4792,7 +4403,7 @@ annoying! cannot fathom why this doesn't work
 (dispatcher)
 #+end_src
 
-*** channels
+**** channels
 :PROPERTIES:
 :ID:       4ef23979-355a-4858-841a-3551e4af3eb2
 :CREATED:  [2022-08-29 Mon 16:40]
@@ -4800,7 +4411,7 @@ annoying! cannot fathom why this doesn't work
 :ROAM_EXCLUDE: t
 :END:
 
-**** channels.scm
+***** channels.scm
 :PROPERTIES:
 :ID:       21ce54e0-18e0-460f-82c7-2b43e243ad45
 :CREATED:  [2022-08-29 Mon 16:40]
@@ -4841,7 +4452,7 @@ annoying! cannot fathom why this doesn't work
      "F695 F39E C625 E081 33B5  759F 0FC6 8703 75EF E2F5")))))
 #+end_src
 
-**** channels-local.scm                                                    :untangle:
+***** channels-local.scm                                                   :untangle:
 :PROPERTIES:
 :ID:       334b6dee-e142-4020-9417-23b3ff933cb9
 :CREATED:  [2023-07-12 Wed 19:20]
@@ -16617,6 +16228,439 @@ select 5,
 |-----|
 |   5 |
 
+* etc
+:PROPERTIES:
+:ID:       88c5af73-609a-4019-ba2f-543528a7b6e2
+:CREATED:  [2022-09-28 Wed 14:29]
+:UPDATED:  [2022-09-28 Wed 14:29]
+:ROAM_EXCLUDE: t
+:END:
+
+** external resources
+:PROPERTIES:
+:ID:       e5794fcd-5a9a-420b-b286-9451cff72f06
+:CREATED:  [2022-08-01 Mon 17:42]
+:UPDATED:  [2022-09-28 Wed 16:41]
+:ROAM_EXCLUDE: t
+:END:
+
+*** rofi theme: base16-dark
+:PROPERTIES:
+:ID:       2669cfa7-4f1b-460c-acde-711d8f49a90f
+:CREATED:  [2022-09-28 Wed 14:29]
+:UPDATED:  [2022-09-28 Wed 14:29]
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src shell
+p="$HOME/git/sys/rde/rde/examples/abcdw/config/rofi/themes"
+mkdir -p $p
+
+curl https://raw.githubusercontent.com/qzdl/rde/qzdl/rde/examples/abcdw/config/rofi/themes/base16-default-dark.rasi \
+     -o $p/base16-default-dark.rasi
+#+end_src
+
+#+RESULTS:
+
+** test
+:PROPERTIES:
+:ID:       cdeb56a4-5c09-4531-bba6-0c0c31bbdd55
+:CREATED:  [2022-08-01 Mon 12:27]
+:UPDATED:  [2022-08-01 Mon 12:27]
+:ROAM_EXCLUDE: t
+:END:
+
+*** e2e: make ixy-home
+:PROPERTIES:
+:ID:       b72fea65-890d-44b4-b746-2f13a8cba015
+:CREATED:  [2022-09-28 Wed 16:41]
+:UPDATED:  [2022-09-28 Wed 16:41]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src shell :results drawer
+make ixy-home >&/tmp/o
+
+cat /tmp/o
+#+end_src
+
+#+RESULTS:
+:results:
+GUILE_LOAD_PATH=../../../ RDE_TARGET=%-home \
+guix home reconfigure ./configs.scm
+"pre-%user-features"
+"pre-%main-features"
+rde/examples/abcdw/configs.scm:1032:1: missing closing parenthesis
+make: *** [Makefile:14: %-home-reconfigure] Error 1
+:end:
+
+*** describe: file hashes
+:PROPERTIES:
+:ID:       c7eb4b3e-4413-4759-b9b2-7bb0b2893f02
+:CREATED:  [2022-09-28 Wed 16:42]
+:UPDATED:  [2022-09-28 Wed 16:42]
+:ROAM_EXCLUDE: t
+:END:
+
+** concerns                                                                    :task:
+:PROPERTIES:
+:ID:       b5ed68eb-64ff-4878-9f79-9baddfd6e45c
+:CREATED:  [2022-09-28 Wed 16:40]
+:UPDATED:  [2022-09-28 Wed 16:40]
+:ROAM_EXCLUDE: t
+:END:
+*** emacs                                                                     :emacs:
+:PROPERTIES:
+:ID:       15c5b396-318c-4de7-ba73-0cb446b4b40a
+:CREATED:  [2022-09-28 Wed 16:40]
+:UPDATED:  [2022-09-28 Wed 16:40]
+:ROAM_EXCLUDE: t
+:END:
+**** TODO investigate completion interface; /why does ~C-k~ not work in ~{M-s l}~ / consult commands?/ (vertico?)
+:PROPERTIES:
+:ID:       9b2e7d9f-4feb-4229-b74f-ba52bef11176
+:CREATED:  [2022-09-28 Wed 16:44]
+:UPDATED:  [2022-09-28 Wed 16:44]
+:ROAM_EXCLUDE: t
+:END:
+
+{M-s l abc C-a C-k}
+**** TODO fix hyperbole loading
+:PROPERTIES:
+:ID:       dafa5eec-e33b-47a8-bd20-a6d9c1eb6378
+:CREATED:  [2022-09-28 Wed 16:45]
+:UPDATED:  [2022-09-28 Wed 16:45]
+:ROAM_EXCLUDE: t
+:END:
+
+as of [2022-09-28 Wed 16:45] (and for the last few weeks) loading hypb yields error for ~klink~;
+
+eval
+
+(require 'hyperbole)
+
+and observe the following
+#+begin_example
+Debugger entered--Lisp error: (file-missing "Cannot open load file" "No such file or directory" "klink")
+  load("klink")
+  byte-code("\300\301\302\"\210\303\304\305\306#\210\307\310!\210\311\312!\207" [setplist ibtypes::man-apropos (definition-name man-apropos quote (to-p nil style nil)) symset:add man-apropos ibtypes symbols run-hooks htype-create-hook load "klink"] 4)
+  require(hibtypes)
+  mapc(require (hvar hui-menu hui-mouse hypb hui hui-mini hbmap hibtypes))
+  byte-code("\300\301\302\"\210\303\304!\204\20\0\305\304\306\"\210\300\207" [mapc require (hvar hui-menu hui-mouse hypb hui hui-mini hbmap hibtypes) fboundp br-in-browser defalias #f(compiled-function () #<bytecode 0x1d8376ab5ddfaff0>)] 3)
+  require(hinit)
+  require(hyperbole)
+  eval((require 'hyperbole) t)
+  eval-expression((require 'hyperbole) nil nil 127)
+  funcall-interactively(eval-expression (require 'hyperbole) nil nil 127)
+  call-interactively(eval-expression nil nil)
+  command-execute(eval-expression)
+
+#+end_example
+**** org
+:PROPERTIES:
+:ID:       7c716491-ce73-4f8c-8fac-4286ce637e88
+:CREATED:  [2022-09-28 Wed 16:48]
+:UPDATED:  [2023-04-15 Sat 13:42]
+:ROAM_EXCLUDE: t
+:HEADER-ARGS: :noweb-ref org
+:END:
+***** TODO port CREATED/UPDATED from file stat info from git
+:PROPERTIES:
+:ID:       5262d510-7a89-4a2c-bf78-143c11404444
+:CREATED:  [2022-09-28 Wed 16:48]
+:UPDATED:  [2022-10-05 Wed 19:29]
+:ROAM_EXCLUDE: t
+:END:
+****** attribute created from headline, using [[id:5367ec4f-24d6-4416-a8d9-18df8cb1c0c2][created && updated]]
+:PROPERTIES:
+:ID:       c0f96018-5457-458c-908c-05fcddc9d052
+:CREATED:  [2022-09-28 Wed 16:49]
+:UPDATED:  [2022-09-28 Wed 16:49]
+:ROAM_EXCLUDE: t
+:END:
+
+***** TODO fix dispatch stuff ([[id:f31ab35b-59e7-4d2c-a123-5957a7da14c8][node-dispatch]])
+:PROPERTIES:
+:ID:       0e8868c1-c243-42fb-bd7c-5bbb8a21ddce
+:CREATED:  [2022-09-28 Wed 11:43]
+:UPDATED:  [2022-09-28 Wed 17:43]
+:ROAM_EXCLUDE: t
+:END:
+****** TODO [#A] elisp parser in RDE
+:PROPERTIES:
+:ID:       d4870719-33ce-4433-98ef-3867e1698969
+:CREATED:  [2022-09-28 Wed 14:12]
+:UPDATED:  [2023-06-01 Thu 23:31]
+:ROAM_EXCLUDE: t
+:END:
+
+******* problems
+:PROPERTIES:
+:ID:       0415f739-d3a7-42bb-b0b0-90eb2ee2c6f7
+:CREATED:  [2023-05-03 Wed 18:06]
+:UPDATED:  [2023-05-03 Wed 18:06]
+:ROAM_EXCLUDE: t
+:END:
+******** clobbers vectors
+:PROPERTIES:
+:ID:       72e5eb23-331e-445a-8004-86637ccf88ad
+:CREATED:  [2023-05-03 Wed 18:06]
+:UPDATED:  [2023-05-03 Wed 18:06]
+:ROAM_EXCLUDE: t
+:END:
+******** clobbers symbols beginning with numbers =44:= -> ~#{44:}~ :: =1+= -> ~#{1+}~
+:PROPERTIES:
+:ID:       3bc8f3bd-3c9d-49d0-8ec8-659b95458f81
+:CREATED:  [2023-05-03 Wed 18:06]
+:UPDATED:  [2023-05-03 Wed 18:06]
+:ROAM_EXCLUDE: t
+:END:
+******** unquote literals =,=  become literal =unquote=
+:PROPERTIES:
+:ID:       6cdd496b-c4ef-4998-9d48-5bf40f0b1246
+:CREATED:  [2023-06-01 Thu 23:31]
+:UPDATED:  [2023-06-01 Thu 23:31]
+:ROAM_EXCLUDE: t
+:END:
+
+
+#+DOWNLOADED: screenshot @ 2023-06-01 23:31:00
+[[file:etc/2023-06-01_23-31-00_screenshot.png]]
+
+******* TODO update rde
+:PROPERTIES:
+:ID:       3c4ea3e2-da0d-4265-911a-0a1e8c272e01
+:CREATED:  [2022-09-28 Wed 15:30]
+:UPDATED:  [2022-09-28 Wed 17:44]
+:ROAM_EXCLUDE: t
+:END:
+******** DONE rebase rde
+CLOSED: [2022-09-28 Wed 14:39]
+:PROPERTIES:
+:ID:       b94f35eb-0413-466f-8b3b-18b57047a7f7
+:CREATED:  [2022-09-28 Wed 14:12]
+:UPDATED:  [2022-09-28 Wed 14:13]
+:ROAM_EXCLUDE: t
+:END:
+:LOGBOOK:
+- CLOSING NOTE [2022-09-28 Wed 14:39] \\
+  just trash configs.scm lol
+CLOCK: [2022-09-28 Wed 14:13]--[2022-09-28 Wed 14:39] =>  0:26
+:END:
+
+******** DONE pull guix
+CLOSED: [2022-09-28 Wed 15:28]
+:PROPERTIES:
+:ID:       758f97f0-c6e3-448b-9679-689495d6e5a9
+:CREATED:  [2022-09-28 Wed 14:39]
+:UPDATED:  [2022-09-28 Wed 14:39]
+:ROAM_EXCLUDE: t
+:END:
+:LOGBOOK:
+CLOCK: [2022-09-28 Wed 14:39]--[2022-09-28 Wed 14:45] =>  0:06
+:END:
+
+hello
+
+******** DONE fix (unrelated errors) elisp config
+CLOSED: [2022-09-28 Wed 15:28]
+:PROPERTIES:
+:ID:       699d3ef0-e0db-4bfc-879e-ccbbbdbb0824
+:CREATED:  [2022-09-28 Wed 15:28]
+:UPDATED:  [2022-09-28 Wed 15:29]
+:ROAM_EXCLUDE: t
+:END:
+:LOGBOOK:
+- CLOSING NOTE [2022-09-28 Wed 15:28] \\
+  :PROPERTIES:
+  :UPDATED:  [2022-09-28 Wed 15:29]
+:END:
+
+tangle -> validate -> continue
+
+extra paren check needed for all tangled files
+CLOCK: [2022-09-28 Wed 14:45]--[2022-09-28 Wed 15:28] =>  0:43
+:END:
+
+******** TODO fix rde config
+:PROPERTIES:
+:ID:       b18f6878-1081-4ced-a467-f54ee66fb1ac
+:CREATED:  [2022-09-28 Wed 15:30]
+:UPDATED:  [2022-09-28 Wed 17:29]
+:ROAM_EXCLUDE: t
+:END:
+:LOGBOOK:
+CLOCK: [2022-09-28 Wed 15:28]--[2022-09-28 Wed 17:29] =>  2:01
+:END:
+
+********* DONE =rde/examples/abcdw/configs.scm:813:5: error: feature-emacs-appearance: unbound variable=
+:PROPERTIES:
+:ID:       97722b28-eb97-44b7-9769-a2bbdcabdf9e
+:CREATED:  [2022-09-28 Wed 15:30]
+:UPDATED:  [2022-09-28 Wed 17:44]
+:ROAM_EXCLUDE: t
+:END:
+******* TODO test elisp parser for vector support
+:PROPERTIES:
+:ID:       e3a0accc-135d-43dd-81be-e6e3e3aeb5db
+:CREATED:  [2022-09-28 Wed 14:12]
+:UPDATED:  [2022-11-08 Tue 12:22]
+:ROAM_EXCLUDE: t
+:END:
+
+***** TODO fix org stuff
+:PROPERTIES:
+:ID:       7f5afdfa-fc3b-47ae-a804-f2c01f215fc0
+:CREATED:  [2022-09-28 Wed 14:13]
+:UPDATED:  [2022-09-28 Wed 17:38]
+:ROAM_EXCLUDE: t
+:END:
+**** keyword / sequence to include NEXT
+:PROPERTIES:
+:ID:       64a44bf1-71f7-491c-95c0-562189180635
+:CREATED:  [2022-09-28 Wed 14:13]
+:UPDATED:  [2022-09-28 Wed 14:13]
+:ROAM_EXCLUDE: t
+:END:
+***** TODO ... search in RDE
+:PROPERTIES:
+:ID:       cb7d58f5-4c44-44cd-bdbd-221cddaae481
+:CREATED:  [2022-09-28 Wed 14:13]
+:UPDATED:  [2022-09-28 Wed 14:13]
+:ROAM_EXCLUDE: t
+:END:
+*** guix                                                                       :guix:
+:PROPERTIES:
+:ID:       2d285252-67e4-4455-a4bc-5a486ebc7718
+:CREATED:  [2022-09-28 Wed 16:40]
+:UPDATED:  [2022-09-28 Wed 16:40]
+:ROAM_EXCLUDE: t
+:END:
+**** TODO upstream [[id:1bca3f7a-3f6b-4ffa-bf10-0856b0eb8a01][emacs-sql-indent]]
+:PROPERTIES:
+:ID:       fd3d9257-d718-4b7b-8ceb-b2d27da0b32b
+:CREATED:  [2022-09-28 Wed 16:40]
+:UPDATED:  [2022-09-28 Wed 16:40]
+:ROAM_EXCLUDE: t
+:END:
+**** TODO upstream [[id:58790647-3625-4145-87d8-2a5baa335b0f][emacs-ob-go]]
+:PROPERTIES:
+:ID:       2e30d804-96c8-448b-8cc8-8f41c570086c
+:CREATED:  [2022-09-28 Wed 16:40]
+:UPDATED:  [2022-09-28 Wed 16:41]
+:ROAM_EXCLUDE: t
+:END:
+*** rde                                                                         :rde:
+:PROPERTIES:
+:ID:       31909571-94cc-4718-a971-558ac7074120
+:CREATED:  [2022-08-15 Mon 12:01]
+:UPDATED:  [2022-09-28 Wed 16:41]
+:ROAM_EXCLUDE: t
+:END:
+
+**** TODO org heading binds =C-M-=
+:PROPERTIES:
+:ID:       86921d8a-358e-4383-bbb2-3d0b47602315
+:CREATED:  [2022-08-15 Mon 12:01]
+:UPDATED:  [2022-08-15 Mon 12:01]
+:ROAM_EXCLUDE: t
+:END:
+
+**** TODO org agenda exports
+:PROPERTIES:
+:ID:       bd9f9bf3-e5e9-4f43-adc6-a30b64378c66
+:CREATED:  [2022-08-15 Mon 12:01]
+:UPDATED:  [2022-08-29 Mon 16:40]
+:ROAM_EXCLUDE: t
+:END:
+:LOGBOOK:
+CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
+:END:
+
+- made commit 7e655baad683b49c53a2683012576b7fb35dafa1
+
+**** TODO system-wide media status
+:PROPERTIES:
+:ID:       5923dc5e-4e2f-473a-9145-d0858d5d811d
+:CREATED:  [2022-08-26 Fri 11:49]
+:UPDATED:  [2022-08-26 Fri 11:49]
+:ROAM_EXCLUDE: t
+:END:
+
+***** feature: respect play / pause / skip from media controls (airpods)
+:PROPERTIES:
+:ID:       bbee3792-cbb4-4064-b9c8-7dcb742031a5
+:CREATED:  [2022-08-26 Fri 11:49]
+:UPDATED:  [2022-08-26 Fri 11:49]
+:ROAM_EXCLUDE: t
+:END:
+
+**** TODO kde-connect
+:PROPERTIES:
+:ID:       1548dc33-dceb-4e69-8326-32f9559e4e21
+:CREATED:  [2022-08-26 Fri 11:49]
+:UPDATED:  [2022-08-26 Fri 11:49]
+:ROAM_EXCLUDE: t
+:END:
+
+**** TODO investigate elisp-serializer clobbering vectors ~[:select abc ...]~ as paren'd functions
+:PROPERTIES:
+:ID:       d1fc1e48-c5e9-4f02-a718-3419f61f81a0
+:CREATED:  [2022-09-28 Wed 16:46]
+:UPDATED:  [2022-09-28 Wed 16:46]
+:ROAM_EXCLUDE: t
+:END:
+
+**** TODO emacs popups
+:PROPERTIES:
+:ID:       3f1f675d-00f4-4f31-93dc-10beed905999
+:CREATED:  [2022-09-28 Wed 16:47]
+:UPDATED:  [2022-09-28 Wed 16:47]
+:ROAM_EXCLUDE: t
+:END:
+
+***** calendar
+:PROPERTIES:
+:ID:       3b5d8aed-2122-4e86-b438-e0e306c26536
+:CREATED:  [2022-09-28 Wed 16:47]
+:UPDATED:  [2022-09-28 Wed 16:47]
+:ROAM_EXCLUDE: t
+:END:
+
+***** password-store
+:PROPERTIES:
+:ID:       6a28ec41-45ed-430c-abc9-89c7faed2e24
+:CREATED:  [2022-09-28 Wed 16:47]
+:UPDATED:  [2022-09-28 Wed 16:47]
+:ROAM_EXCLUDE: t
+:END:
+***** org-capture
+:PROPERTIES:
+:ID:       79feb294-8327-47d1-b583-f9ed9475855c
+:CREATED:  [2022-09-28 Wed 16:47]
+:UPDATED:  [2022-09-28 Wed 16:47]
+:ROAM_EXCLUDE: t
+:END:
+****** protocol (inbox, node)
+:PROPERTIES:
+:ID:       7fbfe5c7-7196-4861-b306-20bd50774e2b
+:CREATED:  [2022-09-28 Wed 16:47]
+:UPDATED:  [2022-09-28 Wed 16:47]
+:ROAM_EXCLUDE: t
+:END:
+****** daily
+:PROPERTIES:
+:ID:       ed8adb71-72ab-4156-bab8-4fe2f4712812
+:CREATED:  [2022-09-28 Wed 16:47]
+:UPDATED:  [2022-09-28 Wed 16:47]
+:ROAM_EXCLUDE: t
+:END:
+***** gpg pinentry
+:PROPERTIES:
+:ID:       e605cc8f-8cc4-48c4-b874-e5a67007de83
+:CREATED:  [2022-09-28 Wed 16:47]
+:UPDATED:  [2022-09-28 Wed 16:47]
+:ROAM_EXCLUDE: t
+:END:
 * Footnotes
 :PROPERTIES:
 :ID:       476ef762-1350-4afa-a8ad-2cd3e42eb730
