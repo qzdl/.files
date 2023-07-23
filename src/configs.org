@@ -1,7 +1,7 @@
 :PROPERTIES:
-:UPDATED:  [2023-05-03 Wed 18:57]
 :CREATED:  [2022-08-30 Tue 11:12]
 :ID:       12f7748c-7095-4969-8261-94ad0169a24c
+
 :END:
 #+title: system config; gnu guix (rde) & emacs
 #+property: header-args       :tangle-mode (identity #o444) :noweb yes
@@ -573,7 +573,7 @@ CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
 :PROPERTIES:
 :ID:       98f42608-b5c0-455d-bb02-9a326af8bc42
 :CREATED:  [2022-08-01 Mon 09:49]
-:UPDATED:  [2022-11-09 Wed 10:19]
+:UPDATED:  [2023-07-12 Wed 19:56]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -603,6 +603,7 @@ CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
 
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages fonts)
+  #:use-module (gnu packages wm)
   #:use-module (gnu packages)
 
   #:use-module (gnu services base)
@@ -1069,15 +1070,6 @@ Install and configure redshift, an adaptive light-temperature controller.")))
      #:keyboard-layout %thinkpad-layout))))
 #+end_src
 
-#+RESULTS:
-
-***** TODO bravehost mails
-:PROPERTIES:
-:ID:       b78b2899-e41b-448b-a3f8-696c19b4fe76
-:CREATED:  [2022-08-01 Mon 17:35]
-:UPDATED:  [2022-10-05 Wed 11:50]
-:ROAM_EXCLUDE: t
-:END:
 ***** debug: print features
 :PROPERTIES:
 :ID:       4d60cafe-ff70-4540-a5ed-2e9b1a7b4b3e
@@ -1111,14 +1103,14 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 :PROPERTIES:
 :ID:       5508a976-f9ad-457c-b4bb-46dbf3b73fb0
 :CREATED:  [2022-07-29 Fri 17:36]
-:UPDATED:  [2023-04-03 Mon 16:48]
+:UPDATED:  [2023-07-13 Thu 09:46]
 :END:
 
 **** pkgs, pkgs-vanilla                                                        :func:
 :PROPERTIES:
 :ID:       5fb5abba-de52-453a-8cfb-875f6d6897ba
 :CREATED:  [2022-08-08 Mon 11:41]
-:UPDATED:  [2022-08-08 Mon 12:10]
+:UPDATED:  [2023-07-13 Thu 09:46]
 :ROAM_EXCLUDE: t
 :END:
 #+begin_src scheme
@@ -1134,8 +1126,8 @@ Install and configure redshift, an adaptive light-temperature controller.")))
     (list (channel
            (name 'guix)
            (url "https://git.savannah.gnu.org/git/guix.git")
-           ;;;; [2023-03-12 Sun 12:44]
-           (commit "a70b9fb319e7f8d64ea90e8f659dcf40a6b971b0"))))
+           ;;;; [2023-07-13 Thu 09:46]
+           (commit "2794caed7c813f2ec4249236de36eaccafee8361"))))
 
   (define inferior (inferior-for-channels channel-guix))
   (define (get-inferior-pkg pkg-name)
@@ -1751,6 +1743,158 @@ bookmarks-alist) to save and restore places with mode-specific functionality.")
 
 #+RESULTS:
 
+****** dogears-remember
+:PROPERTIES:
+:ID:       74f332b7-de08-4ca7-b1bb-3e8d017d579c
+:CREATED:  [2023-07-15 Sat 17:30]
+:UPDATED:  [2023-07-15 Sat 19:13]
+:END:
+
+#+begin_src emacs-lisp
+(defun dogears-remember (&rest _ignore)
+  "Remember (\"dogear\") the current place."
+  (interactive)
+  (unless (cl-some 'funcall dogears-ignore-places-functions)
+    (if-let* ((record (or (ignore-errors
+                            (funcall bookmark-make-record-function))
+                          (dogears--buffer-record)))
+              (record (list (car record)
+                            (append (cdr record)
+                                    (cons 'region (call-interactively
+                                                   'qz/anno-yank-region-to-point))))))
+
+        (progn
+          (pcase (car record)
+            ;; Like `bookmark-make-record', we may have to add a string ourselves.
+            ;; And we want every record to have one as its first element, for
+            ;; consistency.  And sometimes, records have a nil name rather than an
+            ;; empty string, depending on the bookmark-make-record-function (I'm
+            ;; not sure if there are defined standards for what the first element
+            ;; of a bookmark record should be).
+            ((pred stringp)
+             ;; Record already has a string as its first element: do nothing.
+             nil)
+            (`nil (setf (car record) ""))
+            (_ (push "" record)))
+          (setf (map-elt (cdr record) 'manual)
+                (if (called-interactively-p 'interactive) "✓" " "))
+          (unless (map-elt (cdr record) 'buffer)
+            (setf (map-elt (cdr record) 'buffer) (buffer-name)))
+          (when-let ((within (or (funcall dogears-within-function)
+                                 (dogears--within)
+                                 (car record))))
+            (setf (map-elt (cdr record) 'within) within))
+          (setf (map-elt (cdr record) 'mode) major-mode
+                (map-elt (cdr record) 'line) (buffer-substring
+                                              (point-at-bol) (point-at-eol)))
+          ;; It's hard to say whether push or pushnew is the best choice.  When returning
+          ;; to a dogeared place, that place gets moved to the front of the list, or it
+          ;; remains where it was.  Either way, unless we allow dupes, the list changes.
+          (cl-pushnew record dogears-list :test 'dogears--equal)
+          (setf dogears-list (delete-dups dogears-list)
+                dogears-list (seq-take dogears-list dogears-limit))
+          (when (and dogears-update-list-buffer (buffer-live-p dogears-list-buffer))
+            (with-current-buffer dogears-list-buffer
+              (revert-buffer))))
+      (when (called-interactively-p 'interactive)
+        (message "Dogears: Couldn't dogear this place"))
+      )))
+#+end_src
+
+#+RESULTS:
+: dogears-remember
+
+****** dogears-list-mode
+:PROPERTIES:
+:ID:       343eccdc-82d5-460b-b1b4-f7d083aee729
+:UPDATED:  [2023-07-15 Sat 17:38]
+:END:
+
+#+begin_src emacs-lisp :noweb-ref null
+(defun qz/dogears-list ()
+  "Show dogears list."
+  (interactive)
+  (with-current-buffer (get-buffer-create "*Dogears List*")
+    (setf dogears-list-buffer (current-buffer))
+    (qz/dogears-list-mode)
+    (pop-to-buffer (current-buffer))))
+
+(define-derived-mode qz/dogears-list-mode tabulated-list-mode
+  "Dogears-List"
+  :group 'dogears
+  (setf tabulated-list-format (vector
+                               '("#" 3 (lambda (a b)
+                                         (< (string-to-number (elt (cadr a) 0))
+                                            (string-to-number (elt (cadr b) 0)))))
+                               (list (propertize "✓" 'help-echo "Manually remembered") 1 t)
+                               '("Region" 25 t :right-align t)
+                               '("Relevance" 10 t :right-align t)
+                               '("Within" 25 t)
+                               '("Buffer" 20 t)
+                               '("Directory" 25 t))
+        tabulated-list-sort-key '("#" . nil)
+        truncate-string-ellipsis dogears-ellipsis)
+  (add-hook 'tabulated-list-revert-hook
+            (lambda ()
+              (setf tabulated-list-entries
+                    (with-current-buffer (window-buffer (get-mru-window t nil nil))
+                      (qz/dogears-list--entries))))
+            nil 'local)
+  (tabulated-list-init-header)
+  (tabulated-list-revert))
+
+(defun qz/dogears-list--entries ()
+  "Return `tabulated-list-entries'."
+  (cl-loop for place in dogears-list
+           for i from 0
+           collect (list place
+                         (cl-coerce (cons (number-to-string i)
+                                          (qz/dogears--format-record-list place))
+                                    'vector))))
+
+(defun qz/dogears--format-record-list (record)
+  "Return a list of elements in RECORD formatted."
+  (cl-labels ((face-propertize
+                (string face)
+                ;; Return copy of STRING with FACE appended, but only if it doesn't already
+                ;; contain FACE.  (I don't know a better way to prevent faces being added
+                ;; repeatedly, which eventually, drastically slows down redisplay).
+                (setf string (copy-sequence string))
+                (let ((property (get-text-property 0 'face string)))
+                  (unless (or (equal face property)
+                              (and (listp property) (member face property)))
+                    (add-face-text-property 0 (length string) face 'append string)))
+                string))
+    (pcase-let* ((`(,name . ,(map manual within region filename)) record)
+                 (buffer (face-propertize (if filename
+                                              (file-name-nondirectory filename)
+                                            name)
+                                          'font-lock-constant-face))
+                 (region region)
+                 (relevance (face-propertize (dogears--relevance record)
+                                             'font-lock-keyword-face))
+                 (within (if within
+                             (face-propertize within 'font-lock-function-name-face)
+                           ""))
+                 ;; The filename may not always *be* a filename; e.g. somehow in
+                 ;; EWXM buffers it gets set to " - no file -", instead of just nil.
+                 (dir (when filename
+                        (file-name-directory filename))))
+      (if dir
+          (setf dir (split-string dir "/" t)
+                dir (nreverse dir)
+                dir (cl-loop for d in dir
+                             concat (truncate-string-to-width d 10)
+                             concat "\\")
+                dir (face-propertize dir 'font-lock-comment-face))
+        (setf dir ""))
+      (list manual relevance within buffer dir))))
+
+#+end_src
+
+#+RESULTS:
+: qz/dogears--format-record-list
+
 ***** emacs-chatgpt-shell
 :PROPERTIES:
 :ID:       9809acde-26e3-4bc8-bb47-a43759be7568
@@ -2001,7 +2145,7 @@ guix import elpa -a melpa selectric-mode
 :PROPERTIES:
 :ID:       f9fde913-acc6-4e7b-a5ba-2781a52027fd
 :CREATED:  [2023-05-04 Thu 14:45]
-:UPDATED:  [2023-05-04 Thu 14:55]
+:UPDATED:  [2023-07-04 Tue 19:38]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -2085,8 +2229,6 @@ done
 
 
 :end:
-
-
 
 *** imports
 :PROPERTIES:
@@ -2188,6 +2330,7 @@ done
 :UPDATED:  [2023-04-18 Tue 14:06]
 :ROAM_EXCLUDE: t
 :END:
+
 #+name: guile-service-envars
 #+begin_src scheme :noweb-ref services
 ((@ (gnu services) simple-service)
@@ -2294,6 +2437,7 @@ done
 :UPDATED:  [2022-09-28 Wed 15:41]
 :ROAM_EXCLUDE: t
 :END:
+
 #+begin_src scheme :noweb-ref services
 
 (simple-service
@@ -2359,7 +2503,7 @@ done
 && git add . \\
 && git commit -m \"auto-commit | $(date -uIs)\""
        "backup: notes-commit"
-       #:user "samuel")
+       #:user #$my-user)
 
 ;; (use-modules (guix gexp))
 ;; (let ((f (lambda ()
@@ -2403,7 +2547,7 @@ done
          (system*
           #$(file-append (@ (gnu packages search) recoll) "/bin/recollindex")))
        "index: recollindex"
-       #:user "samuel")
+       #:user #$my-user)
 #+end_src
 
 ******** generate source tags                                                   :12h:
@@ -2422,7 +2566,7 @@ done
          (system*
           #$(file-append (@ (gnu packages idutils) idutils) "/bin/mkid") "git"))
        "index: idutils"
-       #:user "samuel")
+       #:user #$my-user)
 #+end_src
 
 ******** hourly reminder
@@ -2452,7 +2596,7 @@ breathe.  do some hangboarding
 :PROPERTIES:
 :ID:       170786cc-da2d-4add-be2a-038b7dc23af4
 :CREATED:  [2023-04-15 Sat 14:00]
-:UPDATED:  [2023-04-18 Tue 12:55]
+:UPDATED:  [2023-07-14 Fri 10:26]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -2462,7 +2606,7 @@ breathe.  do some hangboarding
 #~(job '(next-hour) ;; every hour
        "aplay ~/vids/gong-cut.wav &>/dev/null; shuf -n1 ~/.config/cron/humanity | espeak -s 150"
        "gong"
-       #:user "samuel")
+       #:user #$my-user)
 #+end_src
 
 ******** external data; updates
@@ -2473,7 +2617,7 @@ breathe.  do some hangboarding
 :ROAM_EXCLUDE: t
 :END:
 
-********* forge-pull
+********* TODO forge-pull
 :PROPERTIES:
 :ID:       454cd7fc-d86d-4f4c-a685-6f9d13963db7
 :CREATED:  [2022-10-04 Tue 16:19]
@@ -2512,19 +2656,107 @@ breathe.  do some hangboarding
 :PROPERTIES:
 :ID:       e1bfd63f-ae9c-4043-a2e2-629ffdfa23d5
 :CREATED:  [2022-10-04 Tue 16:19]
-:UPDATED:  [2022-10-04 Tue 16:19]
+:UPDATED:  [2023-07-05 Wed 12:42]
 :ROAM_EXCLUDE: t
 :END:
+
+********* TODO magit-pull
+:PROPERTIES:
+:ID:       2e315ba6-5aa8-40bb-b497-55808aea22e5
+:CREATED:  [2023-07-13 Thu 09:50]
+:UPDATED: [2023-07-13 Thu 09:50]
+:END:
+
+********* TODO org-roam-indirect-link-cache
+:PROPERTIES:
+:ID:       9728dd0c-2a6b-4fe0-8307-7cb5bdbd4091
+:CREATED:  [2023-07-13 Thu 09:50]
+:UPDATED:  [2023-07-13 Thu 09:50]
+:ROAM_EXCLUDE: t
+:END:
+
+********* TODO org-id-locations
+:PROPERTIES:
+:ID:       2dafc686-0a0c-4360-987a-d254df07e00a
+:CREATED:  [2023-07-14 Fri 18:35]
+:UPDATED:  [2023-07-14 Fri 18:35]
+:ROAM_EXCLUDE: t
+:END:
+
+this approximately lists all the meaningful shell commands on my system.  [2023-07-16 Sun] ~ 3800 files.
+
+the aim is to sideloading the IDs from these into file:~/.config/emacs/.org-id-locations, taking the synchronous load off the main emacs process.
+
+will need a helper to just ~reload~ this async-output guy into help:org-id-locations.
+
+- see :: help:org-id-update-id-locations
+- see :: help:org-id-locations-save
+
+#+begin_src shell :results file :file /tmp/id-locations-files
+locate -r '\.org$' -e \
+    | grep '/home/samuel' \
+    | grep -vE '\.(moz|cache)|docker/|go/pkg|org-mode/testing|mail/lists|qz/brain|chrom(ium|e)/Default|matrix/|test(s)?/'
+#+end_src
+
+#+RESULTS:
+:results:
+[[file:/tmp/id-locations-files]]
+:end:
+
+#+begin_src shell
+wc /tmp/id-locations-files
+#+end_src
+
+#+RESULTS:
+:results:
+  3738   3738 231641 /tmp/id-locations-files
+:end:
+
+******* TODO xdg-desktop-portal-wlr :: screencast with slurpy
+:PROPERTIES:
+:ID:       7d5b1d90-1d2b-4a25-b7d1-f28376cb1f3d
+:CREATED:  [2023-07-05 Wed 12:41]
+:UPDATED:  [2023-07-05 Wed 12:41]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme :noweb-ref null
+;;; current
+(simple-service
+ 'xdg-desktop-portal-wlr-configuration--slurpy
+        home-xdg-configuration-files-service-type
+        `(("xdg-desktop-portal-wlr/config"
+           ,(mixed-text-file
+             "xdg-desktop-portal-wlr-config"
+             #~(format #f "[screencast]
+output_name=
+max_fps=30
+chooser_cmd=~a -f %o -or -c ff0000
+chooser_type=simple"
+#$(file-append (get-value 'slurp config slurp) "/bin/slurp"))))))
+
+;; TODO can this fit? ^^ returns "DP-2", but __ returns x,y, etc
+(define-public subject-window-or-selection
+      #~(format #f "~a -t get_tree | ~a -r '.. | select(.pid? and .visible?) \
+| .rect | \"\\(.x),\\(.y) \\(.width)x\\(.height)\"' | ~a -b ~a -B ~a"
+                #$(file-append (get-value 'sway config) "/bin/swaymsg")
+                #$(file-append jq "/bin/jq")
+                ;; TODO: Move to slurp-cmd
+                #$(file-append slurp "/bin/slurp")
+                "303030AA"
+                "303030AA"))
+#+end_src
+
 
 ****** services-sys
 :PROPERTIES:
 :ID:       c2ee7fa1-59a9-4aa5-9049-28949a17c807
 :CREATED:  [2022-09-28 Wed 15:47]
-:UPDATED:  [2022-09-28 Wed 15:59]
+:UPDATED:  [2023-07-13 Thu 09:50]
 :ROAM_EXCLUDE: t
 :END:
 
-******* prometheus-node-exporter
+******* prometheus-node-exporter :metrics:
 :PROPERTIES:
 :ID:       e14e8d70-c704-415d-88ac-62f72ee03df9
 :CREATED:  [2022-09-28 Wed 15:47]
@@ -2533,7 +2765,7 @@ breathe.  do some hangboarding
 :END:
 
 #+begin_src scheme :noweb-ref services-sys
-        ;;; metrics
+        ;;;
 (service (@ (gnu services monitoring)
             prometheus-node-exporter-service-type))
 
@@ -2543,7 +2775,7 @@ breathe.  do some hangboarding
 :PROPERTIES:
 :ID:       b83cdd83-78d4-464f-bb8f-74a481713984
 :CREATED:  [2022-09-28 Wed 15:47]
-:UPDATED:  [2022-09-28 Wed 15:51]
+:UPDATED:  [2023-07-18 Tue 22:27]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -2582,7 +2814,7 @@ breathe.  do some hangboarding
 :PROPERTIES:
 :ID:       e005dec1-7261-4fcd-84b6-49209ea7d7b0
 :CREATED:  [2022-09-28 Wed 15:52]
-:UPDATED:  [2022-09-28 Wed 15:52]
+:UPDATED:  [2023-07-16 Sun 19:46]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -2700,15 +2932,20 @@ rsync \
 
 ******* postgresql (v10)
 :PROPERTIES:
+:ID:       f3e1e339-0500-410e-87b2-ed61fc47f9a0
+:CREATED:  [2023-07-17 Mon 10:10]
+:UPDATED:  [2023-07-17 Mon 10:12]
+:ROAM_EXCLUDE: t
+:END:
+:PROPERTIES:
 :ID:       8d0bccba-0e24-4e9b-8beb-e22d61343dcc
 :CREATED:  [2022-09-28 Wed 15:53]
-:UPDATED:  [2022-09-28 Wed 15:53]
+
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme :noweb-ref services-sys
-        ;;; postgres: don't include if gaming
-(unless gaming?
+(unless #t ;;gaming?
   (service postgresql-service-type
            (postgresql-configuration
             (config-file
@@ -2748,12 +2985,12 @@ host	all	all	0.0.0.0/0       md5
 :PROPERTIES:
 :ID:       4af4ec02-7bd3-416f-a4a3-e311cd752192
 :CREATED:  [2022-09-28 Wed 15:54]
-:UPDATED:  [2022-09-28 Wed 15:54]
+:UPDATED:  [2023-07-17 Mon 10:11]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme :noweb-ref services-sys
-(unless gaming?
+(unless #t ;; gaming?
   (service postgresql-role-service-type
            (postgresql-role-configuration
             (roles (list (postgresql-role
@@ -2873,7 +3110,7 @@ host	all	all	0.0.0.0/0       md5
 :PROPERTIES:
 :ID:       e4de9c1d-4566-4a53-b77b-6e2ad7662d58
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2023-06-19 Mon 11:04]
+:UPDATED:  [2023-07-16 Sun 18:23]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -2899,7 +3136,7 @@ host	all	all	0.0.0.0/0       md5
 :PROPERTIES:
 :ID:       8bd59de0-c2f4-42fb-9f31-4c8890e9e68a
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2022-08-01 Mon 10:52]
+:UPDATED:  [2023-07-15 Sat 19:12]
 :ROAM_EXCLUDE: t
 :END:
 #+begin_src scheme :noweb-ref main
@@ -2944,7 +3181,7 @@ host	all	all	0.0.0.0/0       md5
 :PROPERTIES:
 :ID:       855bb3df-f74b-4fff-9122-7c334a878dcc
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2023-07-03 Mon 18:54]
+:UPDATED:  [2023-07-05 Wed 12:32]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -3103,7 +3340,7 @@ host	all	all	0.0.0.0/0       md5
 :PROPERTIES:
 :ID:       05be317e-8f65-4a14-a83f-db104b19788f
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2023-07-04 Tue 10:48]
+:UPDATED:  [2023-07-19 Wed 17:48]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -3135,7 +3372,8 @@ host	all	all	0.0.0.0/0       md5
      (bindsym $mod+Ctrl+o opacity set 1)
      (bindsym $mod+Ctrl+p opacity minus 0.1)
 
-     (bindsym $mod+x exec $menu)
+     ;;(bindsym $mod+x exec $menu)
+     (gaps inner 40)
      (bindsym $mod+Period exec "tessen -a copy")
 
      (input type:touchpad
@@ -3188,7 +3426,7 @@ host	all	all	0.0.0.0/0       md5
 :PROPERTIES:
 :ID:       af8a8d1a-38ce-4e25-9c34-f1f0c8518394
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2022-08-01 Mon 12:35]
+:UPDATED:  [2023-07-05 Wed 18:47]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -3361,17 +3599,16 @@ annoying! cannot fathom why this doesn't work
 :PROPERTIES:
 :ID:       d2fc9152-8683-46c1-9ef2-4ca84510bb49
 :CREATED:  [2022-09-28 Wed 16:14]
-:UPDATED:  [2023-06-30 Fri 23:04]
+:UPDATED:  [2023-07-04 Tue 19:40]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme :noweb-ref main
 (feature-emacs
- ;;#:emacs emacs-next-pgtk-latest
+ ;;#:emacs (@ (declantsien packages emacs) emacs-next-wr)
+ #:auto-clean-space? #f
  #:emacs (@ (rde packages emacs) emacs-next-pgtk-latest)
- ;; (if (string=? (or (getenv "BUILD_SUBMITTER") "") "git.sr.ht")
- ;;     (@ (gnu packages emacs) emacs-next-pgtk)
- ;;     emacs-next-pgtk-latest)
+
  #:extra-init-el
  (append
   (list #~"(define-key key-translation-map [?\\C-x] [?\\C-u])\n"
@@ -3412,15 +3649,15 @@ annoying! cannot fathom why this doesn't work
 :PROPERTIES:
 :ID:       5f892275-23ad-429c-9651-f48f5e8576ec
 :CREATED:  [2022-09-28 Wed 16:14]
-:UPDATED:  [2023-04-24 Mon 19:00]
+:UPDATED:  [2023-07-14 Fri 18:29]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme :noweb-ref emacs-pkg
 "emacs-elfeed"
 "emacs-calfw"
+"emacs-company"
 "emacs-debbugs"
-"emacs-dashboard"
 "emacs-dimmer"
 "emacs-edit-server"
 "emacs-eglot"
@@ -3431,7 +3668,6 @@ annoying! cannot fathom why this doesn't work
 "emacs-ggtags"
 "emacs-gnuplot"
 "emacs-go-mode"
-"emacs-guix"
 "emacs-highlight-indent-guides"
 "emacs-hl-todo"
 "emacs-htmlize" ;; ement: - ox-export html: org src blocks
@@ -3455,7 +3691,7 @@ annoying! cannot fathom why this doesn't work
 "emacs-protobuf-mode"
 "emacs-py-isort"
 "emacs-python-black"
-"emacs-repology"
+;;"emacs-repology"
 "emacs-restart-emacs"
 "emacs-slime"
 "emacs-slime-repl-ansi-color"
@@ -3473,6 +3709,9 @@ annoying! cannot fathom why this doesn't work
 "emacs-org-web-tools"
 "emacs-lua-mode"
 "emacs-consult-org-roam"
+"emacs-fountain-mode" ;; TODO feature-emacs-fountain-mode
+"emacs-csv-mode"
+"emacs-org-roam-ui"
 ;; TODO feature-emacs-lsp
 ;;"emacs-artbollocks"
 ;;"emacs-vlf" ;; TODO guix: package emacs-vlf
@@ -3485,7 +3724,7 @@ annoying! cannot fathom why this doesn't work
 :PROPERTIES:
 :ID:       e7344b77-dfd0-4bc5-aade-cd6b92dc58da
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2023-03-02 Thu 18:11]
+:UPDATED:  [2023-06-19 Mon 11:05]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -3959,18 +4198,23 @@ annoying! cannot fathom why this doesn't work
 :PROPERTIES:
 :ID:       9490f8c2-7074-4a89-a62e-f82b6bfc2f2b
 :CREATED:  [2022-08-01 Mon 10:55]
-:UPDATED:  [2023-03-30 Thu 12:37]
+:UPDATED:  [2023-07-16 Sun 18:16]
 :ROAM_EXCLUDE: t
 :END:
 
-#+begin_src scheme :noweb-ref main
+#+begin_src scheme :noweb-ref main :noweb yes
 (feature-base-packages
  #:home-packages
  (append
-  (list python-keyring-pass)
+  (list
+   python-keyring-pass
+   ;; perl-graph-easy
+   <<pkg-home>>
+   )
 
   (pkgs
    "wl-clipboard"
+   "grim"
    "figlet" ;; TODO: Move to emacs-artist-mode
    ;;"calibre"
    ;;"icecat" "nyxt"
@@ -4018,8 +4262,15 @@ annoying! cannot fathom why this doesn't work
    "python-scipy"
    ;; "python-virtualenv"
    "python-yq"
+   ;; "python-pydot"
+   ;; "python-networkx"
 
    "libnotify"
+
+   ;; HACK to fix firefox dialog crashes
+   "gdk-pixbuf"
+
+   "v4l-utils"
    ))
  #:system-packages
  (pkgs "fwupd-nonfree")
@@ -4032,7 +4283,7 @@ annoying! cannot fathom why this doesn't work
 :PROPERTIES:
 :ID:       72ecbbb1-860b-471e-a2e8-d96cf8c3dac3
 :CREATED:  [2023-03-30 Thu 12:47]
-:UPDATED:  [2023-07-04 Tue 10:59]
+:UPDATED:  [2023-07-14 Fri 18:32]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -4040,7 +4291,8 @@ annoying! cannot fathom why this doesn't work
 (feature-youtube-dl
  #:emacs-ytdl emacs-ytdl-next)
 ;;(feature-nyxt)
-(feature-emacs-dashboard)
+(feature-emacs-dashboard
+ #:show-on-startup? #f)
 (feature-emacs-ednc)
 (feature-emacs-pulseaudio-control)
 (feature-emacs-display-wttr)
@@ -4056,7 +4308,13 @@ annoying! cannot fathom why this doesn't work
                           (id "@sculp-ns:matrix.org")
                           (server "localhost:8009"))))
 (feature-emacs-ement)
-(feature-emacs-pdf-tools)
+(feature-emacs-geiser)
+(feature-emacs-guix)
+(feature-emacs-elisp)
+(feature-emacs-emms)
+(feature-emacs-flymake)
+(feature-emacs-org-protocol)
+(feature-emacs-spelling)
 #+end_src
 
 ****** pending
@@ -4076,9 +4334,7 @@ annoying! cannot fathom why this doesn't work
 ;;(feature-emacs-debbugs)
 (feature-emacs-dired)
 
-(feature-emacs-elisp)
-(feature-emacs-emms)
-(feature-emacs-flymake)
+
 (feature-emacs-graphviz)
 
 (feature-emacs-webpaste)
@@ -4141,13 +4397,14 @@ annoying! cannot fathom why this doesn't work
 :UPDATED:  [2022-07-29 Fri 17:53]
 :ROAM_EXCLUDE: t
 :END:
-***** mapped devices
+***** mapped devices                                                       :untangle:
 :PROPERTIES:
 :ID:       602eb92a-7d29-4c3a-8ca4-d6e9d61f0e4b
 :CREATED:  [2022-07-29 Fri 17:53]
 :UPDATED:  [2022-07-29 Fri 17:53]
 :ROAM_EXCLUDE: t
 :END:
+
 #+begin_src scheme
 (define ixy-mapped-devices
   (list (mapped-device
@@ -4155,13 +4412,14 @@ annoying! cannot fathom why this doesn't work
          (target "sys-root")
          (type luks-device-mapping))))
 #+end_src
-***** file systems
+***** file systems                                                         :untangle:
 :PROPERTIES:
 :ID:       40a378fb-a7a1-456a-b5e8-f15f2f7c7dd3
 :CREATED:  [2022-07-29 Fri 17:53]
 :UPDATED:  [2022-07-29 Fri 17:53]
 :ROAM_EXCLUDE: t
 :END:
+
 #+begin_src scheme
 (define ixy-file-systems
   (list (file-system
@@ -4175,7 +4433,9 @@ annoying! cannot fathom why this doesn't work
           (type "vfat"))
         ))
 #+end_src
-***** file systems (from andrew)
+
+
+****** file systems (from andrew)
 :PROPERTIES:
 :ID:       4228ac9b-1665-4978-9ded-bfa6e174961c
 :CREATED:  [2022-07-29 Fri 17:53]
@@ -4220,11 +4480,11 @@ annoying! cannot fathom why this doesn't work
  ((nongnu system linux-initrd) #:prefix nongnu-sys:))
 #+end_src
 
-***** features
+***** features                                                             :untangle:
 :PROPERTIES:
 :ID:       3e09d87e-4895-4ab0-9109-4693e44ecb2d
 :CREATED:  [2022-07-29 Fri 17:53]
-:UPDATED:  [2023-03-14 Tue 17:40]
+:UPDATED:  [2023-07-12 Wed 21:18]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -4233,7 +4493,7 @@ annoying! cannot fathom why this doesn't work
   (list
    (feature-host-info
     #:host-name "ixy"
-    #:timezone  "Europe/Berlin")
+    #:timezone  my-timezone)
    ;;; Allows to declare specific bootloader configuration,
    ;;; grub-efi-bootloader used by default
    (feature-bootloader
@@ -4291,7 +4551,7 @@ annoying! cannot fathom why this doesn't work
   (rde-config
    (features
     (append
-     %abcdw-features
+     %user-features
      %main-features
      %ixy-features
      ))))
@@ -4307,7 +4567,7 @@ annoying! cannot fathom why this doesn't work
 
 #+begin_src scheme
 ;; (map pretty-print
-;;      (append %abcdw-features
+;;      (append %user-features
 ;;              %main-features
 ;;              %ixy-features))
 #+end_src
@@ -4359,7 +4619,7 @@ annoying! cannot fathom why this doesn't work
 (pretty-print "post-ixy-he")
 #+end_src
 
-**** live                                                                 :host:live:
+**** TODO live                                                            :host:live:
 :PROPERTIES:
 :ID:       f0223612-a7d9-4a9e-a6c9-993ac3cadcb2
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4417,7 +4677,7 @@ annoying! cannot fathom why this doesn't work
   (rde-config
    (features
     (append
-     %abcdw-features
+     %user-features
      %main-features
      (list
       (feature-host-info
@@ -4487,6 +4747,7 @@ annoying! cannot fathom why this doesn't work
       ("live-system" live-os)
       (_ ixy-he))))
 #+end_src
+
 **** debug: total
 :PROPERTIES:
 :ID:       0ec86b5a-f300-4373-bb1e-ccd6c7327776
@@ -4540,15 +4801,15 @@ annoying! cannot fathom why this doesn't work
 :ROAM_EXCLUDE: t
 :END:
 
-**** channels.tmpl
+**** channels.scm
 :PROPERTIES:
 :ID:       21ce54e0-18e0-460f-82c7-2b43e243ad45
 :CREATED:  [2022-08-29 Mon 16:40]
-:UPDATED:  [2022-08-29 Mon 17:53]
+:UPDATED:  [2023-07-12 Wed 20:32]
 :ROAM_EXCLUDE: t
 :END:
 
-#+begin_src scheme :tangle ../channels.tmpl :noweb-ref 2chan
+#+begin_src scheme :tangle ../rde/channels.scm :noweb-ref 2chan
 ;; -*- mode: scheme -*-
 (use-modules (guix ci)
              (guix channels))
@@ -4565,9 +4826,64 @@ annoying! cannot fathom why this doesn't work
      "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0"))))
  (channel
   (name 'nonguix)
-  (url "https://gitlab.com/nonguix/nonguix")))
+  (url "https://gitlab.com/nonguix/nonguix")
+  (introduction
+   (make-channel-introduction
+    "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
+    (openpgp-fingerprint
+     "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
+ (channel
+  (name 'guix-binary)
+  (url "https://git.sr.ht/~declantsien/guix-channel")
+  (introduction
+   (make-channel-introduction
+    "0c171cf43849f86516e1ee23aec34e586654a3a7"
+    (openpgp-fingerprint
+     "F695 F39E C625 E081 33B5  759F 0FC6 8703 75EF E2F5")))))
 #+end_src
 
+**** channels-local.scm                                                    :untangle:
+:PROPERTIES:
+:ID:       334b6dee-e142-4020-9417-23b3ff933cb9
+:CREATED:  [2023-07-12 Wed 19:20]
+:UPDATED:  [2023-07-12 Wed 19:23]
+:ROAM_EXCLUDE: t
+:END:
+
+- :: https://guix.gnu.org/manual/en/html_node/Specifying-Channel-Authorizations.html
+
+#+begin_src scheme :tangle ../rde/channels-local.scm :noweb-ref 2chan
+;; -*- mode: scheme -*-
+(use-modules (guix ci)
+             (guix channels))
+
+(list
+ %default-guix-channel
+ (channel
+  (name 'rde)
+  (url "/home/samuel/git/sys/rde")
+  (introduction
+   (make-channel-introduction
+    "257cebd587b66e4d865b3537a9a88cccd7107c95"
+    (openpgp-fingerprint
+     "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0"))))
+ (channel
+  (name 'nonguix)
+  (url "/home/samuel/git/sys/nonguix")
+  (introduction
+   (make-channel-introduction
+    "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
+    (openpgp-fingerprint
+     "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
+ (channel
+  (name 'guix-binary)
+  (url "/home/samuel/git/sys/guix-binary")
+  (introduction
+   (make-channel-introduction
+    "0c171cf43849f86516e1ee23aec34e586654a3a7"
+    (openpgp-fingerprint
+     "F695 F39E C625 E081 33B5  759F 0FC6 8703 75EF E2F5")))))
+#+end_src
 
 ** emacs
 :PROPERTIES:
@@ -4606,11 +4922,13 @@ annoying! cannot fathom why this doesn't work
 :ID:       1b524325-ce8c-4d9a-8496-69a393a036e1
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:  [2023-03-02 Thu 17:54]
+:UPDATED:  [2023-07-14 Fri 18:48]
 :END:
 
+- see :: ~/.config/emacs/init.el
+- see also :: ~/.config/emacs/early-init.el
 #+begin_src scheme :tangle emacs.scm :noweb-ref base-emacs
-(define-module (qzdl emacs)
+(define-module (emacs)
   #:use-module (rde serializers elisp)
   #:export (init-el))
 
@@ -4731,6 +5049,7 @@ nil
 ;;(setq qz/debug t)
 
 
+;; TODO bug with 'org-open-at-mouse :: { M-x toggle-debug-on-error } :: [2023-07-04 Tue]
 (defun qz/org-babel-indent-block-hook (beg end &rest args)
   (interactive "r")
   (qz/debug- (message "qz/org-babel-indent-block: BEG %s END %s ARGS %s" beg end args))
@@ -4910,50 +5229,15 @@ buffer are offered."
   )
 #+end_src
 
-**** {C-c C-M-i}       :: org-global-cycle
+**** {C-c C-M-i}       :: org-fold
 :PROPERTIES:
 :ID:       9a8fc009-7e01-46ab-a467-4d639723a060
 :CREATED:  <2022-02-28 Mon 09:42>
-:UPDATED:  [2023-04-12 Wed 18:04]
+:UPDATED:  [2023-07-04 Tue 16:20]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src emacs-lisp :noweb-ref org
-;; (define-key org-mode-map (kbd "C-c C-M-i")
-;;             (lambda ()
-;;               "go to default opening mode -- see `org-startup-folded'"
-;;               (interactive)
-;;               (let ((org-startup-folded (if current-prefix-arg
-;;                                             t
-;;                                           org-startup-folded)))
-;;                 (funcall-interactively 'org-global-cycle '(4)))))
-
-(defun qz/org-fold ()
-  "go to default opening mode -- see `org-startup-folded'
-
-when prefix arg single,    fold to current level.
-when prefix arg numerical, fold to given level.
-when prefix arg nil,       fold to all levels."
-  (interactive)
-  (let ((prefix-arg
-         (if current-prefix-arg
-             (if (equal '(4) current-prefix-arg)
-                 ;; with C-u prefix, reveal sibling-level detail
-                 (org-outline-level)
-               current-prefix-arg)
-           ;; by default, reveal all
-           9999)))
-    (qz/debug- ;; HACK I don't understand prefix / current-prefix
-     (message "prefix: %s" (list current-prefix-arg prefix-arg)))
-    ;;; DO THE FOLD
-    (funcall-interactively 'org-content prefix-arg)
-    ;;; HACK ENSURE NICE DISPLAY IF NICE DISPLAY
-    ;; org-modern-mode doesn't handle "demoting" and manual link
-    ;; editing, etc... all too well
-    (when (and (boundp 'org-modern-mode) org-modern-mode)
-      (org-modern-mode 1))))
-
-
 ;; current subtree
 ;; given some tree
 
@@ -4970,7 +5254,6 @@ aca
  cd
 ad
 "
-
 (define-key org-mode-map (kbd "C-c C-M-i") 'qz/org-fold)
 #+end_src
 
@@ -5224,7 +5507,7 @@ hmm, doesn't allow further input
 :ID:       92b9eb8a-c76c-4284-8dfe-74870f4dcab9
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:  [2022-09-29 Thu 11:11]
+:UPDATED:  [2023-07-04 Tue 16:24]
 :END:
 
 #+begin_src emacs-lisp
@@ -5249,7 +5532,7 @@ hmm, doesn't allow further input
 :PROPERTIES:
 :ID:       0c29ea9e-6cd2-43a5-8062-a8b8f557906a
 :CREATED:  [2022-10-05 Wed 15:41]
-:UPDATED:  [2023-04-13 Thu 17:22]
+:UPDATED:  [2023-07-15 Sat 18:35]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -5263,31 +5546,25 @@ dispatches on /received/ inputs; it won't capture 'horizontally' from
     - {C-i} is equivalent to {TAB}
 
 #+begin_src emacs-lisp
-(defun qz/mode-is-or-derives (mode &rest modes)
-  (or (eq major-mode mode)
-      (apply 'derived-mode-p mode modes)))
-
-;;  (trace-function 'qz/mode-is-or-derives)
-
 (defun qz/dwim-fold ()
   (interactive)
   (let ((fold-fn
-         (cond ((qz/mode-is-or-derives 'org-mode)
-                'qz/org-fold)
-               ((qz/mode-is-or-derives 'magit-mode)
-                'magit-section-cycle)
+         (cond ((qz/mode-is-or-derives 'org-mode)   'qz/org-fold)
+               ((qz/mode-is-or-derives 'magit-mode) 'magit-section-cycle)
                ((qz/mode-is-or-derives 'outline-mode
-                                       ;; .. elisp
+                                       ;; .. i.e. elisp
                                        'lisp-data-mode
-                                       ;; .. markdown
+                                       ;; .. i.e. markdown
                                        'text-mode
                                        )
                 'outline-cycle)
                (t (message "no dwim path configured, honey")))))
     (when (symbolp fold-fn)
-      (message "dn: %s" fold-fn)
-      (call-interactively fold-fn))))
+      (qz/debug- (message "dn: %s" fold-fn))
+      (call-interactively fold-fn))
+    (recenter qz/recenter-line)))
 
+(defvar qz/recenter-line 4)
 (define-key global-map (kbd "s-TAB") 'qz/dwim-fold)
 #+end_src
 
@@ -5313,11 +5590,56 @@ intermediate movement is
 
 seems like lots of ways to move
 
+***** org-fold
+:PROPERTIES:
+:ID:       c3de27b3-951b-4650-a940-bc4021e94663
+:CREATED:  [2023-07-12 Wed 20:46]
+:UPDATED:  [2023-07-15 Sat 18:36]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref org
+(defun qz/org-fold ()
+  "go to default opening mode -- see `org-startup-folded'
+
+when prefix arg single,    fold to current level.
+when prefix arg numerical, fold to given level.
+when prefix arg nil,       fold to all levels."
+  (interactive)
+  (let ((prefix-arg
+         (if current-prefix-arg
+             (cond
+              ((equal '(4) current-prefix-arg)
+               ;; with C-u prefix: reveal all
+               9999)
+              ((eq 0 current-prefix-arg)
+               ;; with 0 prefix; reveal sibling + 1
+               (+ 1 (org-outline-level)))
+              (t current-prefix-arg))
+           ;; by default:  reveal sibling-level
+           (org-outline-level))))
+    (qz/debug- ;; HACK I don't understand prefix / current-prefix
+     ;; ... is it next/ now respectively?
+     (message "prefix: %s" (list current-prefix-arg prefix-arg)))
+    ;;; DO THE FOLD
+    (funcall-interactively 'org-content prefix-arg)
+    ;;; HACK ENSURE NICE DISPLAY IF NICE DISPLAY
+    ;; org-modern-mode doesn't handle "demoting" and manual link
+    ;; editing, etc... all too well
+    (when (and (boundp 'org-modern-mode) org-modern-mode)
+      (org-modern-mode 1))
+    ;; FOR SOME JAZZ, PRINT THE OUTLINE
+    (org-display-outline-path 'with-self t)))
+#+end_src
+
+#+RESULTS:
+: qz/org-fold
+
 **** {C-s-u}           :: dwim-unfold
 :PROPERTIES:
 :ID:       ab36de5a-2dd8-430a-a94f-796f8c7b0376
 :CREATED:  [2023-03-02 Thu 12:21]
-:UPDATED:  [2023-04-13 Thu 14:36]
+:UPDATED:  [2023-07-14 Fri 17:42]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -5327,7 +5649,7 @@ seems like lots of ways to move
 (defun qz/dwim-unfold ()
   (interactive)
   (let ((fold-fn
-         (cond ((qz/mode-is-or-derives 'org-mode) 'qz/org-unfold)
+         (cond ((qz/mode-is-or-derives 'org-mode)   'qz/org-unfold)
                ((qz/mode-is-or-derives 'magit-mode) 'magit-section-cycle-global)
                ((qz/mode-is-or-derives 'outline-mode
                                        ;; .. elisp
@@ -5339,22 +5661,163 @@ seems like lots of ways to move
     (when (symbolp fold-fn)
       (call-interactively fold-fn))))
 
-(defun qz/org-show-all ()
-  (interactive)
-  (run-hook-with-args 'org-pre-cycle-hook 'all)
-  (org-show-all '(headings blocks))
-  (setq org-cycle-global-status 'all)
-  (run-hook-with-args 'org-cycle-hook 'all)
-  (when (not current-prefix-arg)
-    (org-cycle-hide-drawers 'all)))
-
-(defalias 'qz/org-unfold 'qz/org-show-all)
-
 (define-key global-map (kbd "C-s-u") 'qz/dwim-unfold)
 #+end_src
 
 #+RESULTS:
 : qz/dwim-unfold
+
+***** org-show-all
+:PROPERTIES:
+:ID:       e08b934b-1f18-4c94-81fb-86c98a9cd5e0
+:CREATED:  [2023-07-12 Wed 20:47]
+:UPDATED:  [2023-07-16 Sun 17:14]
+:ROAM_EXCLUDE: t
+:END:
+:LOGBOOK:
+CLOCK: [2023-07-15 Sat 18:20]--[2023-07-15 Sat 18:20] =>  0:00
+:END:
+
+#+begin_src emacs-lisp
+(defun qz/org-show-all ()
+  "
+- cycle-hook, show (headings blocks)
+
+call with prefix to really reveal ALL.
+
+"
+  (interactive)
+  (cond ((not current-prefix-arg)
+         (qz/org-denoise-point))
+        (t
+         (run-hook-with-args 'org-pre-cycle-hook 'all)
+         (org-show-all '(headings blocks))
+         (setq org-cycle-global-status 'all)
+         (run-hook-with-args 'org-cycle-hook 'all)
+         (org-cycle-hide-drawers 'all)))
+  ;; FOR SOME JAZZ, PRINT THE OUTLINE
+  (org-display-outline-path 'with-self t)
+  (recenter qz/recenter-line))
+
+(defalias 'qz/org-unfold 'qz/org-show-all)
+#+end_src
+
+#+RESULTS:
+: qz/org-unfold
+
+***** org-denoise point
+:PROPERTIES:
+:ID:       936b5274-2c3a-4167-9a67-7f267bb86a0f
+:CREATED:  [2023-07-15 Sat 14:57]
+:UPDATED:  [2023-07-15 Sat 18:52]
+:ROAM_EXCLUDE: t
+:END:
+:LOGBOOK:
+CLOCK: [2023-07-15 Sat 18:20]--[2023-07-15 Sat 19:00] =>  0:40
+:END:
+
+- 'org-show-all says :: "Show all contents in the visible part of the buffer."
+
+so,  maybe if I narrow the buffer to the subtree at point; 'qz/org-show-all;
+
+#+begin_src emacs-lisp
+(defun qz/org-denoise-point ()
+  (interactive)
+  (call-interactively 'qz/org-fold)
+  ;;
+  (save-excursion
+    (org-back-to-heading)
+    (org-cycle))
+  (org-cycle-hide-drawers 'all)
+  (recenter qz/recenter-line))
+#+end_src
+
+#+RESULTS:
+: qz/org-denoise-point
+
+**** {C-M-|}           :: dwim-indent
+:PROPERTIES:
+:ID:       6b16863f-f6a1-4ba2-82a7-e10a12890eb0
+:CREATED:  [2023-06-19 Mon 18:01]
+:UPDATED:  [2023-06-19 Mon 18:01]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref kbd
+(defun qz/dwim-indent ()
+  "format / indent something.
+
+org-mode: indent the block at point
+prog-mode: indent the whole buffer
+
+for the rest: remember that indent-region still exists.
+
+good-boy mode: cleans up whitespace too
+
+dwim by mode is important
+
+as until now, I've been dodging
+org-errors about caching from my dodgy code"
+  (interactive)
+  (save-mark-and-excursion
+    (when (symbolp 'whitespace-cleanup)
+      (whitespace-cleanup))
+    (when-let ((f (cond
+                   ((and (derived-mode-p 'org-mode)
+                         (and (call-interactively 'org-babel-mark-block)
+                              (not (seq-contains-p
+                                    qz/org-babel-indent-exclude-lang
+                                    (car (org-babel-get-src-block-info))))))
+                    'indent-region)
+                   ((and (derived-mode-p 'prog-mode)
+                         (mark-whole-buffer))
+                    'indent-region)
+                   (t nil))))
+      (call-interactively f))))
+#+end_src
+
+#+RESULTS:
+: qz/dwim-indent
+
+***** TODO ident-region on makefiles is a joke
+:PROPERTIES:
+:ID:       75beb291-3b39-49d9-906a-d4c82d04b678
+:CREATED:  [2023-07-12 Wed 20:50]
+:UPDATED:  [2023-07-14 Fri 17:47]
+:ROAM_EXCLUDE: t
+:END:
+
+... because, their indentation =can be= heterogeneous, and there are many =makefile= modes, for =(make imake bsdmake automake gmake)=.
+
+that is to say, there may be many 'plausible' indentations for a given line, and it's context-sensitive -- akin to how python-mode indentation is kinda bonk.
+
+- see :: https://emacs.stackexchange.com/questions/10272/how-to-make-indent-region-keep-the-tab-in-makefile-buffer
+  - link to :: https://gist.github.com/jordonbiondo/dc4482f07c48cf9ee59a
+
+maybe this is something for lookback regexps (defining our own 'indent-line-function) treesitter to address, if a parse-tree can be formalized for MAKEFILEs.
+
+**** {C-M-=}           :: recenter
+:PROPERTIES:
+:ID:       5beaed40-7273-4071-af7e-549b2b342abd
+:CREATED:  [2023-07-18 Tue 15:26]
+:UPDATED:  [2023-07-18 Tue 15:26]
+:ROAM_EXCLUDE: t
+:END:
+:PROPERTIES:
+:ID:       4eb1314e-4169-4af2-b957-a916ba2c4684
+:CREATED:  [2023-07-18 Tue 13:02]
+
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp
+(defun qz/recenter ()
+  (interactive)
+  (recenter qz/recenter-line))
+
+(define-key global-map (kbd "C-M-=") 'qz/recenter)
+#+end_src
+
 **** toggle
 :PROPERTIES:
 :ID:       c724ddea-fffe-4fba-a908-a6cb1b8fed3b
@@ -5375,7 +5838,7 @@ seems like lots of ways to move
 :PROPERTIES:
 :ID:       4ac601d5-4d2b-4377-a29c-1118a0f24707
 :CREATED:  [2022-10-04 Tue 18:12]
-:UPDATED:  [2022-10-26 Wed 11:56]
+:UPDATED:  [2023-06-18 Sun 16:49]
 :ROAM_EXCLUDE: t
 :END:
 #+begin_src emacs-lisp :noweb-ref kbd
@@ -5410,6 +5873,7 @@ seems like lots of ways to move
 :ID:       9756d355-cbde-4d15-b83b-4f54d31b8e05
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
+:UPDATED:  [2023-06-18 Sun 16:50]
 :END:
 
 #+begin_src emacs-lisp
@@ -5438,6 +5902,7 @@ seems like lots of ways to move
 
 (setq org-goto-interface 'outline-path-completionp)
 (setq org-outline-path-complete-in-steps nil)
+
 ***** COMMENT it would be nice to have individual headings present, not just 'leaves'
 :PROPERTIES:
 :ID:       927d486d-50ae-4e2e-806c-ab6776485c6f
@@ -5509,7 +5974,117 @@ seems like lots of ways to move
    (bookmark-get-position "org-capture-last-stored")))
 #+end_src
 
+**** org-search-from-heading
+:PROPERTIES:
+:ID:       ad53ce27-a9fc-4de7-ac73-d6bca70f38ee
+:CREATED:  [2023-07-16 Sun 21:40]
+:UPDATED:  [2023-07-16 Sun 21:40]
+:ROAM_EXCLUDE: t
+:END:
+:PROPERTIES:
+:ID:       4fc99651-c62d-4e26-bf7b-f6fec0a2df66
+:
+:END:
 
+#+begin_src emacs-lisp :noweb-ref org
+(defun qz/org-search-from-heading ()
+  (interactive)
+  (let* ((cleaned-heading (->> (org-get-heading)
+                               (replace-regexp-in-string "\\[.*\\] " "")))
+         (searchified (->> cleaned-heading
+                           url-encode-url
+                           (concat "https://html.duckduckgo.com/html/?q="))))
+    (call-interactively 'org-insert-subheading-respect-content)
+    (insert (org-make-link-string
+             searchified
+             (concat "!ddg :: " cleaned-heading)))
+    (ignore-errors
+      (org-web-tools-read-url-as-org (org-web-tools--read-url)))
+    ;;; FIXME ddg sometimes has a super long guy which doesn't properly fontify
+    ;; (save-excursion
+    ;;   (org-next-visible-heading 3)
+    ;;   (org-beginning-of-line)
+    ;;   (let ((kill-ring nil))
+    ;;     (org-kill-line)))
+    ;;; goto first result
+    ;;; get summary last (link description) as 4th-level
+    (goto-char (point-min))
+    (org-next-visible-heading 1)
+    (save-excursion
+      (org-map-entries
+       (lambda ()
+         (unless (> (org-outline-level) 4)
+           (qz/debug-
+            (message "%s" (org-link-display-format
+                           (org-no-properties (org-get-heading)))))
+           (org-narrow-to-subtree)
+           (end-of-buffer)
+           (let ((kill-ring nil))
+             (call-interactively 'org-previous-link)
+             (embark-org-copy-link-description)
+             (end-of-buffer)
+             (call-interactively
+              'org-insert-subheading-respect-content)
+             (insert (concat (car kill-ring))))
+           (widen)))))
+    (goto-char (point-min))
+    (let ((current-prefix-arg 4))
+      (qz/org-fold))
+    (org-next-visible-heading 2)
+    ;;; NOTE ddg results
+    ))
+
+(define-key org-mode-map (kbd "C-s-0") 'qz/org-search-from-heading)
+#+end_src
+
+***** TODO ddg links are super borked.  tracking is baked in too
+:PROPERTIES:
+:ID:       453f4d16-d6a3-48a1-818c-89b80aa9a292
+:CREATED:  [2023-07-16 Sun 21:40]
+:UPDATED:  [2023-07-16 Sun 21:52]
+:ROAM_EXCLUDE: t
+:END:
+
+**** TODO sway-choose-window :: {M-S-TAB}                                       :kbd:
+:PROPERTIES:
+:ID:       dbde67fe-7f9d-4941-ab3f-5c941cbba256
+:CREATED:  [2023-07-16 Sun 21:51]
+:UPDATED:  [2023-07-18 Tue 00:08]
+:ROAM_EXCLUDE: t
+:END:
+
+- see :: [[id:f660eff2-5abc-40e6-8bf9-0913ad3e1dd4][[17:26:25] swaywm windows]]
+
+#+begin_src emacs-lisp
+(defun qz/sway-choose-window ()
+  (interactive)
+  (let* ((cmd "swaymsg -t get_tree | jq -r '
+.nodes | map(.
+| .current_workspace as $ws
+| .nodes
+ | map(.
+  | .nodes | map(.
+   | \"\\(.id)::\\($ws)::\\(.app_id):\\(.name)\"
+   ))) | add | add' | sed -e 's/\\[//g' -e 's/\\]//g' -e 's/,//g' -e 's/\"//g'")
+         (cmd-res (shell-command-to-string cmd))
+         (windows (s-split "\n" cmd-res))
+         ;; cleanup 'windows,
+         ;; - remove trailing/leading ws,
+         ;; - remove empty strings
+         (windows (remove "" (mapcar 's-trim windows)))
+         (window-choice (completing-read "choose a window: " windows))
+         ;; e.g "173::1::emacs:<2023-04-04>"
+         (con-id (car (s-split "::" window-choice)))
+         (focus-cmd (format "swaymsg '[con_id=%s] focus'" con-id)))
+    (message "stuff %s" (list windows con-id focus-cmd))
+    (list focus-cmd window-choice (shell-command-to-string focus-cmd))))
+
+(define-key global-map (kbd "M-<iso-lefttab>") 'qz/sway-choose-window)
+(define-key global-map (kbd "s-x") 'qz/sway-choose-window)
+#+end_src
+
+#+RESULTS:
+: qz/sway-choose-window
 
 **** aws
 :PROPERTIES:
@@ -5612,14 +6187,14 @@ or
 :PROPERTIES:
 :ID:       c053accd-329e-440d-be77-735ecea9f0b3
 :CREATED:  [2022-10-31 Mon 13:16]
-:UPDATED:  [2023-04-21 Fri 10:38]
-:ROAM_EXCLUDE: t
+:UPDATED:  [2023-07-15 Sat 17:54]
 :END:
 
 #+name: elisp-read-tab
 #+begin_src emacs-lisp
 (defun qz/get-tabs ()
-  (let* ((file (s-trim (shell-command-to-string "python3 $HOME/life/scratch/tabs.py"))))
+  (when-let* ((file (s-trim (shell-command-to-string "python3 $HOME/life/scratch/tabs.py")))
+              (file (and (not (string-empty-p file)) file)))
     (mapcar (lambda (o) (cons (gethash "title" o) o))
             (cl-sort ;; accessed ASC
              (with-temp-buffer
@@ -5629,12 +6204,12 @@ or
                         (gethash "accessed" o))))))
 
 (defun qz/tab (&optional tab insert?)
-  (let* ((tab (or tab (cdr (car (qz/get-tabs)))))
-         (org (derived-mode-p 'org-mode))
-         (title (gethash "title" tab))
-         (url (gethash "url" tab))
-         (text (if org (org-make-link-string url title)
-                 (format "%s %s :: %s" comment-start title url))))
+  (when-let* ((tab (or tab (cdr (car (qz/get-tabs)))))
+              (title (gethash "title" tab))
+              (url   (gethash "url" tab))
+              (text (if (derived-mode-p 'org-mode)
+                        (org-make-link-string url title)
+                      (format "%s %s :: %s" comment-start title url))))
     (when insert?
       (insert text)
       (org-end-of-line)
@@ -5667,7 +6242,7 @@ or
 :PROPERTIES:
 :ID:       5af6010e-4010-4c80-80c7-4050a689eeab
 :CREATED:  [2022-10-31 Mon 13:22]
-:UPDATED:  [2022-10-31 Mon 13:30]
+:UPDATED:  [2023-07-15 Sat 17:54]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -5701,6 +6276,8 @@ debug = False
 output = "/tmp/tabs-out.json"
 
 # Set up path and regex for files
+# i.e.. ~/.mozilla/firefox/oxd0gsnm.default
+#    *sessionstore*
 path = pathlib.Path.home().joinpath(".mozilla/firefox")
 files = list(path.glob("*default*/sessionstore-backups/recovery.jsonlz4"))
 # files = path.glob("oxd0gsnm.default-release-1/sessionstore-backups/recovery" + ".jsonlz4")
@@ -5717,24 +6294,32 @@ tabs = []
 
 def go():
     for f in files:
-        # decompress if necessary
-        b = f.read_bytes()
-        if b[:8] == b"mozLz40\0":
-            b = lz4.block.decompress(b[8:])
-
-        j = json.loads(b)
-        with open("/tmp/tabs-in.json", "w+") as f:
-            json.dump(j, f, indent=2)
-
-        if "windows" not in j.keys():
-            break
-        for w in j["windows"]:
+        j = None
+        try:
+            # decompress if necessary
+            b = f.read_bytes()
+            if b[:8] == b"mozLz40\0":
+                b = lz4.block.decompress(b[8:])
+                j = json.loads(b)
+                if debug:
+                    with open("/tmp/tabs-in.json", "w+") as f:
+                        json.dump(j, f, indent=2)
+        except BaseException as e:
+            debug and print("error: ", e)
+            continue
+        if not j:
+            continue
+        for w in j.get("windows", []):
             most_recent_tab_index = ""
             min_time = 1000
 
             debug and print("w.tabs len", len(w["tabs"]))
             for t in w["tabs"]:
-                i = t["index"] - 1  # Firefox does not 0-index
+                if not t:
+                    continue
+                i = t.get("index", 0) - 1  # Firefox does not 0-index
+                if 1 > i:
+                    continue
                 debug and print(
                     "(ID . (length t/entries/[i]/children))",
                     t["entries"][i]["ID"],
@@ -5769,7 +6354,7 @@ go()
 
 # <<elisp-read-tab>>
 #+end_src
-
+pngg
 *** general
 :PROPERTIES:
 :ID:       8f3dada6-e104-4726-aaa2-25c1475c534e
@@ -5886,7 +6471,7 @@ body      *values you wish to transform*: a list; cons, proper,
 :PROPERTIES:
 :ID:       1cbecd4e-64c7-4692-a478-c7cb577a7b83
 :CREATED:  [2023-04-03 Mon 12:46]
-:UPDATED:  [2023-04-03 Mon 12:46]
+:UPDATED:  [2023-07-12 Wed 20:47]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -5900,6 +6485,25 @@ body      *values you wish to transform*: a list; cons, proper,
 #+RESULTS:
 : qz/save-no-hooks
 
+**** mode-is-or-derives
+:PROPERTIES:
+:ID:       c5fe576d-aa68-42ff-a469-358ce251d182
+:CREATED:  [2023-07-12 Wed 20:47]
+:UPDATED:  [2023-07-12 Wed 20:47]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref general
+(defun qz/mode-is-or-derives (mode &rest modes)
+  (or (eq major-mode mode)
+      (apply 'derived-mode-p mode modes)))
+
+;;  (trace-function 'qz/mode-is-or-derives)
+#+end_src
+
+#+RESULTS:
+: qz/mode-is-or-derives
+
 **** TODO debug
 :PROPERTIES:
 :ID:       fe64fe7a-bb4c-4828-bb8b-5f263df8b3e9
@@ -5911,8 +6515,8 @@ body      *values you wish to transform*: a list; cons, proper,
 (defvar qz/debug 0 "debugging assists")
 
 (defmacro qz/debug- (&rest body)
-  (if (< 0 qz/debug)
-      `(progn ,@body)))
+  (when (< 0 (or qz/debug 0))
+    `(progn ,@body)))
 
 (qz/debug- (message "yo"))
 #+end_src
@@ -6168,7 +6772,7 @@ CLOCK: [2022-03-17 Thu 10:06]--[2022-03-17 Thu 11:32] =>  1:26
 :PROPERTIES:
 :ID:       eaeefe83-2fbf-4eab-81e7-34c0a278bdca
 :CREATED:  [2022-05-24 Tue 12:25]
-:UPDATED:  [2022-10-10 Mon 10:42]
+:UPDATED:  [2023-06-14 Wed 13:17]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -6205,6 +6809,7 @@ CLOCK: [2022-03-17 Thu 10:06]--[2022-03-17 Thu 11:32] =>  1:26
      (select-clause sqlind-right-justify-clause)
      (select-column sqlind-indent-select-column)
      (select-column-continuation sqlind-indent-select-column +)
+     ;;(select-table-continuation 0)
      ;; ((default . ++) (kinda . +) ( . sqlind-use-anchor-indentation))
      (select-join-condition ++) ; this should wrap
      (select-table sqlind-indent-select-table)
@@ -6261,7 +6866,8 @@ CLOCK: [2022-03-17 Thu 10:06]--[2022-03-17 Thu 11:32] =>  1:26
      (select-column-continuation sqlind-indent-select-column +)
      (select-join-condition -- --)
      (select-table sqlind-indent-select-table)
-     (select-table-continuation sqlind-indent-select-table +)
+     ;;(select-table-continuation sqlind-indent-select-table +)
+     (select-table-continuation sqlind-lineup-joins-to-anchor)
      (in-select-clause sqlind-lineup-to-clause-end sqlind-right-justify-logical-operator)
      (insert-clause sqlind-right-justify-clause)
      (in-insert-clause sqlind-lineup-to-clause-end sqlind-right-justify-logical-operator)
@@ -6276,7 +6882,7 @@ CLOCK: [2022-03-17 Thu 10:06]--[2022-03-17 Thu 11:32] =>  1:26
 :PROPERTIES:
 :ID:       0f7c1f78-677a-40a5-ac69-218c1c5e157e
 :CREATED:  [2023-04-26 Wed 16:47]
-:UPDATED:  [2023-04-27 Thu 15:43]
+:UPDATED:  [2023-07-05 Wed 10:39]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -6284,23 +6890,28 @@ CLOCK: [2022-03-17 Thu 10:06]--[2022-03-17 Thu 11:32] =>  1:26
 (defun qz/sqlfluff-region (&optional beg end info)
   "uses src block by default"
   (interactive)
-  (let ((dialect
-         (cl-case (intern (cdr (assoc :engine
-                                      (nth 2 (or info
-                                                 (org-babel-get-src-block-info))))))
-           (bq "bigquery")
-           (postgres "postgresql")
-           (t (error "🙄 my lazy ass")))))
+  (let* ((info (or info (org-babel-get-src-block-info)))
+         (dialect (or (and info (cl-case
+                                    (intern (cdr (assoc :engine (nth 2 info))))
+                                  (bq "bigquery")
+                                  (postgres "postgresql")
+                                  (t (error "🙄 my lazy ass"))))
+                      ;; default
+                      "bigquery")))
+    (if info
+        (save-mark-and-excursion
+          (org-babel-mark-block))
+      ;; default
+      (unless (region-active-p)
+        (mark-whole-buffer)))
     (cl-destructuring-bind
-        (beg end) (or (and beg end (list beg end))
-                      (save-mark-and-excursion
-                        (org-babel-mark-block)
-                        (list (region-beginning) (region-end))))
+        (beg end)
+        (or (and beg end (list beg end))
+            (list (region-beginning) (region-end)))
       (shell-command-on-region
        beg end
-       (format
-        "sqlfluff fix --force --disable_progress_bar --dialect %s -"
-        dialect)
+       (format "sqlfluff fix --FIX-EVEN-UNPARSABLE --force --disable-progress-bar --dialect %s -"
+               dialect)
        nil ;; no output buffer
        'replace))))
 #+end_src
@@ -6312,21 +6923,60 @@ CLOCK: [2022-03-17 Thu 10:06]--[2022-03-17 Thu 11:32] =>  1:26
 :PROPERTIES:
 :ID:       51e144e6-da9d-4293-974d-9639cbee4173
 :CREATED:  [2022-08-11 Thu 11:01]
-:UPDATED:  [2023-04-27 Thu 14:08]
+:UPDATED:  [2023-07-21 Fri 14:45]
 :END:
 
 #+begin_src emacs-lisp :noweb-ref org
 
-(setq org-babel-default-header-args:sql
+(setq qz/org-babel-default-header-args:sql:postgres
       '((:engine . "postgres")
         (:dbport . 5432) ;; NEVER connect to an external on 5433 by default
-        (:dbhost . "localhost")
-        (:var bi . "`p-t-business-intelligence-0da1`")))
-
+        (:dbhost . "localhost"))
+      qz/bq/bi "`p-t-business-intelligence-0da1`"
+      qz/org-babel-default-header-args:sql:bq
+      `((:engine . "bq")
+        (:results . "raw")
+        (:var bi . ,qz/bq/bi)
+        (:var datep . "> timestamp_add(current_date(), interval -$period day)")
+        (:var timep . "> timestamp_add(current_timestamp(), interval -$period day)")
+        ;; this var 'period' must go "at the end", such that it may be
+        ;; referenced by vars "at the start".  'timep' & 'datep' here
+        ;; would fail otherwise.
+        (:var period . 7)
+        (:var return . ,(concat qz/bq/bi ".t_checkout.vw_item_return"))
+        (:var soi    . ,(concat qz/bq/bi ".t_order_management.vw_dim_sales_order_item_all_time"))
+        (:var so     . "`p-t-business-intelligence-0da1`.t_order_management.vw_order")
+        (:var vsoi   . "`p-t-order-management-svc-6996`.validation_stream.om_public_sales_order_item")
+        (:var rsoi   . "`p-t-order-management-svc-6996`.raw_stream.om_public_sales_order_item")
+        (:var dmsoi  . "`p-t-order-management-svc-6996`.dm.dimension_sales_order_item")))
 #+end_src
 
 #+RESULTS:
-: ((:engine . postgres) (:dbport . 5432) (:dbhost . localhost) (:var bi . `p-t-business-intelligence-0da1`))
+: ((:engine . "bq") (:results . "raw") (:var bi . "`p-t-business-intelligence-0da1`") (:var datep . "> timestamp_add(current_date(), interval -$period day)") (:var timep . "> timestamp_add(current_timestamp(), interval -$period day)") (:var period . 7) (:var return . "`p-t-business-intelligence-0da1`.t_checkout.vw_item_return") (:var soi . "`p-t-business-intelligence-0da1`.t_order_management.vw_dim_sales_order_item_all_time") (:var so . "`p-t-business-intelligence-0da1`.t_order_management.vw_order") (:var vsoi . "`p-t-order-management-svc-6996`.validation_stream.om_public_sales_order_item") (:var rsoi . "`p-t-order-management-svc-6996`.raw_stream.om_public_sales_order_item") (:var dmsoi . "`p-t-order-management-svc-6996`.dm.dimension_sales_order_item"))
+
+****** qz/choose-org-babel-default-header-args:sql
+:PROPERTIES:
+:ID:       ceff098a-12f2-419f-911c-8ba2dfcebab0
+:CREATED:  [2023-05-10 Wed 11:58]
+:UPDATED:  [2023-07-21 Fri 14:45]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref org
+(defun qz/choose-org-babel-default-header-args:sql (&optional dialect)
+  (interactive)
+  (setq org-babel-default-header-args:sql
+        (symbol-value (intern
+                       (format "qz/org-babel-default-header-args:sql:%s"
+                               (or dialect
+                                   (completing-read "dialect: "
+                                                    '(bq postgres))))))))
+
+(qz/choose-org-babel-default-header-args:sql 'bq)
+#+end_src
+
+#+RESULTS:
+: ((:engine . "bq") (:results . "raw") (:var bi . "`p-t-business-intelligence-0da1`") (:var datep . "> timestamp_add(current_date(), interval -$period day)") (:var timep . "> timestamp_add(current_timestamp(), interval -$period day)") (:var period . 7) (:var return . "`p-t-business-intelligence-0da1`.t_checkout.vw_item_return") (:var soi . "`p-t-business-intelligence-0da1`.t_order_management.vw_dim_sales_order_item_all_time") (:var so . "`p-t-business-intelligence-0da1`.t_order_management.vw_order") (:var vsoi . "`p-t-order-management-svc-6996`.validation_stream.om_public_sales_order_item") (:var rsoi . "`p-t-order-management-svc-6996`.raw_stream.om_public_sales_order_item") (:var dmsoi . "`p-t-order-management-svc-6996`.dm.dimension_sales_order_item"))
 
 ***** bigquery
 :PROPERTIES:
@@ -6339,7 +6989,7 @@ CLOCK: [2022-03-17 Thu 10:06]--[2022-03-17 Thu 11:32] =>  1:26
 :PROPERTIES:
 :ID:       4bc34558-e335-475b-ad80-87333824ac44
 :CREATED:  [2023-04-14 Fri 18:34]
-:UPDATED:  [2023-04-17 Mon 13:14]
+:UPDATED:  [2023-06-18 Sun 16:52]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -6349,14 +6999,26 @@ she said im cool!!
 - based on :: [[https://github.com/renzmann/.emacs.d][baserenzmann/.emacs.d: My literate Emacs configuration]] ([[https://github.com/renzmann/.emacs.d#bigquery-sql-blocks-in-org-babel][exact ref]])
 - next: auto-taxy query plan  :: https://github.com/alphapapa/taxy.el/tree/master/examples
 
+
+
 #+begin_src elisp :noweb-ref org
 (defun org-babel-execute:bq (orig-fun body params)
-  (let ((dry? (assq :dry params)))
+  (let* ((dry? (assq :dry params))
+         (cmd (format "bq query --format=json --nouse_legacy_sql %s '
+%s
+'"
+                      (if dry? "--dry_run" "")
+                      (s-replace-all '(
+                                       ("'" . "\"")
+                                       ;;("*" . "\*") ;; TODO \* (rde)
+                                       ;; ("`" . "\\`")
+                                       ;;   ("\"" . "\\\"")
+                                       )
+                                     (org-babel-expand-body:sql body params)))))
     (if (string-equal-ignore-case (cdr (assq :engine params)) "bq")
         (let ((res (org-babel-execute:shell
-                    (format "bq query --format=json --nouse_legacy_sql %s '%s'"
-                            (if dry? "--dry_run" "")
-                            (org-babel-expand-body:sql body params))
+                    ;; ....the quoting ..... i know......
+                    cmd
                     params)))
           (ignore-errors
             (message "Estimated Bytes: %.2f MB"
@@ -6375,12 +7037,35 @@ she said im cool!!
 #+RESULTS:
 | qz/advice-enable--org-babel-execute:sql--org-babel-execute:bq | qz/advice-disable--org-babel-execute:sql--org-babel-execute:bq |
 
+******* testing
+:PROPERTIES:
+:ID:       c3172b1e-eca3-44c0-b3c7-25996a423e8a
+:CREATED:  [2023-05-11 Thu 12:37]
+:UPDATED:  [2023-05-11 Thu 12:37]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src elisp :noweb-ref null
+(org-babel-execute:shell
+ (format " query --format=json --nouse_legacy_sql %s '%s'"
+         (if dry? "--dry_run" "")
+         (org-babel-expand-body:sql body params))
+ params)
+#+end_src
+
+******* TODO sort output json's top-level keys with respect to input order (need to lex the query)
+:PROPERTIES:
+:ID:       6f525eda-40aa-49b6-a90c-8ebd041fb9e2
+:CREATED:  [2023-06-05 Mon 12:02]
+:UPDATED:  [2023-06-05 Mon 12:03]
+:ROAM_EXCLUDE: t
+:END:
 
 ****** bq-consult-attrs
 :PROPERTIES:
 :ID:       3ee4f0e6-7ead-44fd-b01a-7537aa93c236
 :CREATED:  [2023-05-05 Fri 14:23]
-:UPDATED:  [2023-05-05 Fri 14:26]
+:UPDATED:  [2023-07-19 Wed 15:11]
 :END:
 
 - see also :: [[id:cbfce57c-9f96-4e68-9585-620f4f249f5a][bq: cli cheatsheet]]
@@ -6393,12 +7078,26 @@ she said im cool!!
 :ROAM_EXCLUDE: t
 :END:
 
+******** bq-scrape
+:PROPERTIES:
+:ID:       7a20fc56-4be9-48c2-869b-45dad61a5072
+:CREATED:  [2023-06-21 Wed 09:59]
+:UPDATED:  [2023-07-19 Wed 15:09]
+:ROAM_EXCLUDE: t
+:END:
+
+#+name: sh-bq-get-dataset-table
 #+begin_src shell :results file :file ~/.cache/bq-schema.txt :tangle ~/.local/bin/bq-scrape
 qdatasets() { bq ls --format=json | jq -r 'map( .datasetReference | [.projectId, .datasetId] | join(".") ) | join("\n") ' ; }
 
 datasets() { bq ls --format=json | jq -r 'map( .datasetReference.datasetId ) | join("\n") ' ; }
 
 tables() { bq ls --format=json $1 | jq -r 'map( .tableReference | [.datasetId, .tableId] | join(".") ) | join("\n") ' ; }
+#+end_src
+
+#+name: bq-scrape
+#+begin_src shell :results file :file ~/.cache/bq-schema.txt :tangle ~/.local/bin/bq-scrape :noweb yes
+<<sh-bq-get-dataset-table>>
 
 table() { bq show --format=json $1 | jq -r ' .
 | (.tableReference | [.datasetId, .tableId] | join(".")) as $tbl
@@ -6419,6 +7118,97 @@ done
     :results:
     [[file:~/.cache/bq-schema.txt]]
     :end:
+
+******** bq-export-views
+:PROPERTIES:
+:ID:       d54a9751-5a80-42fe-b12e-2ba85b6c7b03
+:CREATED:  [2023-06-21 Wed 09:59]
+:UPDATED:  [2023-07-19 Wed 15:11]
+:ROAM_EXCLUDE: t
+:END:
+
+#+name: bq-export-views
+#+begin_src shell :tangle ~/.local/bin/bq-export-views :noweb yes
+<<sh-bq-get-dataset-table>>
+
+table() { bq show --format=json $1 | jq -r '.view.query' }
+
+for dataset in $(datasets) ; do
+    echo $dataset
+    for tbl in $(tables $dataset) ; do
+        o="/tmp/${tbl}.sql"
+        (table $tbl > "${o}" && echo "${o}") || echo oops! $tbl
+    done
+    echo
+done
+#+end_src
+
+
+#+RESULTS:
+:results:
+t_checkout
+/tmp/t_checkout.vw_item_return.sql
+
+t_clienteling
+/tmp/t_clienteling.vw_conversation.sql
+/tmp/t_clienteling.vw_message.sql
+/tmp/t_clienteling.vw_sales_attribution.sql
+
+t_currency_conversion
+/tmp/t_currency_conversion.vw_currency_exchange_rates.sql
+
+t_dre
+/tmp/t_dre.gmv_dashboard.sql
+/tmp/t_dre.test_join_on_view.sql
+/tmp/t_dre.vw_insights_kpis.sql
+
+t_order_management
+/tmp/t_order_management.vw_dbt_freshness__audit.sql
+/tmp/t_order_management.vw_dim_sales_order_item.sql
+/tmp/t_order_management.vw_dim_sales_order_item_all_time.sql
+/tmp/t_order_management.vw_dim_sales_order_item_all_time_timezones.sql
+/tmp/t_order_management.vw_dim_sales_order_item_staging.sql
+/tmp/t_order_management.vw_order.sql
+
+t_payment
+/tmp/t_payment.vw_transaction_report.sql
+/tmp/t_payment.vw_transactions.sql
+
+t_routing
+/tmp/t_routing.vw_fulfillment_request.sql
+/tmp/t_routing.vw_fulfillment_request_item_rejections.sql
+/tmp/t_routing.vw_fulfillment_request_item_state.sql
+/tmp/t_routing.vw_item_shipment.sql
+/tmp/t_routing.vw_location.sql
+/tmp/t_routing.vw_transitions.sql
+
+t_store_fulfillment
+/tmp/t_store_fulfillment.vw_store.sql
+:end:
+
+********* diff with src versions
+:PROPERTIES:
+:ID:       3b67f9f0-2ea8-4358-8033-6288892eecfc
+:CREATED:  [2023-06-21 Wed 10:15]
+:UPDATED:  [2023-06-21 Wed 10:38]
+:ROAM_EXCLUDE: t
+:END:
+
+
+#+begin_src shell
+src=$HOME/git/ns/dre/bi-dbt
+rm /tmp/*.diff
+
+for f in $(ls /tmp/*.sql) ; do
+    s="$(echo $f | cut -d. -f2,3)"
+    m="$(find $src -name "$s" | grep -v target)"
+    [ "${m}x" != "x" ] && (diff "$f" "$m") > /tmp/$s.diff
+done
+#+end_src
+
+#+RESULTS:
+:results:
+:end:
 
 
 ******* elisp
@@ -6455,10 +7245,57 @@ done
         ))
      :sort nil)))
 
+(defun qz/bq-read-attrs ()
+  (interactive)
+  (let ((d (mapcar
+            (lambda (line) (s-split "::" line))
+            ;; lines
+            (s-split "\n"
+                     ;; remove last empty line
+                     (s-trim (with-temp-buffer
+                               ;; TODO memoize
+                               (insert-file "~/.cache/bq-schema.txt")
+                               (buffer-string)))))))
+    (insert (completing-read
+"choose attr: "
+(mapcar 'car d))
+     )))
+
+
 #+end_src
 
 #+RESULTS:
-: qz/bq-consult-attrs
+: qz/bq-read-attrs
+**** general
+:PROPERTIES:
+:ID:       8b699792-c0e5-41a4-b3fb-11b0d8a15fb2
+:CREATED:  [2023-07-15 Sat 16:56]
+:UPDATED:  [2023-07-15 Sat 16:56]
+:ROAM_EXCLUDE: t
+:END:
+***** pp-eval
+:PROPERTIES:
+:ID:       8ae18fe6-796c-404c-ad01-c01636f1c548
+:CREATED:  [2023-07-15 Sat 16:56]
+:UPDATED:  [2023-07-15 Sat 16:56]
+:ROAM_EXCLUDE: t
+:END:
+****** reset '(temp-buffer-show-function temp-buffer-show-hook)
+:PROPERTIES:
+:ID:       0ec7d6ff-d6f7-4ad9-91e6-0c7e33a52e65
+:CREATED:  [2023-07-15 Sat 16:56]
+:UPDATED:  [2023-07-15 Sat 16:56]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp
+(setq temp-buffer-show-function 'hkey-help-show
+      temp-buffer-show-hook (remove 'hkey-help-show
+                                    temp-buffer-show-hook))
+#+end_src
+
+#+RESULTS:
+: (completion-list-mode-finish help-mode-finish)
 
 **** [[id:091ac573-6b34-4e0e-88b8-415785d5ae85][python]]
 :PROPERTIES:
@@ -6874,6 +7711,24 @@ this gets clobbered from RDE
 | project-compile      | Compile        |
 | magit-project-status | Magit          |
 
+***** use magit-todos-mode
+:PROPERTIES:
+:ID:       e66f0f4e-9e42-4492-8629-4d6e06164abe
+:CREATED:  [2023-07-07 Fri 17:49]
+:UPDATED:  [2023-07-07 Fri 17:49]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'magit
+  (if (fboundp 'magit-todos-mode)
+      (funcall 'magit-todos-mode)
+    (message "qz: config :: magit-todos-mode is not loaded")))
+#+end_src
+
+#+RESULTS:
+: t
+
 **** shell | (ba|z|fi)?sh
 :PROPERTIES:
 :ID:       40701551-041c-4b72-84dd-e5434edbb529
@@ -6909,7 +7764,7 @@ rg 'src.(shell|bash|sh).*drawer' $HOME/life/roam | wc -l
 #+RESULTS:
 : ((:results . drawer))
 
-*** package
+*** packages
 :PROPERTIES:
 :ID:       2fa9d7ef-cfd9-4d3c-aca8-09e1d6243705
 :CREATED:  [2022-09-28 Wed 16:36]
@@ -7027,7 +7882,7 @@ rg 'src.(shell|bash|sh).*drawer' $HOME/life/roam | wc -l
 :PROPERTIES:
 :ID:       45c9ebe8-5220-4d7f-8c01-1bc3a71e2ead
 :CREATED:  [2023-05-03 Wed 18:21]
-:UPDATED:  [2023-05-03 Wed 19:00]
+:UPDATED:  [2023-05-07 Sun 17:29]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -7035,13 +7890,14 @@ this is amazing!!!!
 
 #+begin_src emacs-lisp :noweb-ref git-gutter
 (defun qz/git-gutter:popup-hunk ()
+  (interactive)
   (ignore-errors (git-gutter:popup-hunk)))
 
 (qz/advice- git-gutter-transient :after qz/git-gutter:popup-hunk)
 #+end_src
 
 #+RESULTS:
-| qz/advice-enable--git-gutter-transient--git-gutter:popup-hunk | qz/advice-disable--git-gutter-transient--git-gutter:popup-hunk |
+| qz/advice-enable--git-gutter-transient--qz/git-gutter:popup-hunk | qz/advice-disable--git-gutter-transient--qz/git-gutter:popup-hunk |
 
 ***** filter timestamp writes when reverting (avoid circular writing)
 :PROPERTIES:
@@ -7062,6 +7918,157 @@ this is amazing!!!!
 
 #+RESULTS:
 | qz/advice-enable--git-gutter:revert-hunk--qz/filter--updated-timestamp | qz/advice-disable--git-gutter:revert-hunk--qz/filter--updated-timestamp |
+
+***** get hunks around point
+:PROPERTIES:
+:ID:       927246c3-3ca0-4162-8f1b-27eaab48d7fd
+:CREATED:  [2023-05-07 Sun 17:36]
+:UPDATED:  [2023-05-10 Wed 12:23]
+:END:
+
+the scope of [[id:a7be4fdd-eead-4590-9ab7-765605ea1b84][git-gutter:popup-hunk]] will only address the current line.
+
+if i have changed near the point, and hit the gutter I am probably interested
+in stuff near the point.
+
+to ease the precision required in this spirit, jump me (in order of
+preference) backwards or forwards if there's a change within =N= lines.
+
+the current implementation from [[id:70371eff-c009-4546-8ce5-543e36e28419][git-gutter:search-here-diffinfo]] goes like
+this:
+
+#+name: current-hunk-detection code
+#+begin_src emacs-lisp :noweb-ref null
+(cl-loop with current-line = (line-number-at-pos)
+         for diffinfo in git-gutter:diffinfos
+         for start = (git-gutter-hunk-start-line diffinfo)
+         for end   = (or (git-gutter-hunk-end-line diffinfo) (+ 1 start))
+         when (and (>= current-line start) (<= current-line end))
+         return diffinfo
+         finally do (error "Here is not changed!!"))
+#+end_src
+
+this is a very verbose way of returning the first hunk which is at point.
+Running this code as I'm writing this very prose[fn:5], yields:
+
+#+RESULTS: current-hunk-detection code
+#+begin_example
+#s(git-gutter-hunk added "@@ -6700,0 +6876,33 @@ this is amazing!!!!
++***** get hunks around point
++:PROPERTIES:
++:ID:       927246c3-3ca0-4162-8f1b-27eaab48d7fd
++:CREATED:  [2023-05-07 Sun 17:36]
++:UPDATED:  [2023-05-07 Sun 17:38]
++:END:
++
++the scope of [[id:a7be4fdd-eead-4590-9ab7-765605ea1b84][git-gutter:popup-hunk]] will only address the current line.
++
++if i have changed near the point, and hit the gutter I am probably interested
++in stuff near the point.
++
++to ease the precision required in this spirit, jump me (in order of
++preference) backwards or forwards if there's a change within =N= lines.
++
++the current implementation from [[id:70371eff-c009-4546-8ce5-543e36e28419][git-gutter:search-here-diffinfo]] goes like
++this:
++
++#+name: current-hunk-detection code
++#+begin_src emacs-lisp
++(cl-loop with current-line = (line-number-at-pos)
++         for diffinfo in git-gutter:diffinfos
++         for start = (git-gutter-hunk-start-line diffinfo)
++         for end   = (or (git-gutter-hunk-end-line diffinfo) (+ 1 start))
++         when (and (>= current-line start) (<= current-line end))
++         return diffinfo
++         finally do (error \"Here is not changed!!\"))
++#+end_src
++
++this is a very verbose way of returning the first hunk which is at point.
++Running this code as I'm writing this very prose, yields:
++
++" 6876 6908)
+#+end_example
+
+Good to exit upon first relevant result, but we can simplyify this into the
+basic constraints
+
+#+begin_src emacs-lisp :noweb-ref null
+;; (cl-loop with current-line = line
+;;          for diffinfo in diffinfos
+;;          for start =
+;;          for end   = (or (git-gutter-hunk-end-line diffinfo) (+ 1 start))
+;;          when (and (>= current-line start) (<= current-line end))
+;;          return diffinfo
+;;          finally do (error "Here is not changed!!"))
+
+(let* ((line (line-number-at-pos))
+       (diffinfos git-gutter:diffinfos))
+  (cons (list line)
+        (mapcar
+         (lambda (i)
+           (mapcar (lambda (f)
+                     (when-let* ((n (- line (funcall f i))))
+                       (and (< (abs n) 40) n)))
+                   '(git-gutter-hunk-start-line
+                     git-gutter-hunk-end-line)))
+         diffinfos)))
+#+end_src
+
+#+RESULTS:
+| 6965 |     |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+| nil  | nil |
+
+
+
 
 **** consult
 :PROPERTIES:
@@ -7113,7 +8120,7 @@ not elegant AT ALL, but the API to ripgrep from consult uses
 #+RESULTS:
 : qz/consult-ripgrep-files
 
-***** {C-c b s} consult-ripgrep-bookmark                                   :func:kbd:
+***** {C-c b s}     :: consult-ripgrep-bookmark                        :func:kbd:
 :PROPERTIES:
 :ID:       1ec5c6fe-e672-457a-ab67-82e358244df3
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -7135,7 +8142,7 @@ consuming
 #+RESULTS:
 : qz/consult-ripgrep-bookmark
 
-***** {C-x C-M-SPC} consult-mark
+***** {C-x C-M-SPC} :: consult-mark
 :PROPERTIES:
 :ID:       a4470ca2-9b0e-4ab4-a1d0-32b86da18abd
 :CREATED:  [2022-03-31 Thu 11:07]
@@ -7146,7 +8153,7 @@ consuming
 (define-key global-map (kbd "C-x C-M-SPC") 'consult-global-mark)
 #+end_src
 
-***** {M-s L}  :: consult-line-multi
+***** {M-s L}       :: consult-line-multi
 :PROPERTIES:
 :ID:       5778ec90-f568-48d3-87cb-9dae958ceeb9
 :CREATED:  [2022-11-17 Thu 13:09]
@@ -7161,7 +8168,7 @@ consuming
 #+RESULTS:
 : consult-line-multi
 
-***** {C-c C-j} :: consult-imenu
+***** {C-c C-j}     :: consult-imenu
 :PROPERTIES:
 :ID:       cc85169e-c54b-4841-bda7-6c3d189c0b34
 :CREATED:  [2023-04-25 Tue 19:54]
@@ -7175,6 +8182,38 @@ consuming
 
 #+RESULTS:
 : consult-imenu
+
+***** consult--fontify-all as interactive
+:PROPERTIES:
+:ID:       64723a95-781d-4dd7-9273-04882e295203
+:CREATED:  [2023-07-04 Tue 11:14]
+:UPDATED:  [2023-07-04 Tue 16:09]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp
+;;; SRC as of [2023-07-04 Tue 11:12]
+;;
+;; (defun consult--fontify-all ()
+;;   "Ensure that the whole buffer is fontified."
+;;   ;; Font-locking is lazy, i.e., if a line has not been looked at yet, the line
+;;   ;; is not font-locked.  We would observe this if consulting an unfontified
+;;   ;; line.  Therefore we have to enforce font-locking now, which is slow.  In
+;;   ;; order to prevent is hang-up we check the buffer size against
+;;   ;; `consult-fontify-max-size'.
+;;   (when (and consult-fontify-preserve jit-lock-mode
+;;              (< (buffer-size) consult-fontify-max-size))
+;;     (jit-lock-fontify-now)))
+
+(defun qz/fontify-all ()
+  "Useful when using org-modern, which is *abhorrent* when
+ partially font-locked"
+  (interactive)
+  (consult--fontify-all))
+#+end_src
+
+#+RESULTS:
+: qz/fontify-all
 
 ***** recoll
 :PROPERTIES:
@@ -7283,6 +8322,34 @@ consult-recoll--search-flags
 
 #+RESULTS:
 | consult-buffer |
+
+**** eww
+:PROPERTIES:
+:ID:       05495ea8-2e30-4fb2-839c-0f91a347bb25
+:CREATED:  [2023-07-05 Wed 10:12]
+:UPDATED:  [2023-07-05 Wed 10:12]
+:ROAM_EXCLUDE: t
+:END:
+
+***** {C-RET} :: eww-open-in-new-buffer
+:PROPERTIES:
+:ID:       eb34e4cb-5a88-4166-add1-bd1970667e89
+:CREATED:  [2023-07-05 Wed 10:12]
+:UPDATED:  [2023-07-05 Wed 10:12]
+:ROAM_EXCLUDE: t
+:END:
+
+By default, this is clobbered by 'hkey-either.
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'eww
+  (define-key eww-mode-map (kbd "C-<return>") 'eww-open-in-new-buffer)
+  )
+#+end_src
+
+#+RESULTS:
+: eww-open-in-new-buffer
+
 **** pdf-view
 :PROPERTIES:
 :ID:       90477387-9ef3-4e7b-8d80-d2344623d521
@@ -7305,16 +8372,21 @@ consult-recoll--search-flags
 :PROPERTIES:
 :ID:       628a3caa-7fbd-4c56-bc5e-221cfdb2a5da
 :CREATED:  [2022-10-04 Tue 18:12]
-:UPDATED:  [2022-10-04 Tue 18:13]
+:UPDATED:  [2023-05-07 Sun 21:46]
 :ROAM_EXCLUDE: t
 :END:
 
-it's [2022-10-04 Tue]; I have just retrieved the dirtiest hack in a
-while from the archive; but I mean... [[id:0f7be177-127d-4476-9a0f-a1ed3a570400][look at it]][fn:3]
+
+it's [2022-10-04 Tue]; I have just retrieved the dirtiest hack in a while from the archive; but I mean... [[id:0f7be177-127d-4476-9a0f-a1ed3a570400][look at it]][fn:3]
 
 #+begin_src emacs-lisp
-(defun pj-line-width () 650)
+(with-eval-after-load 'justify-kp
+  (defun pj-line-width ()
+    (* (max 1 text-scale-mode-amount) 600)))
 #+end_src
+
+#+RESULTS:
+: pj-line-width
 
 ***** screenshot
 :PROPERTIES:
@@ -7340,6 +8412,7 @@ while from the archive; but I mean... [[id:0f7be177-127d-4476-9a0f-a1ed3a570400]
 :ROAM_EXCLUDE: t
 :UPDATED:  [2023-04-12 Wed 17:30]
 :END:
+
 #+begin_src emacs-lisp
 (require 'hyperbole)
 #+end_src
@@ -7383,12 +8456,13 @@ while from the archive; but I mean... [[id:0f7be177-127d-4476-9a0f-a1ed3a570400]
 :PROPERTIES:
 :ID:       1c1c6905-2462-4aa2-a805-de40854fa3af
 :CREATED:  [2023-05-03 Wed 11:39]
-:UPDATED:  [2023-05-03 Wed 11:46]
+:UPDATED:  [2023-06-19 Mon 17:19]
 :ROAM_EXCLUDE: t
 :END:
 
 
 #+begin_src emacs-lisp :noweb-ref null
+;; FIXME this shit is broken -- org-store-link
 (defun dogears-safe (&rest ignored)
   (save-mark-and-excursion
     (dogears-remember)))
@@ -7400,6 +8474,26 @@ while from the archive; but I mean... [[id:0f7be177-127d-4476-9a0f-a1ed3a570400]
 
 #+RESULTS:
 | qz/advice-enable--org-store-link--dogear-safe | qz/advice-disable--org-store-link--dogear-safe |
+
+****** why org-store-link doesn't play nicely with advice?
+:PROPERTIES:
+:ID:       53e02e0b-e8db-4fa4-a4bc-12e20d03e17a
+:CREATED:  [2023-06-19 Mon 18:41]
+:UPDATED:  [2023-06-19 Mon 18:41]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src elisp :noweb-ref null
+(defun qz/safe (&rest ignored)
+  )
+
+
+
+(qz/advice- org-store-link :after qz/safe)
+#+end_src
+
+#+RESULTS:
+| qz/advice-enable--org-store-link--qz/safe | qz/advice-disable--org-store-link--qz/safe |
 
 **** kubernetes
 :PROPERTIES:
@@ -7522,6 +8616,144 @@ https://github.com/NapoleonWils0n/cerberus/blob/master/emacs/mpv-timer.org
 -kwq
 :: https://github.com/NapoleonWils0n/cerberus/blob/master/emacs/edit-videos-with-ffmpeg-mpv-emacs.org
 
+**** project
+:PROPERTIES:
+:ID:       9ba6a6bd-ef23-4909-bb86-15c5cecf6714
+:ROAM_EXCLUDE: t
+:END:
+
+***** TODO project-vterm
+:PROPERTIES:
+:ID:       01fb88ae-fd1b-478e-af85-552a50e5f5e2
+:ROAM_EXCLUDE: t
+:UPDATED:  [2023-06-13 Tue 14:52]
+:END:
+
+#+begin_src emacs-lisp
+(with-eval-after-load
+    'project
+  (defun project-vterm ()
+    "Start vterm in the current project's root directory.
+If a buffer already exists for running vterm in the project's root,
+switch to it.  Otherwise, create a new vterm buffer.
+With \\[universal-argument] prefix arg, create a new vterm buffer even
+if one already exists."
+    (interactive)
+    (let* ((default-directory (project-root (project-current t)))
+           (vterm-buffer-name (project-prefixed-buffer-name "vterm"))
+           (vterm-buffer (get-buffer vterm-buffer-name)))
+      (if (and vterm-buffer (not current-prefix-arg))
+          (pop-to-buffer-same-window vterm-buffer)
+        (vterm t))))
+  (define-key project-prefix-map (kbd "t") 'project-vterm)
+  (add-to-list 'project-switch-commands
+               '(project-vterm
+                 "Start vterm in the current project's root directory.")))
+#+end_src
+
+#+RESULTS:
+| project-vterm        | Start vterm in the current project's root directory. |
+| consult-ripgrep      | Search for regexp with rg                            |
+| consult-find         | Find file consult                                    |
+| project-find-file    | Find file                                            |
+| project-find-regexp  | Find regexp                                          |
+| project-find-dir     | Find directory                                       |
+| project-vc-dir       | VC-Dir                                               |
+| project-eshell       | Eshell                                               |
+| project-compile      | Compile                                              |
+| magit-project-status | Magit                                                |
+| consult-ripgrep      | ripgrep                                              |
+
+**** moldable-emacs
+:PROPERTIES:
+:ID:       f4532c31-7054-42c9-a0b0-c4279cccebca
+:CREATED:  [2023-07-05 Wed 17:06]
+:UPDATED:  [2023-07-15 Sat 16:58]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp
+(defun qz/mold ()
+  (interactive)
+  (unless (fboundp 'me-mold)
+    (require 'moldable-emacs)
+    (me-setup-molds))
+  (call-interactively 'me-mold))
+#+end_src
+
+#+RESULTS:
+: qz/mold
+
+***** TODO optimize 'me-mold (me-usable-molds)
+:PROPERTIES:
+:ID:       e73afb55-c53b-4a8c-a41a-e4332d1236a3
+:CREATED:  [2023-07-15 Sat 15:26]
+:UPDATED:  [2023-07-15 Sat 15:26]
+:ROAM_EXCLUDE: t
+:END:
+
+****** redef me-usable-molds
+:PROPERTIES:
+:ID:       80d7b977-1c38-4b58-a84b-555a0c92eb19
+:CREATED:  [2023-07-15 Sat 15:26]
+:UPDATED:  [2023-07-16 Sun 18:23]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp
+;;(setq me-molds-debug-on t)
+
+(with-eval-after-load 'moldable-emacs
+  (require 'dash)
+
+  (defun qz/me-usable-molds (&optional molds buffer)
+    "Return the usable molds among the `me-available-molds'.
+Optionally you can pass your own candidate MOLDS.
+Optionally you can pass a BUFFER to use instead of the `current-buffer'."
+    (let ((_ (setq me-usable-mold-stats nil))
+          (molds (or molds me-available-molds))
+          (buffer (or buffer (current-buffer))))
+      (with-current-buffer buffer
+        (--filter
+         (let* ((beginning (current-time))
+                (result (save-excursion
+                          (condition-case err
+                              (me-mold-run-given it)
+                            (error (message "me-usable-molds: error in :given of %s:\n   %s" (plist-get it :key) err))))) ; TODO composite molds
+                (ending (current-time))
+                (_ (when me-molds-debug-on
+                     (add-to-list 'me-usable-mold-stats (list :time
+                                                              (time-to-seconds
+                                                               (time-subtract
+                                                                ending
+                                                                beginning))
+                                                              :nmold (plist-get it q:key)
+                                                              :given (plist-get it :given))))))
+           result) ;; TODO run this in parallel when time goes over 100ms)
+         molds))))
+
+  ;; TODO macro; dump all molds as M-x
+  (defmacro qz/me-mold--M-x ()
+    `(progn
+       (ignore-errors
+         ,@(--map
+            (let* ((k (plist-get it :key))
+                   (f (intern (concat "qz/me-mold--" k))))
+              `((fmakunbound ',f)
+                (defun ,f ()
+                  (interactive)
+                  (if (me-mold-run-given ',it)
+                      (me-mold , k)
+                    (message "me-mold: Cannot run '%s' here" ,k)))))
+            me-available-molds))))
+
+  (qz/me-mold--M-x))
+;;(qz/me-mold--Stats)
+#+end_src
+
+#+RESULTS:
+: nil
+
 *** [[id:6baf4bff-d5fe-4ce0-a130-0464e49de67d][org]]
 :PROPERTIES:
 :ID:       71e29a1b-5349-4d90-965f-b628210f1fdb
@@ -7529,7 +8761,7 @@ https://github.com/NapoleonWils0n/cerberus/blob/master/emacs/mpv-timer.org
 :ROAM_EXCLUDE: t
 :UPDATED:  [2022-09-28 Wed 16:36]
 :END:
-**** -
+**** packages
 :PROPERTIES:
 :ID:       760039ac-145f-46b1-8e5a-60d3771c0c44
 :CREATED:  [2022-09-29 Thu 13:08]
@@ -7770,6 +9002,7 @@ rg '^\*+' $(rg '2023-04-1' ~/life/roam/ -c -t org | grep -v 'org#' | awk -F '[,:
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
 :END:
+
 #+begin_src emacs-lisp :noweb-ref roam
 (defun qz/inspect-agenda-files ()
   `((org-files-list . ,(length (org-files-list)))
@@ -8205,10 +9438,10 @@ If OTHERS is true, skip all entries that do not correspond to TAG."
 :ID:       3719c9a6-45ea-497e-a3ee-bc4c64a566e3
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:  [2022-04-19 Tue 16:20]
+:UPDATED:  [2023-07-16 Sun 22:10]
 :END:
-#+begin_src emacs-lisp  :noweb-ref org
 
+#+begin_src emacs-lisp  :noweb-ref org
 ;; NOWEB AGENDA START
 
 (with-eval-after-load 'org-agenda
@@ -8219,6 +9452,9 @@ If OTHERS is true, skip all entries that do not correspond to TAG."
 ;; NOWEB AGENDA END
 
 #+end_src
+
+#+RESULTS:
+: qz/diary-sunset
 
 ****** settings                                                                 :var:
 :PROPERTIES:
@@ -8490,7 +9726,7 @@ The diary entry can contain `%s' which will be replaced with
 :UPDATED:  [2023-04-21 Fri 15:28]
 :ROAM_EXCLUDE: t
 :END:
-****** qz/org-ql
+****** qz/org-ql :hello:baby:
 :PROPERTIES:
 :ID:       f4ac07db-3576-4843-8164-ffb169de5db1
 :CREATED:  [2023-04-21 Fri 15:28]
@@ -8522,11 +9758,11 @@ The diary entry can contain `%s' which will be replaced with
 
 (defun qz/org-ql-:select-default ()
   (lambda ()
-    (list :title   (cdar (org-collect-keywords '("TITLE")))
+    (list :title   (cadar (org-collect-keywords '("TITLE")))
           :outline (org-get-outline-path)
           :heading (org-get-heading)
           :id      (org-id-get)
-          :tags    (org-get-tags)
+          :tags    (s-join ":" (org-get-tags))
           :node    (org-roam-node-at-point)
           :updated (or (org-entry-get (point) "UPDATED") "[0000-00-00]")
           :created (or (org-entry-get (point) "CREATED") "[0000-00-00]"))))
@@ -8564,16 +9800,17 @@ The diary entry can contain `%s' which will be replaced with
 
 (defun qz/org-ql--time (time-col &optional limit cols)
   (let ((cols (or cols
-                  (list time-col :title))))
+                  (list time-col :title ))))
     (qz/org-ql
      ;; select
      (qz/org-ql-:select-default)
-     ;; from
+     ;;; from
      (qz/month-files)
+     ;; (length (org-roam-list-files)) ; 3497... this is just too much
      ;; where
      nil
      ;; order
-     (qz/org-ql-:order-time :updated)
+     (qz/org-ql-:order-time time-col)
      ;; limit
      limit
      ;; transform
@@ -8586,10 +9823,346 @@ The diary entry can contain `%s' which will be replaced with
 (defun qz/org-ql--created ()
   (qz/org-ql--time :created))
 
-;;(qz/org-ql--updated)
+;;(car (qz/org-ql--updated))
 ;;(qz/org-ql--created)
+
 #+end_src
 
+******* org-now
+:PROPERTIES:
+:ID:       6f7cb6d8-c938-4b28-81ce-0a35cd891132
+:CREATED:  [2023-06-05 Mon 21:29]
+:UPDATED:  [2023-06-30 Fri 18:10]
+:ROAM_EXCLUDE: t
+:END:
+
+
+
+#+begin_src emacs-lisp :noweb-ref org
+(defun qz/org-now ()
+  (interactive)
+  (let* ((b (get-buffer-create "*org-now*"))
+         (n 5))
+    (save-excursion
+      (with-current-buffer b
+        (setq-local default-directory org-directory)
+        (read-only-mode -1)
+        (org-mode)
+        (olivetti-mode -1)
+
+        (mark-whole-buffer)
+        (delete-region (region-beginning)
+                       (region-end))
+
+        (cl-labels ((fmt (r)
+                      (insert (format "| %s |\n"
+                                      (s-join " | " r))))
+                    (line (&rest s)
+                      (insert (format "%s\n" (or (and s (s-join " " s)) "")))))
+          ;;(line "* org-now")
+          (eval-after-load 'svg-clock
+            (svg-clock-insert))
+          (line)
+
+          (insert "* feed\n")
+
+
+          (insert "** looking at\n")
+          (line)
+          (mapcar (lambda (s)
+                    (ignore-errors
+                      (line "-" (plist-get (car s) :timestamp) "::"
+                            (org-link-make-string
+                             (car (cdr s))
+                             ;; FIXME ugly ass conditions
+                             (or (cadr (cdr s))
+                                 (car (cdr s)))))))
+                  qz/looking-at)
+          (line)
+
+
+          (insert "** stored\n")
+          (line)
+          (mapcar (lambda (s) (line "- " (apply 'org-link-make-string s)))
+                  org-stored-links)
+          (line)
+
+          (insert "** clocking\n")
+          (line)
+
+          ;; XXX copied from above
+          ;; (headline "" (mapcar (line (links (link-fn)))))
+          (mapcar (lambda (s)
+                    (and s
+                         (line "- " (apply 'org-link-make-string s))))
+                  ;; FYI to get max value from this
+                  ;; (setq org-clock-history-length 1000000) ;; 1 million
+                  ;; (setq org-clock-persist t)
+                  ;; (find-file org-clock-persist-file)
+                  ;; (org-clock-load) ;; to historic clocks
+                  (save-excursion
+                    (mapcar (lambda (h)
+                              (when-let* ((b (and h (marker-buffer h))))
+                                (with-current-buffer b
+                                  (goto-char h)
+                                  (list (concat "id:" (org-id-get-create))
+                                        (org-get-heading)))))
+                            org-clock-history)))
+          (line)
+
+          ;; TODO new section? actions/refile actions/captured
+
+          (when prefix-arg
+            (insert "** heading\n")
+            (insert "*** updated\n")
+            (funcall fmt '("date" "title" "heading" "node"))
+            (insert "|----------\n")
+            (mapcar fmt (seq-take (qz/org-ql--updated) n))
+            (org-table-align)
+            (insert "\n")
+
+            (insert "*** created\n")
+            (funcall fmt '("date" "title" "heading" "node"))
+            (insert "|----------\n")
+            (mapcar fmt (seq-take (qz/org-ql--created) n))
+            (org-table-align)
+            (insert "\n")
+
+            (insert "** node\n")
+            (insert "*** updated\n")
+            (funcall fmt '("date" "node-title"))
+            (insert "|----------\n")
+            (mapcar fmt (org-babel-execute:sqlite
+                         (format "
+select
+  (
+    case when instr(properties, '(\"UPDATED\" .') > 0
+      then substr(properties, instr(properties, '(\"UPDATED\" .') + 15, 20)
+    else null end
+  ) as created,
+  title
+  from nodes
+ where (
+   instr(properties, '(\"UPDATED\" .') > 0
+ )
+ order by created desc
+ limit %s" n)
+                         '((:db . "~/.config/emacs/org-roam.db"))))
+            (org-table-align)
+            (insert "\n")
+
+
+            (insert "*** created\n")
+            (funcall fmt '("date" "node-title"))
+            (insert "|----------\n")
+            (mapcar fmt (org-babel-execute:sqlite
+                         (format "
+select
+  (
+    case when instr(properties, '(\"CREATED\" .') > 0
+      then substr(properties, instr(properties, '(\"CREATED\" .') + 15, 20)
+    else null end
+  ) as created,
+  title
+  from nodes
+ where (
+   instr(properties, '(\"CREATED\" .') > 0
+ )
+ order by created desc
+ limit %s" n)
+                         '((:db . "~/.config/emacs/org-roam.db"))))
+            (org-table-align)
+            (insert "\n"))
+
+          ;; end tables
+          )
+        (read-only-mode 1)
+        ;; end display
+        ))
+    (display-buffer b)))
+
+(define-key global-map (kbd "C-s-n") 'qz/org-now)
+
+#+end_src
+
+#+RESULTS:
+: qz/org-now
+
+******* org-anno
+:PROPERTIES:
+:ID:       dc1545dc-0425-4b80-b01e-c1b1bad6b4bf
+:CREATED:  [2023-06-19 Mon 19:04]
+:UPDATED:  [2023-07-15 Sat 19:27]
+:END:
+:LOGBOOK:
+CLOCK: [2023-07-15 Sat 18:16]--[2023-07-15 Sat 18:20] =>  0:04
+:END:
+
+
+feels like I'm rewriting org-capture here, as org-noter.
+
+the ability to grab stuff /before capture/ is solid now, given =hoist=.
+
+so, maybe I need to rethink this.
+
+- highlight-region, auto-face-selection, ... are nice.
+
+  this helps me in the source buffer -- but /will I/ (multi)act backwards?  (i.e. occur, ...)
+
+the basic question; in reading '[[id:9038d1de-c374-4c3f-be25-d6a88424ec28][chatgpt weighing in]]' what helps me to pick the text apart?
+
+what is the flow?
+- "captures in the same general area go to the same place"
+  - /general area/ X /same place/ determine the place.
+    - ...
+
+
+#+begin_src emacs-lisp :noweb-ref org
+(defun qz/choose-anno-mode ()
+  (completing-read "anno: " '(full light)))
+
+(defun qz/anno-yank-region-to-point ()
+  "use with prefix argument to make an index to the buffer"
+  (interactive)
+  (when-let* ((s (qz/peek-region))
+              (s (s-trim s))
+              (r (bookmark-make-record))
+              (L (or (ignore-errors (let ((org-stored-links '()))
+                                      (call-interactively 'org-store-link)))
+                     '("" . "")))
+              (l (apply 'org-link-make-string l))
+              (info (buffer-name (current-buffer)))
+              (f   (qz/anno-face nil))
+              (buf (qz/anno-buffer info)))
+    (with-current-buffer buf
+      ;; hl in org-anno
+      (highlight-phrase s f)
+      ;;; ensure org
+      (when (not (eq major-mode 'org-mode))
+        (org-mode))
+      ;; cl-case choose-anno-mode
+      (cond
+       ;; new default
+       ((eq 1 current-prefix-arg)
+        (end-of-buffer)
+        (org-insert-heading-respect-content)
+        (insert l))
+       ;;
+       (current-prefix-arg
+        (end-of-buffer)
+        ;; (ignore-errors
+        ;;   (end-of-line)
+        ;;   (org-forward-sentence))
+        (org-insert-heading-respect-content)
+        (insert (format "%s :: %s\n"
+                        l
+                        (org-link-make-string
+                         (format "elisp:(with-current-buffer (get-buffer \"%s\") (occur \"%s\"))" info s)
+                         (s-truncate 30 s))))
+        (insert (format "#+begin_quote %s\n%s\n#+end_quote"
+                        l s)))
+       (t
+        (end-of-buffer)
+        (insert (format "\n- \"%s\"\n" s))
+        (display-buffer buf))))
+    ;; hl in source buffer
+    (highlight-phrase s f)
+    s))
+
+(setq org-link-elisp-confirm-function 'y-or-n-p)
+(defun qz/anno-face (&optional phrase)
+  ;; TODO
+  'underline
+  'gnus-emphasis-underline-bold-italic)
+
+(defun qz/anno-buffer (&optional source)
+  "future; there may be many"
+  (get-buffer-create (format "*org-anno :: [%s]*" source)))
+
+(define-key global-map (kbd "s-i") 'qz/anno-yank-region-to-point)
+
+
+
+(define-key global-map (kbd "C-<mouse-down-1>")
+            'qz/anno-yank-region-to-point)
+(define-key global-map (kbd "C-<mouse-1>")
+            'qz/anno-yank-region-to-point)
+(define-key global-map (kbd "C-s-<down-mouse-1>")
+            'qz/anno-yank-region-to-point)
+#+end_src
+
+#+RESULTS:
+: qz/anno-yank-region-to-point
+
+******** org-link-highlight-last
+:PROPERTIES:
+:ID:       50e88ae0-8bf2-4acc-b299-0a2a8645a83d
+:CREATED:  [2023-06-20 Tue 17:12]
+:UPDATED:  [2023-07-04 Tue 16:34]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp
+(defun qz/org-link-highlight-last (&rest args)
+  (qz/debug- (message "highlight-last: args :: %s" args))
+  ;; XXX search back through stack & determine if org-store-link is
+  ;; interactive?
+  (when-let ((s (cadar org-stored-links)))
+    (highlight-phrase (s-trim s)
+                      (qz/anno-face))))
+
+(qz/advice- org-store-link :after qz/org-link-highlight-last)
+#+end_src
+
+#+RESULTS:
+| qz/advice-enable--org-store-link--qz/org-link-highlight-last | qz/advice-disable--org-store-link--qz/org-link-highlight-last |
+
+
+is it a regular region?
+
+
+testing
+
+so, it will insert at the end of the region
+
+******* alternative sources
+:PROPERTIES:
+:ID:       509ed476-dddc-4552-90b0-4465ac0e32dc
+:CREATED:  [2023-06-05 Mon 21:29]
+:UPDATED:  [2023-06-05 Mon 21:29]
+:ROAM_EXCLUDE: t
+:END:
+******** ripgrep
+:PROPERTIES:
+:ID:       1a4ab8d4-5d82-40ae-ad0b-a699f3ed3a32
+:CREATED:  [2023-06-05 Mon 21:29]
+:UPDATED:  [2023-06-05 Mon 21:29]
+:ROAM_EXCLUDE: t
+:END:
+********* headings per file
+:PROPERTIES:
+:ID:       d7d8404f-e234-423e-a7ca-0acfe8f494e9
+:CREATED:  [2023-06-05 Mon 21:29]
+:UPDATED:  [2023-07-23 Sun 10:57]
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src shell :results silent
+rg ':(CREATED|UPDATED):' $HOME/life -c -t org  | sort -nk2 -t: | tail -n 10
+#+end_src
+
+********* most recent DATE for file
+:PROPERTIES:
+:ID:       14662bb3-a324-41b0-86d2-0cfe3dba38ce
+:CREATED:  [2023-06-05 Mon 21:29]
+:UPDATED:  [2023-07-23 Sun 10:57]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src shell :results silent
+rg ':(CREATED|UPDATED):' $HOME/life -t org  \
+    | awk -F: '{print $1, $3 $4 ":" $5 }' \
+    | sort  | uniq | tail -n25
+#+end_src
 
 ***** clock
 :PROPERTIES:
@@ -9169,7 +10742,7 @@ to improve:
 :PROPERTIES:
 :ID:       824bc327-7c73-46cb-b9fe-34c8416eff80
 :CREATED:  [2023-04-26 Wed 15:22]
-:UPDATED:  [2023-04-26 Wed 18:08]
+:UPDATED:  [2023-05-07 Sun 15:54]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -9182,26 +10755,29 @@ to improve:
                           babel-call
                           inline-src-block
                           src-block)
-                        t)))
-    (cl-case (org-element-type context)
-      ((or babel-call inline-babel-call)
-       (let ((info (org-babel-lob-get-info context)))
-         ;; this setf is to convert the the 'call args to 'src args.
-         ;;
-         ;;   call :: (:var . "ya=\"dooby\"")
-         ;;   src  :: (:var ya . "dooby")
-         ;;
-         ;; in org proper 'org-babel-execute-src-block, this parameter
-         ;; normalization also happens before the 'expand call
-         (let ((old-info (copy-tree info)))
-           (setf (nth 2 info)
-                 (org-babel-process-params (nth 2 info)))
-           (list (car info) (org-babel-expand-src-block nil info)))))
-      (t
-       (let ((info (org-babel-get-src-block-info context)))
-         (list (car info) (org-babel-expand-src-block nil info)))))))
+                        t))
+              (finfo
+               (cl-case (org-element-type context)
+                 ((or babel-call inline-babel-call) 'org-babel-lob-get-info)
+                 (t 'org-babel-get-src-block-info)))
+              (info (funcall finfo context)))
+    (let ((old-info (copy-tree info)))
+      (setf (nth 2 info) (org-babel-process-params (nth 2 info)))
+      (list (car info) (org-babel-expand-src-block nil info)))))
+#+end_src
 
+#+RESULTS:
+: qz/preview-org-expand-src-or-call-block
 
+******** {C-c C-v v} :: qz/preview-org-expand-src-or-call-block
+:PROPERTIES:
+:ID:       9242b212-985b-4af0-97d2-e2b591c59e5c
+:CREATED:  [2023-04-26 Wed 15:22]
+:UPDATED:  [2023-05-07 Sun 15:55]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref org
 (defun qz/preview-org-expand-src-or-call-block ()
   (interactive)
   (let* ((buf (progn (and (get-buffer "*qz/Org Src*")
@@ -9212,22 +10788,10 @@ to improve:
       (funcall (intern (concat (car info) "-mode")))
       (insert (cadr info)))
     (select-window (temp-buffer-window-show buf))))
-#+end_src
 
-#+RESULTS:
-: qz/preview-org-expand-src-or-call-block
-
-******** {C-c C-v v} :: qz/preview-org-expand-src-or-call-block
-:PROPERTIES:
-:ID:       9242b212-985b-4af0-97d2-e2b591c59e5c
-:CREATED:  [2023-04-26 Wed 15:22]
-:UPDATED:  [2023-04-26 Wed 15:22]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src emacs-lisp :noweb-ref org
 (define-key org-babel-map (kbd "v")
             'qz/preview-org-expand-src-or-call-block)
+
 ;; NOTE default is:
 ;; (define-key org-babel-map (kbd "C-v") 'org-babel-expand-src-block)
 #+end_src
@@ -9235,75 +10799,6 @@ to improve:
 #+RESULTS:
 : qz/preview-org-expand-src-or-call-block
 
-******* org-expand-call
-:PROPERTIES:
-:ID:       824bc327-7c73-46cb-b9fe-34c8416eff80
-:CREATED:  [2023-04-26 Wed 15:22]
-:UPDATED:  [2023-04-26 Wed 18:08]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src emacs-lisp :noweb-ref org
-(defun qz/org-expand-src-or-call-block ()
-  (when-let* ((context (org-element-lineage
-                        (org-element-context)
-                        ;; limit to call, src
-                        '(inline-babel-call
-                          babel-call
-                          inline-src-block
-                          src-block)
-                        t)))
-    (cl-case (org-element-type context)
-      ((or babel-call inline-babel-call)
-       (let ((info (org-babel-lob-get-info context)))
-         ;; this setf is to convert the the 'call args to 'src args.
-         ;;
-         ;;   call :: (:var . "ya=\"dooby\"")
-         ;;   src  :: (:var ya . "dooby")
-         ;;
-         ;; in org proper 'org-babel-execute-src-block, this parameter
-         ;; normalization also happens before the 'expand call
-         (let ((old-info (copy-tree info)))
-           (setf (nth 2 info)
-                 (org-babel-process-params (nth 2 info)))
-           (list (car info) (org-babel-expand-src-block nil info)))))
-      (t
-       (let ((info (org-babel-get-src-block-info context)))
-         (list (car info) (org-babel-expand-src-block nil info)))))))
-
-
-(defun qz/preview-org-expand-src-or-call-block ()
-  (interactive)
-  (let* ((buf (progn (and (get-buffer "*qz/Org Src*")
-                          (kill-buffer (get-buffer "*qz/Org Src*")))
-                     (get-buffer-create "*qz/Org Src*")))
-         (info (qz/org-expand-src-or-call-block)))
-    (with-current-buffer buf
-      (funcall (intern (concat (car info) "-mode")))
-      (insert (cadr info)))
-    (select-window (temp-buffer-window-show buf))))
-#+end_src
-
-#+RESULTS:
-: qz/preview-org-expand-src-or-call-block
-
-******** {C-c C-v v} :: qz/preview-org-expand-src-or-call-block
-:PROPERTIES:
-:ID:       9242b212-985b-4af0-97d2-e2b591c59e5c
-:CREATED:  [2023-04-26 Wed 15:22]
-:UPDATED:  [2023-04-26 Wed 15:22]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src emacs-lisp :noweb-ref org
-(define-key org-babel-map (kbd "v")
-            'qz/preview-org-expand-src-or-call-block)
-;; NOTE default is:
-;; (define-key org-babel-map (kbd "C-v") 'org-babel-expand-src-block)
-#+end_src
-
-#+RESULTS:
-: qz/preview-org-expand-src-or-call-block
 
 ******* list->rows                                                             :func:
 :PROPERTIES:
@@ -9325,9 +10820,16 @@ to improve:
 :ID:       71c9cef1-f758-4691-a223-446dc82705fd
 :CREATED:  [2022-02-22 Tue 15:27]
 :ROAM_EXCLUDE: t
-:UPDATED:  [2022-04-29 Fri 12:08]
+:UPDATED:  [2023-05-07 Sun 15:40]
 :END:
 
+******** hi-lock
+:PROPERTIES:
+:ID:       b75c1c22-a0ad-46a9-aac6-acc16bf296d5
+:CREATED:  [2023-05-09 Tue 10:20]
+:UPDATED:  [2023-05-09 Tue 10:20]
+:ROAM_EXCLUDE: t
+:END:
 #+begin_src emacs-lisp :tangle no :noweb-ref null
 (defun hi-lock-face-symbol-at-point ()
   "Highlight each instance of the symbol at point.
@@ -9394,6 +10896,48 @@ the major mode specifies support for Font Lock."
 
 #+RESULTS:
 : hi-lock-face-phrase-buffer
+
+******** syntax table for =<>=
+:PROPERTIES:
+:ID:       72c8f746-d84c-4902-904a-e4fdc6b3cbe4
+:CREATED:  [2023-05-09 Tue 10:20]
+:UPDATED:  [2023-05-10 Wed 12:24]
+:ROAM_EXCLUDE: t
+:END:
+
+- from :: https://emacs.stackexchange.com/a/52209
+
+thanks [[id:0ea561d0-e0fe-4b97-975c-476d62c058c2][John Kitchin]]!
+
+#+begin_src emacs-lisp :noweb-ref org
+(defun org-mode-<>-syntax-fix (start end)
+  "Change syntax of characters ?< and ?> to symbol within source code blocks."
+  (let ((case-fold-search t))
+    (when (eq major-mode 'org-mode)
+      (save-excursion
+        (goto-char start)
+        (while (re-search-forward "<\\|>" end t)
+          (when (save-excursion
+                  (and
+                   (re-search-backward "[[:space:]]*#\\+\\(begin\\|end\\)_src\\_>" nil t)
+                   (string-equal (downcase (match-string 1)) "begin")))
+            ;; This is a < or > in an org-src block
+            (put-text-property (point) (- (point) 1)
+                               'syntax-table (string-to-syntax "_"))))))))
+
+(defun org-setup-<>-syntax-fix ()
+  "Setup for characters ?< and ?> in source code blocks.
+Add this function to `org-mode-hook'."
+  (make-local-variable 'syntax-propertize-function)
+  (setq syntax-propertize-function 'org-mode-<>-syntax-fix)
+  (syntax-propertize (point-max)))
+
+;;; TODO fix this slow fucker
+;;(add-hook 'org-mode-hook 'org-setup-<>-syntax-fix)
+#+end_src
+
+#+RESULTS:
+: org-setup-<>-syntax-fix
 
 ***** [[id:b33372ae-f731-4482-8e3a-0c5e986ac70a][roam]]
 :PROPERTIES:
@@ -9509,11 +11053,87 @@ relevance: 20
   (org-set-property "ROAM_EXCLUDE" "t"))
 
 (define-key org-mode-map (kbd "C-c C-x i") 'qz/create-node)
-(define-key org-mode-map (kbd "C-c C-x i") 'qz/create-node)
 #+end_src
 
 #+RESULTS:
 : qz/create-node
+
+****** extract-as-subtree-with-link
+:PROPERTIES:
+:ID:       19efeebd-be59-4f1f-84f9-946d728a38ca
+:CREATED:  [2023-06-18 Sun 17:51]
+:UPDATED:  [2023-06-18 Sun 17:51]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref roam
+(defun org-roam-extract-subtree ()
+  "Convert current subtree at point to a node, and extract it into a new file."
+  (interactive)
+  (save-excursion
+    (org-back-to-heading-or-point-min t)
+    (when (bobp) (user-error "Already a top-level node"))
+    (org-id-get-create)
+    (save-buffer)
+    (org-roam-db-update-file)
+    (let* ((template-info nil)
+           (node (org-roam-node-at-point))
+           (template (org-roam-format-template
+                      (string-trim (org-capture-fill-template org-roam-extract-new-file-path))
+                      (lambda (key default-val)
+                        (let ((fn (intern key))
+                              (node-fn (intern (concat "org-roam-node-" key)))
+                              (ksym (intern (concat ":" key))))
+                          (cond
+                           ((fboundp fn)
+                            (funcall fn node))
+                           ((fboundp node-fn)
+                            (funcall node-fn node))
+                           (t (let ((r (read-from-minibuffer (format "%s: " key) default-val)))
+                                (plist-put template-info ksym r)
+                                r)))))))
+           (file-path
+            ;; ✂️ removing the "read" interactive bit
+            (expand-file-name
+             (concat (file-name-as-directory org-roam-directory) template)
+             org-roam-directory)))
+      (when (file-exists-p file-path)
+        (user-error "%s exists. Aborting" file-path))
+      (org-cut-subtree)
+      (save-buffer)
+      (with-current-buffer (find-file-noselect file-path)
+        (org-paste-subtree)
+        (save-buffer) ;; HACK this save is  just for `org-roam-promote-entire-buffer' to find the file....
+        (while (> (org-current-level) 1) (org-promote-subtree))
+        (org-roam-promote-entire-buffer)
+        (save-buffer)
+        (org-roam-node-at-point)))))
+
+(defun qz/org-roam-extract-subtree-as-link (&rest args)
+  (interactive)
+  (save-excursion
+    (qz/create-node)
+    (let ((n (org-roam-extract-subtree)))
+      (org-previous-visible-heading 1)
+      (org-insert-subheading-respect-content nil)
+      (insert (org-link-make-string (concat "id:" (org-roam-node-id n))
+                                    (org-roam-node-title n))))))
+#+end_src
+
+****** qualify recursive nodes
+:PROPERTIES:
+:ID:       c3a45b33-8c15-480c-82af-bd5742119167
+:CREATED:  [2023-07-21 Fri 10:04]
+:UPDATED:  [2023-07-21 Fri 10:04]
+:ROAM_EXCLUDE: t
+:END:
+
+inspired by graphbrain, single-word nodes are a good first-step in
+
+#+begin_src shell
+#+end_src
+
+
 
 ****** capture
 :PROPERTIES:
@@ -9527,6 +11147,7 @@ relevance: 20
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
 :END:
+
 ******** capture current, todo
 :PROPERTIES:
 :ID:       dd40d2ba-097a-49bf-9992-47f4af9b7bd1
@@ -9534,6 +11155,7 @@ relevance: 20
 :UPDATED:  <2022-03-03 Thu 12:31>
 :ROAM_EXCLUDE: t
 :END:
+
 #+begin_src emacs-lisp :noweb-ref roam
 (defun qz/org-roam-capture-current ()
   (interactive)
@@ -9553,6 +11175,97 @@ relevance: 20
                                                   :finalize 'insert-link))
     (qz/capture-last-captured)))
 #+end_src
+
+******** slug
+:PROPERTIES:
+:ID:       55b3848e-4ed1-4048-a0b5-941c05b10121
+:CREATED:  [2023-07-07 Fri 14:17]
+:UPDATED: [2023-07-07 Fri 14:17]
+:ROAM_EXCLUDE: t
+:END:
+
+- source  :: org-hugo-slug
+
+#+begin_src emacs-lisp
+(defun qz/slug (str &optional allow-double-hyphens)
+  "Convert string STR to a `slug' and return that string.
+
+A `slug' is the part of a URL which identifies a particular page
+on a website in an easy to read form.
+
+Example: If STR is \"My First Post\", it will be converted to a
+slug \"my-first-post\", which can become part of an easy to read
+URL like \"https://example.com/posts/my-first-post/\".
+
+In general, STR is a string.  But it can also be a string with
+Markdown markup because STR is often a post's sub-heading (which
+can contain bold, italics, link, etc markup).
+
+The `slug' generated from that STR follows these rules:
+
+- Contain only lower case alphabet, number and hyphen characters
+  ([[:alnum:]-]).
+- Not have *any* HTML tag like \"<code>..</code>\",
+  \"<span class=..>..</span>\", etc.
+- Not contain any URLs (if STR happens to be a Markdown link).
+- Replace \".\" in STR with \"dot\", \"&\" with \"and\",
+  \"+\" with \"plus\".
+- Replace parentheses with double-hyphens.  So \"foo (bar) baz\"
+  becomes \"foo--bar--baz\".
+- Replace non [[:alnum:]-] chars with spaces, and then one or
+  more consecutive spaces with a single hyphen.
+- If ALLOW-DOUBLE-HYPHENS is non-nil, at most two consecutive
+  hyphens are allowed in the returned string, otherwise consecutive
+  hyphens are not returned.
+- No hyphens allowed at the leading or trailing end of the slug."
+  (let* (;; All lower-case
+         (str (downcase str))
+         ;; Remove "<FOO>..</FOO>" HTML tags if present.
+         (str (replace-regexp-in-string "<\\(?1:[a-z]+\\)[^>]*>.*</\\1>" "" str))
+         ;; Remove URLs if present in the string.  The ")" in the
+         ;; below regexp is the closing parenthesis of a Markdown
+         ;; link: [Desc](Link).
+         (str (replace-regexp-in-string (concat "\\](" ffap-url-regexp "[^)]+)") "]" str))
+         ;; Replace "&" with " and ", "." with " dot ", "+" with
+         ;; " plus ".
+         (str (replace-regexp-in-string
+               "&" " and "
+               (replace-regexp-in-string
+                "\\." " dot "
+                (replace-regexp-in-string
+                 "\\+" " plus " str))))
+         ;; Replace all characters except alphabets, numbers and
+         ;; parentheses with spaces.
+         (str (replace-regexp-in-string "[^[:alnum:]()]" " " str))
+         ;; On emacs 24.5, multibyte punctuation characters like "："
+         ;; are considered as alphanumeric characters! Below evals to
+         ;; non-nil on emacs 24.5:
+         ;;   (string-match-p "[[:alnum:]]+" "：")
+         ;; So replace them with space manually..
+         (str (if (version< emacs-version "25.0")
+                  (let ((multibyte-punctuations-str "：")) ;String of multibyte punctuation chars
+                    (replace-regexp-in-string (format "[%s]" multibyte-punctuations-str) " " str))
+                str))
+         ;; Remove leading and trailing whitespace.
+         (str (replace-regexp-in-string "\\(^[[:space:]]*\\|[[:space:]]*$\\)" "" str))
+         ;; Replace 2 or more spaces with a single space.
+         (str (replace-regexp-in-string "[[:space:]]\\{2,\\}" " " str))
+         ;; Replace parentheses with double-hyphens.
+         (str (replace-regexp-in-string "\\s-*([[:space:]]*\\([^)]+?\\)[[:space:]]*)\\s-*" " -\\1- " str))
+         ;; Remove any remaining parentheses character.
+         (str (replace-regexp-in-string "[()]" "" str))
+         ;; Replace spaces with hyphens.
+         (str (replace-regexp-in-string " " "-" str))
+         ;; Remove leading and trailing hyphens.
+         (str (replace-regexp-in-string "\\(^[-]*\\|[-]*$\\)" "" str)))
+    (unless allow-double-hyphens
+      (setq str (replace-regexp-in-string "--" "-" str)))
+    str))
+#+end_src
+
+#+RESULTS:
+: qz/slug
+
 ******** utc timestamp
 :PROPERTIES:
 :ID:       50e60437-87cf-487f-aca3-850a76b02fdc
@@ -9564,18 +11277,27 @@ relevance: 20
 (defun qz/utc-timestamp ()
   (format-time-string "%Y%m%dT%H%M%SZ" (current-time) t))
 #+end_src
+********* qz/org-roam-extract-subtree
+:PROPERTIES:
+:ID:       c1034905-2820-41ed-825e-b16af8ed46f4
+:CREATED:  [2023-06-13 Tue 09:55]
+:UPDATED:  [2023-06-13 Tue 09:55]
+:ROAM_EXCLUDE: t
+:END:
+
 
 ******* templates                                                               :var:
 :PROPERTIES:
 :ID:       5a0c855e-f0ed-4dee-bf03-b7dfec2f023b
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:  [2022-03-14 Mon 10:53]
+:UPDATED:  [2023-07-07 Fri 14:33]
 :END:
 
 #+begin_src emacs-lisp  :noweb-ref roam
-(setq qz/org-roam-capture-head "#+title: ${title}\n")
-(setq qz/capture-title-timestamp-roam "%(qz/utc-timestamp)-${slug}.org")
+(setq qz/org-roam-capture-head "#+title: ${title}\n\n")
+(setq qz/capture-title-timestamp-roam "%(qz/utc-timestamp)-${slug}.org"
+      org-roam-extract-new-file-path qz/capture-title-timestamp-roam)
 
 (setq org-roam-capture-templates
       `(("d" "default" plain "%?"
@@ -9585,12 +11307,15 @@ relevance: 20
         ("n" "empty" plain "%?"
          :if-new (file+head ,qz/capture-title-timestamp-roam
                             ,qz/org-roam-capture-head)
-         :immediate-finish t)
-        ))
+         :immediate-finish t)))
 #+end_src
 
 #+RESULTS:
-| d | default | plain | %? | :if-new | (file+head %(qz/utc-timestamp)-${slug}.org #+title: ${title} |
+: (("d" "default" plain "%?" :if-new (file+head "%(qz/utc-timestamp)-${slug}.org" "#+title: ${title}
+:
+: ") :unnarrowed t) ("n" "empty" plain "%?" :if-new (file+head "%(qz/utc-timestamp)-${slug}.org" "#+title: ${title}
+:
+: ") :immediate-finish t))
 
 ****** core bindings                                                            :kbd:
 :PROPERTIES:
@@ -9623,6 +11348,127 @@ relevance: 20
 #+RESULTS:
 : qz/consult-notes
 
+****** buffer / sidebar
+:PROPERTIES:
+:ID:       5b82a2ed-464b-4f16-b90c-6e05a9ece021
+:CREATED:  [2023-07-05 Wed 18:44]
+:UPDATED:  [2023-07-05 Wed 18:44]
+:ROAM_EXCLUDE: t
+:END:
+
+******* org-roam-mode-sections :var:
+:PROPERTIES:
+:ID:       ba3dd508-d97a-440c-ad26-e1213938887c
+:CREATED:  [2023-07-05 Wed 19:32]
+:UPDATED: [2023-07-10 Mon 14:14]
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp :noweb-ref roam
+(setq org-roam-mode-sections
+      (list 'org-roam-backlinks-section
+            'org-roam-reflinks-section
+            ;; fuck it why not
+            'qz/org-roam-unlinked-references-section))
+#+end_src
+
+#+RESULTS:
+: (org-roam-backlinks-section org-roam-reflinks-section org-roam-unlinked-references-section)
+
+******* org-roam-unlinked-references-section                                  :redef:
+:PROPERTIES:
+:ID:       6dd1621a-cb6b-49d4-b1af-86102f3d5f23
+:CREATED:  [2023-07-05 Wed 19:32]
+:UPDATED:  [2023-07-10 Mon 14:14]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref roam
+(defun qz/org-roam-unlinked-references-section (node)
+  "The unlinked references section for NODE.
+References from FILE are excluded."
+  (when (and (executable-find "rg")
+             (org-roam-node-title node)
+             (not (string-match "PCRE2 is not available"
+                                (shell-command-to-string "rg --pcre2-version"))))
+    (let* ((titles (cons (org-roam-node-title node)
+                         (org-roam-node-aliases node)))
+           (rg-command (concat "rg -L -o --vimgrep -P -i "
+                               (mapconcat (lambda (glob) (concat "-g " glob))
+                                          (org-roam--list-files-search-globs org-roam-file-extensions)
+                                          " ")
+                               (format " '\\[([^[]]++|(?R))*\\]%s' "
+                                       (mapconcat (lambda (title)
+                                                    (format "|(\\b%s\\b)" (shell-quote-argument title)))
+                                                  titles ""))
+                               org-roam-directory))
+           (results (split-string (shell-command-to-string rg-command) "\n"))
+           f row col match)
+      (magit-insert-section (unlinked-references)
+        (magit-insert-heading "Unlinked References:")
+        (dolist (line results)
+          (save-match-data
+            (when (string-match org-roam-unlinked-references-result-re line)
+              (setq f (match-string 1 line)
+                    row (string-to-number (match-string 2 line))
+                    col (string-to-number (match-string 3 line))
+                    match (match-string 4 line))
+              (when (and match
+                         (not (file-equal-p (org-roam-node-file node) f))
+                         (member (downcase match) (mapcar 'downcase titles)))
+                (magit-insert-section section (org-roam-grep-section)
+                  (oset section file f)
+                  (oset section row row)
+                  (oset section col col)
+                  (insert
+                   (propertize
+                    (format "%s:%s:%s"
+                                              ;;; ✂️
+                            ;; removing my utc data
+                            ;; i.e.
+                            ;;   (replace-regexp-in-string "^.+Z-" "" "20210607T1536e21Z-mm.org")
+                            (s-pad-right
+                             25 " " (truncate-string-to-width
+                                     (replace-regexp-in-string
+                                      "^.+Z-" ""
+                                      (file-name-base f))
+                                     25 nil nil t))
+                                              ;;; ✂️
+                            row col)
+                    'font-lock-face 'org-roam-dim)
+                   " "
+                   (org-roam-fontify-like-in-org-mode
+                    (org-roam-unlinked-references-preview-line f row))
+                   "\n"))))))
+        (insert ?\n)))))
+        #+end_src
+
+        #+RESULTS:
+        : qz/org-roam-unlinked-references-section
+
+        #+begin_src emacs-lisp :noweb-ref null
+        (s-pad-right
+         25 " " (truncate-string-to-width
+                 (replace-regexp-in-string
+                  "^.+Z-" ""
+                  "20210607T1536e21Z-mm.org")
+                 25 nil nil t))
+#+end_src
+
+#+RESULTS:
+: "mm.org                   "
+
+******* screenshot
+:PROPERTIES:
+:ID:       fda5aa87-a02f-48ba-9b3b-c23f5012e5a8
+:CREATED:  [2023-07-05 Wed 18:47]
+:UPDATED:  [2023-07-05 Wed 18:47]
+:ROAM_EXCLUDE: t
+:END:
+
+#+DOWNLOADED: screenshot @ 2023-07-05 18:46:05
+[[file:screenshots/2023-07-05_18-46-05_screenshot.png]]
+
+
 ****** dailies
 :PROPERTIES:
 :ID:       a82c9727-9f53-48f2-b7b8-7c981feeebc2
@@ -9635,59 +11481,246 @@ relevance: 20
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
 :END:
+******** experiments
+:PROPERTIES:
+:ID:       ba6750c3-a246-4878-a3b9-c875fc9e645f
+:CREATED:  [2023-06-15 Thu 14:20]
+:UPDATED:  [2023-06-18 Sun 16:12]
+:ROAM_EXCLUDE: t
+:END:
+********* capture fulcrum
+:PROPERTIES:
+:ID:       ed1a403b-f7b4-47c4-9c8b-01ea3ca5977c
+:CREATED:  [2023-06-15 Thu 14:20]
+:UPDATED:  [2023-07-16 Sun 22:31]
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp :noweb-ref roam
+(defun qz/solar-moment (&optional time)
+  (symbol-name
+   (let ((i (string-to-number
+             (format-time-string "%H" (or time (current-time))))))
+     (cond
+      ((and (>= i 4)  (< i 7))  'dawn)
+      ((and (>= i 7)  (< i 12)) 'morning)
+      ((and (>= i 12) (< i 17)) 'afternoon)
+      ((and (>= i 17) (< i 20)) 'evening)
+      ((and (>= i 20)) 'night)
+      (t 'void-time)))))
+;; (qz/solar-moment)
+
+;; (list
+;;  (solar-sunrise-sunset-string
+;;   (org-date-to-gregorian (format-time-string "%Y-%m-%d"))
+;;   'no-location)
+;;  (solar-exact-local-noon
+;;   (org-date-to-gregorian
+;;    (format-time-string "%Y-%m-%d"))))
+
+
+(defun qz/org-roam-dailies-capture-fulcrum (&optional time)
+  ;; '(((> 4) . 'dawn)
+  ;;   ((> 7) . 'morning)
+  ;;   ((> 12) . 'afternoon)
+  ;;   ((> 5) . 'evening)
+  ;;   ((> 8) . 'night))
+  (list "journal" (qz/solar-moment time)))
+
+;; (qz/org-roam-dailies-capture-fulcrum)
+#+end_src
+
+#+RESULTS:
+: qz/org-roam-dailies-capture-fulcrum
+
+********* quotada-o-nada :: conditional inclusion of data
+:PROPERTIES:
+:ID:       29bc0a54-9a16-4f91-9e47-bec28e618f81
+:CREATED:  [2023-06-15 Thu 14:20]
+:UPDATED:  [2023-06-19 Mon 18:27]
+:END:
+
+intent is to only push the region into the template if it's active.
+
+hmm.  I suppose the template itself could be changed on the fly, seeing as
+we're just joining strings anyway.
+
+#+begin_src emacs-lisp :noweb-ref roam :results silent
+;; TODO this is bonk and doesn't work
+(defun qz/region-quotada-o-nada (&rest args)
+  "returns a (formatted) region if hacky-captured before dailies-capture
+
+intended for use in an `org-capture-template', which may safely
+drop this in; optionally including itself if it has any content.
+
+this is my workaround for the `%i' template being total nonsense
+to an expression in a regular template, such as `%(my-fun %i)' or
+`%(my-fun \"%i\")'.
+
+`%i' is true to form, but I can't grasp it as a list of
+args.
+"
+  (if qz/hoist--org-capture
+      (format "- region      ::\n  #+begin_quote\n%s\n  #+end_quote\n"
+              qz/hoist--org-capture)
+    ""))
+#+end_src
+
+********* qz/peek-region
+:PROPERTIES:
+:ID:       2baf4769-cb59-4058-9f56-726082962546
+:CREATED:  [2023-06-19 Mon 17:38]
+:UPDATED:  [2023-06-19 Mon 18:22]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref roam
+(defun qz/peek-region ()
+  "get the region.
+
+how many times have I written this"
+  (interactive)
+  (when-let ((s (and (region-active-p)
+                     (filter-buffer-substring (region-beginning)
+                                              (region-end)))))
+    (kill-new s)
+    (qz/debug- (message "QZ peek-region :: %s" s))
+    s))
+#+end_src
+
+#+RESULTS:
+: qz/peek-region
+
+#+begin_src emacs-lisp :noweb-ref roam
+;; TODO think about this; before/after with hoisted var as
+;; hoist--hookfn-actfn
+;;
+;; (defmacro qz/hoist- (fn &optional unset?)
+;;   `(setq ,(intern (format "qz/hoist--%s" name))
+;;          ,(when (not unset?) (funcall fn))))
+
+(qz/advice- org-capture :before qz/hoist-peek-region)
+(qz/advice- org-capture :after  qz/unhoist-peek-region)
+
+(defun qz/hoist-peek-region (&rest args)
+  (qz/debug- (message "QZ hoist"))
+  (setq qz/hoist--org-capture (qz/peek-region)))
+
+(defun qz/unhoist-peek-region (&rest args)
+  (qz/debug- (message "QZ unhoist"))
+  (setq qz/hoist--org-capture nil))
+#+end_src
+
+#+RESULTS:
+: qz/unhoist-peek-region
+
+#+begin_src emacs-lisp :noweb-ref roam :results silent
+(defun qz/peek-thing ()
+  (interactive)
+  (let ((s ())
+        (kill-new s)
+        (qz/debug- (message "QZ peek-region :: %s" s))
+        s)))
+
+#+end_src
+
+#+begin_src emacs-lisp :noweb-ref roam :results silent
+(defun qz/peek-look-mouse ()
+  (interactive)
+  (let ((s (posn-col-row
+            (let* ((m (mouse-pixel-position))
+                   (xy (cdr m)))
+              (posn-at-x-y (car xy) (cdr xy) (car m))))))
+    (kill-new s)
+    (qz/debug- (message "QZ peek-region :: %s" s))
+    s))
+#+end_src
+
+********* tab-o-nada
+:PROPERTIES:
+:ID:       64391ca0-3099-4e73-963e-7ba089e2a70f
+:CREATED:  [2023-06-18 Sun 16:12]
+:UPDATED:  [2023-06-18 Sun 16:21]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref roam
+(defun qz/capture-tab-or-nada (&rest args)
+  (if-let ((d (qz/tab nil 'as-link)))
+      (format "- from: tab   :: %s" d)
+    ""))
+
+#+end_src
+
+#+RESULTS:
+: qz/capture-tab-or-nada
+
 ******** templates
 :PROPERTIES:
 :ID:       46fed150-b670-4899-aaa2-b029262db572
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:  [2023-04-19 Wed 19:44]
+:UPDATED:  [2023-07-17 Mon 09:42]
 :END:
 
 - see also :: about capture templates
 
-#+begin_src emacs-lisp :noweb-ref roam
-(setq org-roam-dailies-capture-templates
-      `(("d" "default" entry
-         ,(s-join "\n" '("* [%<%H:%M:%S>] %?"
-                         ;;"CREATED: <%<%Y-%m-%d %H:%M>>"
-                         "- from: point :: %a"
-                         "- from: tab   :: %(qz/tab nil 'as-link)"
-                         ;;"- from (point) :: %f"
-                         "- clocking    :: %K" ; REVIEW does this solve tangents?
-                         ;; the region one is a bit tricky
-                         ;;"- region ::\n  #+begin_quote\n%(\"%i\")\n#+end_quote"
-                         ))
-         :if-new (file+head+olp
-                  ,qz/org-roam-dailies-filespec
-                  ,(s-join "\n" '("#+title: <%<%Y-%m-%d>>"
-                                  "#+filetags: daily private project" "" ""
-                                  "%(qz/today-dateref)" "" ""
-                                  "* today, I will"
-                                  "** daily review"
-                                  "** life"
-                                  "** work"))
-                  ("journal")))
-        ))
+#+begin_src emacs-lisp :noweb-ref roam :results silent
+(defun qz/dailies-capture-template (&optional time)
+  `(("d" "default" entry
+     "* [%<%H:%M:%S>]
+- from: point :: %a
+- clocking    :: %K
+%(qz/capture-tab-or-nada)
+%(qz/region-quotada-o-nada)
 
-(setq qz/org-roam-dailies-capture-templates--tangent
-      '("d" "default" entry
-        ,(s-join "\n" '("* TANGENT [%<%H:%M>] %?"
-                        ;;"CREATED: <%<%Y-%m-%d %H:%M>>"
-                        "- from :: %a"))
-        :if-new (file+head+olp
-                 ,qz/org-roam-dailies-filespec
-                 ,(s-join "\n" '("#+title: <%<%Y-%m-%d>>"
-                                 "#+filetags: daily private project" ""
-                                 "%(qz/today-dateref)" ""
-                                 "* today, I will"
-                                 "* journal"
-                                 "* tangent"))
-                 ("tangent"))))
+%?"
+     :if-new (file+head+olp
+              ,qz/org-roam-dailies-filespec
+              ,(s-join "\n" '("#+title: <%<%Y-%m-%d>>"
+                              "#+filetags: daily private project" "" ""
+                              "%(qz/today-dateref)" "" ""
+                              "* today, I will"
+                              "** daily review"
+                              "** life"
+                              "** work"))
+              ,(qz/org-roam-dailies-capture-fulcrum time)))))
+
+(defun qz/dailies-capture-template--set (&rest args)
+  (setq org-roam-dailies-capture-templates
+        (qz/dailies-capture-template (current-time))))
+
+(qz/advice-
+ org-roam-dailies-capture-today
+ :before qz/dailies-capture-template--set)
+#+end_src
+
+********* TODO ... tangent (reconsider)
+:PROPERTIES:
+:ID:       b0998f7a-7088-47ad-a82f-ca79eb8041c0
+:CREATED:  [2023-07-16 Sun 22:38]
+:UPDATED:  [2023-07-16 Sun 22:38]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref null :results silent
+;; (setq qz/org-roam-dailies-capture-templates--tangent
+;;       '("d" "default" entry
+;;         ,(s-join "\n" '("* TANGENT [%<%H:%M>] %?"
+;;                         ;;"CREATED: <%<%Y-%m-%d %H:%M>>"
+;;                         "- from :: %a"))
+;;         :if-new (file+head+olp
+;;                  ,qz/org-roam-dailies-filespec
+;;                  ,(s-join "\n" '("#+title: <%<%Y-%m-%d>>"
+;;                                  "#+filetags: daily private project" ""
+;;                                  "%(qz/today-dateref)" ""
+;;                                  "* today, I will"
+;;                                  "* journal"
+;;                                  "* tangent"))
+;;                  ("tangent"))))
 #+end_src
 
 #+RESULTS:
 | d | default | entry | (, (s-join |
-
 ******** helpers
 :PROPERTIES:
 :ID:       3c0c901e-65d7-4269-af39-da71d60997fe
@@ -9697,6 +11730,8 @@ relevance: 20
 ********* today's date reference as roam links                         :project:func:
 :PROPERTIES:
 :ID:       24cca9c1-2a89-4de2-b840-5d2adb9180931
+:UPDATED:  [2023-06-19 Mon 18:23]
+:CREATED:  [2023-06-19 Mon 18:23]
 :END:
 
 this is just a nice reference spec to include in the daily notes.
@@ -9736,6 +11771,7 @@ make a new year in this case.
 :ID:       c9f144b9-f170-4193-898f-a7d73c514ee3
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
+:UPDATED:  [2023-06-13 Tue 09:57]
 :END:
 #+begin_src emacs-lisp :noweb-ref roam
 (defvar qz/month-lookup
@@ -9778,13 +11814,17 @@ make a new year in this case.
                      (org-roam-node-title node)))
                 year))))
 #+end_src
+
 ********* daily-tangent-capture[fn:1]                                          :func:
 :PROPERTIES:
 :ID:       8d1c9152-3401-4414-a446-b8389523e5d4
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
+:UPDATED:  [2023-06-13 Tue 09:57]
 :END:
+
 so we can use it as a COMMAND. better traceability than a lambda
+
 #+begin_src emacs-lisp :noweb-ref roam
 (defun qz/org-daily-tangent-capture ()
   (interactive)
@@ -9794,6 +11834,7 @@ so we can use it as a COMMAND. better traceability than a lambda
 
 #+RESULTS:
 : qz/org-daily-tangent-capture
+
 ********* today-as-dailies-file
 :PROPERTIES:
 :ID:       82ad41ee-9e11-46c9-893e-7b196ea4ce5c
@@ -10383,6 +12424,7 @@ tasks.
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
 :END:
+
 #+begin_src emacs-lisp
 (setq qz/transitive-query "
 with recursive cte (id, degree) as (
@@ -10410,6 +12452,8 @@ order by degree desc
 (defun qz/transitive-links (dst)
   (org-roam-db-query qz/transitive-query dst))
 
+
+
 (defun qz/has-transitive-link-p (dst &optional src)
   (if-let* ((nap (or src (org-roam-node-at-point)))
             (src (or src (org-roam-node-id nap))))
@@ -10425,6 +12469,20 @@ order by degree desc
   (qz/has-transitive-link (org-roam-node-id dst) src))
 
 ;;x(qz/has-transitive-link-p (qz/title->roam-id "emacs"))
+#+end_src
+
+************ exploring links
+:PROPERTIES:
+:ID:       d5f4e927-59e1-4c43-8dad-87333028a5ff
+:CREATED:  [2023-05-03 Wed 19:47]
+:UPDATED:  [2023-05-03 Wed 19:48]
+:END:
+
+what I really want is the transitive links, and the connections between such
+transitive members.
+
+#+begin_src emacs-lisp :noweb-ref null
+(qz/transitive-links (qz/title->roam-id "emacs-lisp"))
 #+end_src
 
 #+RESULTS:
@@ -10796,6 +12854,28 @@ cat /tmp/oo | awk -F, '{print $2,$3}' | sort | uniq -c | sort -rgk1 | head
 
 #+end_src
 
+******* stop journals from being nodes
+:PROPERTIES:
+:ID:       6d720847-87ae-44c3-ae1b-5b82244e3335
+:UPDATED:  [2023-05-07 Sun 23:53]
+:END:
+
+how to iterate over nodes, given some predicate
+
+#+begin_src emacs-lisp :noweb-ref null
+(mapc (lambda (n)
+        (when (equal "journal" (org-roam-node-title n))
+          (with-current-buffer (find-file-noselect (org-roam-node-file n))
+            (goto-char (org-roam-node-point n))
+            ;;; ✂️
+            ;;(message "%s" (org-get-heading))
+            (qz/exclude-node)
+            (save-buffer)
+            ;;; ✂️
+            )))
+      (org-roam-node-list))
+#+end_src
+
 ****** protocol (ref)
 :PROPERTIES:
 :ID:       366af88d-6c6d-4638-970f-c00f33152ef6
@@ -10860,11 +12940,12 @@ cat /tmp/oo | awk -F, '{print $2,$3}' | sort | uniq -c | sort -rgk1 | head
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
 :END:
-******* =*org-roam*= (backlinks) buffer                                      :var:func:
+******* =*org-roam*= (backlinks) buffer                                    :var:func:
 :PROPERTIES:
 :ID:       fca1f0cb-46ad-4064-ad9d-925dc56b4ebb
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
+:UPDATED:  [2023-06-02 Fri 16:04]
 :END:
 ******** ... images should be small
 :PROPERTIES:
@@ -10929,7 +13010,7 @@ https://github.com/org-roam/org-roam/issues/991#issuecomment-882010053
 :PROPERTIES:
 :ID:       bd54943e-a232-42ed-9488-5cbea8f08b4f
 :CREATED:  [2023-05-03 Wed 19:26]
-:UPDATED:  [2023-05-03 Wed 19:26]
+:UPDATED:  [2023-05-07 Sun 15:41]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -10945,10 +13026,207 @@ https://github.com/org-roam/org-roam/issues/991#issuecomment-882010053
 :ID:       b32477c3-9346-4c88-8710-043b6eb9824f
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
+:UPDATED:  [2023-06-02 Fri 15:57]
+:END:
+
+****** init
+:PROPERTIES:
+:ID:       ec6dc61c-94ed-4d00-9d3e-43e224fa57f6
+:CREATED:  [2023-06-02 Fri 15:56]
+:UPDATED:  [2023-06-02 Fri 15:56]
+:ROAM_EXCLUDE: t
 :END:
 #+begin_src emacs-lisp :noweb-ref org
 (require 'org-download)
 #+end_src
+
+#+RESULTS:
+: org-download
+
+****** fix those fucking insane paths -- seriously wtf
+:PROPERTIES:
+:ID:       97d1b8cb-1044-4945-a462-011e1b178761
+:CREATED:  [2023-06-02 Fri 15:56]
+:UPDATED:  [2023-07-23 Sun 10:59]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref org
+(defun org-download--dir-2 () "screenshots")
+#+end_src
+
+#+RESULTS:
+: org-download--dir-2
+
+
+#+begin_src shell :results silent
+find $HOME/life -name '*.png' | grep screenshot.png
+#+end_src
+
+
+
+***** web-tools
+:PROPERTIES:
+:ID:       48282827-1d68-4b3d-b528-1dd3f2f62c42
+:CREATED:  [2023-07-07 Fri 14:21]
+:UPDATED:  [2023-07-07 Fri 14:21]
+:ROAM_EXCLUDE: t
+:END:
+
+'org-web-tools provides us great tools for chopping up web pages.  'eww-readable is used under the hood, which is mostly useable.
+
+
+
+
+****** TODO download pages to =org-directory/data/timestamp-urlslug=
+:PROPERTIES:
+:ID:       7c82dd4d-8de1-43f3-ac99-cf9a046948f0
+:CREATED:  [2023-07-07 Fri 14:21]
+:UPDATED:  [2023-07-07 Fri 15:19]
+:ROAM_EXCLUDE: t
+:END:
+
+- workflow
+
+have some link.  (from eww, firefox)
+begin capture with title=link.
+in body,
+call 'org-web-tools-insert-web-page-as-entry
+set title link-title.  (aka HTML.HEAD.TITLE)
+
+<<<title>>>
+<<<link>>
+
+- referencing concept
+
+webpage-node shows up in 'org-roam-node-find.  [fn:6]
+
+it is wise to keep notes-dir/roam as org-roam-directory.  symlinking to notes-dir/data seems good for the structured-data-store
+
+#+begin_src emacs-lisp :noweb-ref org
+
+#+end_src
+
+******* ensure the page has an org-roam-node
+:PROPERTIES:
+:ID:       20421b1b-d2f0-4367-a5d8-dfac0eff6d5b
+:CREATED:  [2023-07-07 Fri 14:22]
+:UPDATED:  [2023-07-07 Fri 14:27]
+:ROAM_EXCLUDE: t
+:END:
+
+****** url at poinit
+:PROPERTIES:
+:ID:       0d8e2fcf-2321-49b1-afbc-495b7c08a1ec
+:CREATED:  [2023-07-18 Tue 19:01]
+:UPDATED:  [2023-07-19 Wed 21:07]
+:ROAM_EXCLUDE: t
+:END:
+
+
+#+begin_src emacs-lisp
+(cl-defun qz/org-web-tools-read-url-as-org (url &key (show-buffer-fn 'switch-to-buffer))
+  "Read URL's readable content in an Org buffer.
+Buffer is displayed using SHOW-BUFFER-FN."
+  (interactive (list (org-web-tools--get-first-url)))
+  (let ((entry (org-web-tools--url-as-readable-org url)))
+    (when entry
+      (funcall show-buffer-fn url)
+      (org-mode)
+      (insert entry)
+      ;; Set buffer title
+      (goto-char (point-min))
+      (org-next-link)
+      (rename-buffer (format "*org-web [%s]*"
+                             (cdr (qz/org-web-tools--read-org-bracket-link)))))))
+
+(defun qz/read-org-bracket-link (&optional link)
+  "Return (TARGET . DESCRIPTION) for Org bracket LINK or next link on current line."
+  ;; Searching to the end of the line seems the simplest way
+  (save-excursion
+    (when (org-in-regexp org-link-any-re)
+      (let* ((full (match-string-no-properties 0))
+             (target (or (match-string-no-properties 2)
+                         (match-string-no-properties 0)))
+             (description (match-string-no-properties 3)))
+        (cons target description)))))
+
+;;(ignore-errors (call-interactively 'qz/org-web-tools-read-url-as-org))
+;;(concat org-directory "data/web/")
+         #+end_src
+
+         #+RESULTS:
+         : qz/read-org-bracket-link
+
+****** post process prose with pj-justify
+:PROPERTIES:
+:ID:       d2d618b2-03e4-4dab-8edc-ba4f9771b834
+:CREATED:  [2023-07-18 Tue 19:01]
+:UPDATED:  [2023-07-18 Tue 19:01]
+:ROAM_EXCLUDE: t
+:END:
+
+
+#+begin_src emacs-lisp :noweb-ref null
+(org-next-paragraph)
+#+end_src
+
+
+#+DOWNLOADED: screenshot @ 2023-07-18 18:02:24
+[[file:screenshots/2023-07-18_18-02-24_screenshot.png]]
+
+******* tangent
+:PROPERTIES:
+:ID:       f0702969-b3dc-457e-a9e6-d09376701af9
+:CREATED:  [2023-07-18 Tue 19:01]
+:UPDATED:  [2023-07-18 Tue 19:01]
+:ROAM_EXCLUDE: t
+:END:
+
+memoizing these kinds of things would be a lot quicker
+-  (org-in-regexp org-link-any-re)
+
+i'm doing it here, and later --in time, and down in the lexical parse tree -- inside 'qz/read-org-bracket-link.
+
+scope? "in-regexp" commands, any string matching,
+
+
+****** org-download from image at point
+:PROPERTIES:
+:ID:       5816f17e-0f27-49e5-b376-29a35b076938
+:CREATED:  [2023-07-18 Tue 19:01]
+:UPDATED:  [2023-07-18 Tue 19:01]
+:ROAM_EXCLUDE: t
+:END:
+
+handy to pop this an image link from org-web-tools
+
+#+begin_src emacs-lisp
+(defun qz/org-download-image-at-point ()
+  (interactive)
+  (when-let ((l (qz/read-org-bracket-link)))
+    (org-download-image l)))
+#+end_src
+
+
+
+****** ? could this be done with org-roam-capture?
+:PROPERTIES:
+:ID:       cd9f37e7-fc82-4d67-8a42-afc1b15b5fbf
+:CREATED:  [2023-07-07 Fri 14:26]
+:UPDATED:  [2023-07-07 Fri 15:20]
+:ROAM_EXCLUDE: t
+:END:
+:LOGBOOK:
+CLOCK: [2023-07-07 Fri 14:24]--[2023-07-07 Fri 15:20] =>  0:56
+:END:
+
+maybe, if the org-roam-directory is locally overridden, or a capture-target is used for the directory
+
+checking on capture templates, the structure is '(KEY NAME TYPE LOCATION PATTERN).
+- see :: [[info:org#Capture templates][org#Capture templates]]
+
+
 
 ***** table
 :PROPERTIES:
@@ -10969,7 +13247,7 @@ https://github.com/org-roam/org-roam/issues/991#issuecomment-882010053
 CLOCK: [2023-04-27 Thu 14:16]--[2023-04-27 Thu 17:29] =>  3:13
 :END:
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :noweb-ref org
 (defvar qz/orgtbl-plot-function
   ;;'orgtbl-uc-draw-cont
   'orgtbl-uc-draw-grid
@@ -11222,7 +13500,7 @@ C-M-S
 (define-key org-mode-map (kbd "C-S-<return>")
             'org-insert-heading)
 
-(defun org-insert-subheading-respect-content (arg)
+(defun org-insert-subheading-respect-content (&rest arg)
   (interactive "P")
   (let ((org-insert-heading-respect-content t))
     (org-insert-subheading arg)))
@@ -11236,15 +13514,16 @@ C-M-S
 (define-key org-mode-map (kbd "C-c C-M->") 'org-do-demote)
 
 (define-key org-mode-map (kbd "C-c C-M-p")
-             (lambda ()
-               (interactive)
-               (make-marker)
-               (org-up-heading-or-point-min)))
+            (lambda ()
+              (interactive)
+              (make-marker)
+              (org-up-heading-or-point-min)))
 #+end_src
 
 #+RESULTS:
-| lambda | nil | (interactive) | (org-up-heading-or-point-min) |
+| lambda | nil | (interactive) | (make-marker) | (org-up-heading-or-point-min) |
 
+(org-insert-subheading nil)
 **** effort estimates
 :PROPERTIES:
 :ID:       4139f89e-a615-43b6-a951-79880772cd4e
@@ -11362,8 +13641,9 @@ also accessible from the agenda with the ‘e’ key.
 :ID:       ded3219a-de09-4bee-a919-bf79debb9022
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:  [2022-09-28 Wed 15:25]
+:UPDATED:  [2023-05-07 Sun 15:52]
 :END:
+
 #+begin_src emacs-lisp
 ;; NOWEB ORG START
 (message "pre org: %s" (shell-command-to-string "date"))
@@ -11623,6 +13903,71 @@ any value <0 is a most controversial decision
 
 #+RESULTS:
 : t
+
+**** slack
+:PROPERTIES:
+:ID:       4454a5e4-98c8-482c-95da-c70f0a77bb29
+:ROAM_EXCLUDE: t
+:END:
+
+***** redef slack-conversations-list
+:PROPERTIES:
+:ID:       26eafa99-2e8c-4965-996c-42039faa5342
+:ROAM_EXCLUDE: t
+:UPDATED:  [2023-05-24 Wed 07:50]
+:END:
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'slack
+  (defun slack-conversations-list (team success-callback &optional types)
+    (let ((lexical t)
+          (cursor nil)
+          (channels nil)
+          (groups nil)
+          (ims nil)
+          (types (or types (list ;;"public_channel"
+                            "private_channel"
+                            "mpim"
+                            "im"))))
+      (cl-labels
+          ((on-success
+             (&key data &allow-other-keys)
+             (slack-request-handle-error
+              (data "slack-conversations-list")
+              (cl-loop for c in (plist-get data :channels)
+                       do (cond
+                           ((eq t (plist-get c :is_channel))
+                            (push (slack-room-create c 'slack-channel)
+                                  channels))
+                           ((eq t (plist-get c :is_im))
+                            (push (slack-room-create c 'slack-im)
+                                  ims))
+                           ((eq t (plist-get c :is_group))
+                            (push (slack-room-create c 'slack-group)
+                                  groups))))
+              (slack-if-let*
+                  ((meta (plist-get data :response_metadata))
+                   (next-cursor (plist-get meta :next_cursor))
+                   (has-cursor (< 0 (length next-cursor))))
+                  (progn
+                    (setq cursor next-cursor)
+                    (request))
+                (funcall success-callback
+                         channels groups ims))))
+           (request ()
+             (slack-request
+              (slack-request-create
+               slack-conversations-list-url
+               team
+               :params (list (cons "types" (mapconcat 'identity types ","))
+                             (and slack-exclude-archived-channels (cons "exclude_archived" "true"))
+                             (and cursor (cons "cursor" cursor)))
+               :success 'on-success))))
+        (request)))))
+#+end_src
+
+#+RESULTS:
+: slack-conversations-list
 
 **** links
 :PROPERTIES:
@@ -12230,7 +14575,7 @@ a communication channel."
 :ID:       21946f30-986f-49fe-a51d-38c78f315543
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:  [2023-03-29 Wed 18:47]
+:UPDATED:  [2023-07-16 Sun 18:18]
 :END:
 
 #+begin_src emacs-lisp
@@ -12252,7 +14597,14 @@ a communication channel."
   (interactive)
   (async-shell-command
    (concat
-    "make -C $HOME/git/sys/rde/examples home"
+    "make -C $HOME/git/qz/dotfiles home"
+    "&& echo 'home--bal-ehg--di' | espeak --stdin ")))
+
+(defun qz/build-config-home ()
+  (interactive)
+  (async-shell-command
+   (concat
+    "make -C $HOME/git/qz/dotfiles hbuild"
     "&& echo 'home--bal-ehg--di' | espeak --stdin ")))
 
 (defun qz/reload-config-system ()
@@ -12266,9 +14618,9 @@ a communication channel."
   (interactive)
   (async-shell-command
    (concat
-    "   make -C $HOME/git/sys/rde rde/channels/update-locked"
-    "&& make -C $HOME/git/sys/rde rde/channels/pull-locked"
-    "&& make -C $HOME/git/sys/rde/examples all"
+    "   make -C $HOME/git/sys/rde/examples -B guix"
+    "&& make -C $HOME/git/sys/rde/examples home"
+    "&& sudo -E make -C $HOME/git/sys/rde/examples system"
     "&& echo 'do the do, like ooo; pull & home & system bal-ehg--di'"
     "   | espeak --stdin")))
 
@@ -12276,18 +14628,34 @@ a communication channel."
   (interactive)
   (load-file "~/.config/emacs/init.el"))
 
-(defun qz/reload-guix-pins ()
+(defun qz/guix-pull ()
   (interactive)
   (async-shell-command
-   (s-join " " '("cd $HOME/git/sys/rde"
-                 "&& make rde/channels/update-locked"
-                 "&& make rde/channels/pull-locked"))))
+   "make -C $HOME/git/sys/rde/examples -B guix"))
+#+end_src
+
+#+RESULTS:
+: qz/guix-pull
+
+***** describe-lab
+:PROPERTIES:
+:ID:       4f4a342c-4eab-47dd-87d9-cc6f9b91bdd7
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp
+(defun qz/guix-describe-lag ()
+  "
+
+"
+
+
+  (interactive))
 
 (defun qz/guix-upgrade ()
   (interactive)
   (async-shell-command
    (s-join " "
-           '("cd $HOME/git/sys/rde"
+           '("make -C $HOME/git/sys/rde/examples -B guix"
              "&& make rde/channels/update-locked"
              "&& make rde/channels/pull-locked"
              "&& guix package -u"
@@ -12460,7 +14828,10 @@ Creates mapped commands against each named device."
        (list ',enable ',disable))))))
 
 (defvar qz/bluetooth-devices
-  '(airpods . 44:F0:9E:51:52:7B))
+  '((airpods . "44:F0:9E:51:52:7B")
+    (boomzo . nil)
+    (aiaia . nil)
+    (ap2 . nil)))
 
 
 (defun qz/bt-airpods ()
@@ -12497,6 +14868,7 @@ Creates mapped commands against each named device."
 :ID:       85fc83bc-5603-493f-973a-e3aa994654cd
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
+:UPDATED:  [2023-07-16 Sun 16:19]
 :END:
 #+begin_src emacs-lisp
 
@@ -12508,10 +14880,18 @@ Creates mapped commands against each named device."
             (setq-local olivetti-body-width 200)
             (olivetti-mode)))
 
+
+(defun qz/big-mode ()
+  (interactive)
+  (call-interactively 'global-text-scale-adjust)
+  (setq olivetti-body-width 150)
+
+  )
+
 #+end_src
 
 #+RESULTS:
-| lambda | nil | (setq-local olivetti-body-width 200) | (olivetti-mode) |
+: qz/big-mode
 
 **** [[id:c6490b3a-4dc3-4f9a-bb21-81bb6abc6beb][emacs-perfect-margin]]
 :PROPERTIES:
@@ -12532,12 +14912,16 @@ Creates mapped commands against each named device."
 :ID:       f7063b4c-226d-49cc-8bd8-a43249dd6c65
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:  [2023-03-28 Tue 15:29]
+:UPDATED:  [2023-06-19 Mon 10:57]
 :END:
-#+begin_src emacs-lisp :noweb-ref null
+
+#+begin_src emacs-lisp
 (custom-set-variables
- '(cursor-type 'hbar))
+ '(cursor-type 'bar))
 #+end_src
+
+#+RESULTS:
+
 **** outline
 :PROPERTIES:
 :ID:       b5fec793-6a50-4f9d-b88f-715df300dc2c
@@ -14115,20 +16499,35 @@ eval "docker run --rm --volumes-from gcloud-config gcr.io/google.com/cloudsdktoo
 :PROPERTIES:
 :ID:       09a964e2-400a-4fd0-b379-d5acf0e1933f
 :CREATED:  [2023-04-03 Mon 13:05]
-:UPDATED:  [2023-05-03 Wed 15:49]
+:UPDATED:  [2023-07-18 Tue 12:12]
 :ROAM_EXCLUDE: t
 :END:
+
 #+begin_src shell :tangle ~/.local/bin/gcloud
 #!/usr/bin/env sh
 
 eval "docker run --rm --volumes-from gcloud-config gcr.io/google.com/cloudsdktool/google-cloud-cli gcloud" "$@"
 #+end_src
 
+**** gsutil
+:PROPERTIES:
+:ID:       ba39068b-5e0d-49a3-83e3-2ac05eab3ef7
+:CREATED:  [2023-07-18 Tue 12:11]
+:UPDATED:  [2023-07-18 Tue 12:11]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src shell :tangle ~/.local/bin/gsutil
+#!/usr/bin/env sh
+
+eval "docker run --rm --volumes-from gcloud-config gcr.io/google.com/cloudsdktool/google-cloud-cli gsutil" "$@"
+#+end_src
+
 **** bq
 :PROPERTIES:
 :ID:       13367261-6c04-4004-8a8b-45a5323035cc
 :CREATED:  [2023-04-03 Mon 13:05]
-:UPDATED:  [2023-04-26 Wed 17:11]
+:UPDATED:  [2023-06-06 Tue 13:09]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -14138,11 +16537,16 @@ eval "docker run --rm --volumes-from gcloud-config gcr.io/google.com/cloudsdktoo
 # fucking hell :: https://stackoverflow.com/questions/1668649/how-to-keep-quotes-in-bash-arguments#1669548
 # the saddest part is that it works 😭
 # OFFERED WITH NO WARRANTY
+
 qargs=$( printf ' %q' "$@" | sed -e 's/\\n/ /g' -e "s/\$'/'/g")
 
-echo "docker run --rm --volumes-from gcloud-config gcr.io/google.com/cloudsdktool/google-cloud-cli bq" "$qargs" > /tmp/bq-last.in
+#echo $qargs > $HOME/.cache/bq.out
 
-eval "docker run --rm --volumes-from gcloud-config gcr.io/google.com/cloudsdktool/google-cloud-cli bq" "$qargs" | tee /tmp/bq-last.out
+cmd='docker run --rm --volumes-from gcloud-config gcr.io/google.com/cloudsdktool/google-cloud-cli bq'
+
+echo "$cmd" "$qargs" > $HOME/.cache/bq.in
+
+eval "$cmd" "$qargs"| tee "${HOME}/.cache/bq.out"
 
 # TODO safe fmt
 # ((cat /tmp/bq-last.out | jq) ||  cat /tmp/bq-last.out) > /tmp/bq-last.out
@@ -14150,13 +16554,82 @@ eval "docker run --rm --volumes-from gcloud-config gcr.io/google.com/cloudsdktoo
 #+end_src
 
 
+
+
+***** testing: multiline
+:PROPERTIES:
+:ID:       b23cb3d2-eb80-469e-9d77-96859d449773
+:CREATED:  [2023-06-05 Mon 11:18]
+:UPDATED:  [2023-06-05 Mon 12:01]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src sql
+select 1,
+  --hello
+       2,
+       'ollh'
+
+#+end_src
+
+#+RESULTS:
+| f0_ | f1_ | f2_  |
+|-----+-----+------|
+|   1 |   2 | ollh |
+
+#+begin_src shell
+
+
+q="
+select 1,
+  --hello
+       2,
+       'olleh'
+"
+eval "docker run --rm --volumes-from gcloud-config gcr.io/google.com/cloudsdktool/google-cloud-cli bq query \
+       --format=json --nouse_legacy_sql \"$q\""
+
+#+end_src
+
+#+RESULTS:
+:results:
+[{"f0_":"1","f1_":"2","f2_":"olleh"}]
+:end:
+
+***** testing: backticks
+:PROPERTIES:
+:ID:       3a7a7c45-7b85-4396-a71b-feb873344299
+:CREATED:  [2023-06-05 Mon 12:18]
+:UPDATED:  [2023-06-16 Fri 08:33]
+:ROAM_EXCLUDE: t
+:END:
+
+
+#+begin_src sql
+select 5,
+  --hello
+       2,
+       `ollh`
+
+#+end_src
+
+#+RESULTS:
+| f0_ |
+|-----|
+|   5 |
+
 * Footnotes
 :PROPERTIES:
 :ID:       476ef762-1350-4afa-a8ad-2cd3e42eb730
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:  [2023-05-03 Wed 18:57]
+:UPDATED:  [2023-07-07 Fri 14:42]
 :END:
+
+[fn:6] :uniformity:
+[fn:5] though I had to kill-yank this paragraph back in-front of the
+[[id:0164a152-f655-4143-85eb-8b0c4e3b1516][#+RESULTS]].
+
 
 [fn:4] as of [2022-10-05 Wed], [[id:93ad19fa-a4fe-48c8-81ac-42bd5e138af9][swaywm]]
 [fn:3] using olivetti, nov-el, and rde@77bf57ba
