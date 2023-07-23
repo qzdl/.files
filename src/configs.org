@@ -12,6 +12,113 @@
 #+property: header-args:emacs-lisp :noweb-ref conf-emacs
 
 
+* header
+:PROPERTIES:
+:ID:       d5a65665-c696-493b-a426-89a0ce6c1fbd
+:CREATED:  [2023-07-12 Wed 19:42]
+:UPDATED:  [2023-07-12 Wed 21:17]
+:ROAM_EXCLUDE: t
+:END:
+
+all the host/user specific things.
+
+
+#+begin_src scheme :noweb-ref header-imports
+(rde features mail)
+(rde features base)
+(rde features gnupg)
+#+end_src
+
+#+begin_src scheme :tangle header.scm
+(define-module (header)
+  #:use-module <<header-imports>>
+  )
+
+;; NOWEB HEADER
+<<header>>
+;; NOWEB HEADER
+
+(define-public my-hosts '()
+  ;; ixy
+  ;; live
+  )
+
+
+(define-public my-user "samuel")
+(define-public my-timezone "Europe/Berlin")
+
+(define-public my-feature-mail-settings
+  (feature-mail-settings
+   #:mail-accounts
+   (list
+    (mail-account
+     (id   'personal)
+     (fqda "samuel@samuelculpepper.com")
+     (type 'bravehost))
+    (mail-account
+     (id   'work)
+     (fqda "sculpepper@newstore.com")
+     (type 'gmail-tls))
+    (mail-account
+     (id   'yt)
+     (fqda "imzaniiyt@gmail.com")
+     (type 'gmail-tls)))
+   #:mailing-lists
+   (list
+    ;; https://public-inbox.org/README.html
+    (mail-lst 'public-inbox-meta "meta@public-inbox.org"
+              '("https://public-inbox.org/meta"
+                "nntps://news.public-inbox.org/inbox.comp.mail.public-inbox.meta"
+                "imaps://news.public-inbox.org/inbox.comp.mail.public-inbox.meta.0"))
+
+     ;;;; source: https://mail.python.org/archives/list/speed@python.org/latest
+     ;;;;  -> mbox: https://mail.python.org/archives/list/speed@python.org/export/speed@python.org-2022-02.mbox.gz?start=1970-01-01&end=2022-02-21
+     ;;;; (mail-lst 'python-speed "speed@python.org"
+     ;;;;           '("https://mail.python.org/mailman/listinfo/speed"
+     ;;;;             "https://mail.python.org/archives/list/speed@python.org/"))
+    ;;
+     ;;;; (mail-lst 'rde-announce "~acbdw/rde-announce@lists.sr.ht"
+     ;;;;           '("https://lists.sr.ht/~abcdw/rde-announce/export"))
+     ;;;; (mail-lst 'rde-discuss "~acbdw/rde-discuss@lists.sr.ht"
+     ;;;;           '("https://lists.sr.ht/~abcdw/rde-discuss"))
+     ;;;; (mail-lst 'rde-devel "~acbdw/rde-devel@lists.sr.ht"
+     ;;;;           '("https://lists.sr.ht/~abcdw/rde-devel"))
+     ;;;;; emacs
+    ;;(mail-lst 'emacs-org-mode "emacs-orgmode@gnu.org"
+    ;;          '("https://yhetil.org/orgmode"))
+    ;;(mail-lst 'emacs-bugs "bug-gnu-emacs@gnu.org"
+    ;;          '("https://yhetil.org/emacs-bugs"))
+    ;;
+    ;;
+    ;;(mail-lst 'emacs-hyperbole "bug-hyperbole@gnu.org"
+    ;;          '("https://lists.gnu.org/archive/mbox/bug-hyperbole"
+    ;;            "https://lists.gnu.org/archive/html/bug-hyperbole"))
+    ;;(mail-lst 'emacs-hyperbole-users "hyperbole-users@gnu.org"
+    ;;          '("https://lists.gnu.org/archive/mbox/hyperbole-users"
+    ;;            "https://lists.gnu.org/archive/html/hyperbole-users"))
+    ;;
+    ;;(mail-lst 'guix-bugs "guix-bugs@gnu.org"
+    ;;          '("https://yhetil.org/guix-bugs/0"))
+    ;;(mail-lst 'guix-devel "guix-devel@gnu.org"
+    ;;          '("https://yhetil.org/guix-devel/0"))
+    ;;(mail-lst 'guix-patches "guix-patches@gnu.org"
+    ;;          '("https://yhetil.org/guix-patches/1"))
+    )))
+
+(define-public my-feature-user-info
+  (feature-user-info
+   #:emacs-advanced-user? #t
+   #:user-name my-user
+   #:full-name "Samuel Culpepper"
+   #:email "samuel@samuelculpepper.com"
+   #:user-groups '("lp" "wheel" "video")))
+
+(define-public my-feature-gnupg
+  (feature-gnupg
+   #:gpg-primary-key "EE20E25391AAB9BB"))
+#+end_src
+
+
 * etc
 :PROPERTIES:
 :ID:       88c5af73-609a-4019-ba2f-543528a7b6e2
@@ -71,7 +178,7 @@ cat /tmp/o
 :results:
 GUILE_LOAD_PATH=../../../ RDE_TARGET=%-home \
 guix home reconfigure ./configs.scm
-"pre-%abcdw-features"
+"pre-%user-features"
 "pre-%main-features"
 rde/examples/abcdw/configs.scm:1032:1: missing closing parenthesis
 make: *** [Makefile:14: %-home-reconfigure] Error 1
@@ -478,13 +585,14 @@ CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
 :PROPERTIES:
 :ID:       6bb15998-32c1-4674-890a-85180a89d66a
 :CREATED:  [2022-07-29 Fri 18:22]
-:UPDATED:  [2023-04-25 Tue 20:07]
+:UPDATED:  [2023-07-12 Wed 21:16]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme
-(define-module (qzdl configs)
-  #:use-module (qzdl emacs)
+(define-module (configs)
+  #:use-module (header)
+  #:use-module (emacs)
 
   #:use-module (gnu bootloader)
   #:use-module (gnu bootloader grub)
@@ -593,7 +701,8 @@ CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
 :UPDATED:  [2022-07-29 Fri 17:48]
 :ROAM_EXCLUDE: t
 :END:
-#+begin_src scheme
+
+#+begin_src scheme :noweb-ref header
 (define* (mail-lst id fqda urls)
   "Make a simple mailing-list."
   (mailing-list
@@ -933,90 +1042,26 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 :END:
 
 #+begin_src scheme
-(pretty-print "pre-%abcdw-features")
+(pretty-print "pre-%user-features")
 #+end_src
 
 **** abcdw features
 :PROPERTIES:
 :ID:       1532c6ba-0d0c-499e-bddd-ae1caa1dc778
 :CREATED:  [2022-07-29 Fri 17:48]
-:UPDATED:  [2022-10-28 Fri 16:42]
+:UPDATED:  [2023-07-05 Wed 12:32]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme
-(define %abcdw-features
+(define %user-features
   (remove
    unspecified?
    (list
-    (feature-user-info
-     #:emacs-advanced-user? #t
-     #:user-name "samuel"
-     #:full-name "Samuel Culpepper"
-     #:email "samuel@samuelculpepper.com"
-     #:user-groups '("lp" "wheel")) ;; TODO confluence of features -> groups
-
-    (feature-gnupg
-     #:gpg-primary-key "EE20E25391AAB9BB")
-
+    my-feature-user-info
+    my-feature-gnupg
     (feature-password-store)
-
-    (feature-mail-settings
-     #:mail-accounts
-     (list
-      (mail-account
-       (id   'personal)
-       (fqda "samuel@samuelculpepper.com")
-       (type 'bravehost))
-      (mail-account
-       (id   'work)
-       (fqda "sculpepper@newstore.com")
-       (type 'gmail-tls))
-      (mail-account
-       (id   'yt)
-       (fqda "imzaniiyt@gmail.com")
-       (type 'gmail-tls)))
-     #:mailing-lists
-     (list
-      ;; https://public-inbox.org/README.html
-      (mail-lst 'public-inbox-meta "meta@public-inbox.org"
-                '("https://public-inbox.org/meta"
-                  "nntps://news.public-inbox.org/inbox.comp.mail.public-inbox.meta"
-                  "imaps://news.public-inbox.org/inbox.comp.mail.public-inbox.meta.0"))
-
-     ;;;; source: https://mail.python.org/archives/list/speed@python.org/latest
-     ;;;;  -> mbox: https://mail.python.org/archives/list/speed@python.org/export/speed@python.org-2022-02.mbox.gz?start=1970-01-01&end=2022-02-21
-     ;;;; (mail-lst 'python-speed "speed@python.org"
-     ;;;;           '("https://mail.python.org/mailman/listinfo/speed"
-     ;;;;             "https://mail.python.org/archives/list/speed@python.org/"))
-      ;;
-     ;;;; (mail-lst 'rde-announce "~acbdw/rde-announce@lists.sr.ht"
-     ;;;;           '("https://lists.sr.ht/~abcdw/rde-announce/export"))
-     ;;;; (mail-lst 'rde-discuss "~acbdw/rde-discuss@lists.sr.ht"
-     ;;;;           '("https://lists.sr.ht/~abcdw/rde-discuss"))
-     ;;;; (mail-lst 'rde-devel "~acbdw/rde-devel@lists.sr.ht"
-     ;;;;           '("https://lists.sr.ht/~abcdw/rde-devel"))
-     ;;;;; emacs
-      ;;(mail-lst 'emacs-org-mode "emacs-orgmode@gnu.org"
-      ;;          '("https://yhetil.org/orgmode"))
-      ;;(mail-lst 'emacs-bugs "bug-gnu-emacs@gnu.org"
-      ;;          '("https://yhetil.org/emacs-bugs"))
-      ;;
-      ;;
-      ;;(mail-lst 'emacs-hyperbole "bug-hyperbole@gnu.org"
-      ;;          '("https://lists.gnu.org/archive/mbox/bug-hyperbole"
-      ;;            "https://lists.gnu.org/archive/html/bug-hyperbole"))
-      ;;(mail-lst 'emacs-hyperbole-users "hyperbole-users@gnu.org"
-      ;;          '("https://lists.gnu.org/archive/mbox/hyperbole-users"
-      ;;            "https://lists.gnu.org/archive/html/hyperbole-users"))
-      ;;
-      ;;(mail-lst 'guix-bugs "guix-bugs@gnu.org"
-      ;;          '("https://yhetil.org/guix-bugs/0"))
-      ;;(mail-lst 'guix-devel "guix-devel@gnu.org"
-      ;;          '("https://yhetil.org/guix-devel/0"))
-      ;;(mail-lst 'guix-patches "guix-patches@gnu.org"
-      ;;          '("https://yhetil.org/guix-patches/1"))
-      ))
+    my-feature-mail-settings
 
     (feature-keyboard
      ;; To get all available options, layouts and variants run:
@@ -1041,7 +1086,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 :ROAM_EXCLUDE: t
 :END:
 #+begin_src scheme
-;;(map pretty-print %abcdw-features)
+;;(map pretty-print %user-features)
 #+end_src
 
 ***** TODO future features
