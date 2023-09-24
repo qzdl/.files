@@ -186,6 +186,10 @@ mixxx:
 # Store items doesn't have useful mtime, so we rely on guix.lock to prevent
 # unnecessary rebuilds
 
+_dirs:
+	mkdir -p rde
+	mkdir -p rde ~/.config/cron
+
 
 guix: target/profiles/guix-time-marker
 guix-local: target/profiles/guix-local-time-marker
@@ -211,7 +215,7 @@ target/profiles/guix: target/profiles rde/channels-lock.scm
 
 target/profiles/guix-local: target/profiles rde/channels-lock-local.scm
 	@echo ... target/profiles/guix-local
-	guix pull -C rde/channels-lock-local.scm -p ${GUIX_PROFILE} \
+	guix pull -C rde/channels-lock-local.scm -p ${GUIX_PROFILE}-home \
 		--allow-downgrades --disable-authentication \
 		${PULL_EXTRA_OPTIONS}
 
