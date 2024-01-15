@@ -7,8 +7,7 @@ GUIX=./pre-inst-env ${GUIX_PROFILE}/bin/guix
 GRAPH := neato
 EMACS := emacs
 EBATCH := $(EMACS) -Q --batch \
-	  --eval '(setq python-indent-guess-indent-offset nil)'
-
+	--eval '(setq python-indent-guess-indent-offset nil)'
 
 RDE_LOCAL ?= qzdl
 SRC_DIR=./src
@@ -29,8 +28,8 @@ TANGLES=$(shell rg -o ':tangle .+' src/configs.org | cut -d' ' -f2 | sed 's/:tan
 
 ###
 all:    check ixy/home/reconfigure ixy/system/reconfigure
-home:   check ixy/home/reconfigure
-system: check ixy/system/reconfigure
+home:   ixy/home/reconfigure
+system: ixy/system/reconfigure
 
 hbuild: check ixy/home/build
 sbuild: check ixy/system/build
@@ -65,6 +64,7 @@ inputs:
 tangle:
 	$(EBATCH) \
 	  -f package-initialize ${CONFIGO} \
+	  --eval '(setq buffer-read-only t)' \
 	  -f org-babel-tangle
 
 # NOTE the parser isn't super robust
@@ -99,7 +99,7 @@ search:
 		search "cron" ${CONFIGS}
 
 ixy/home/build: guix
-	RDE_TARGET=ixy-home ${GUIX} home \
+	RDE_TARtangleGET=ixy-home ${GUIX} home \
 		build ${CONFIGS}
 
 ixy/home/container: guix
@@ -113,10 +113,12 @@ ixy/home/reconfigure:
 
 ixy/system/build:
 	RDE_TARGET=ixy-system ${GUIX} system \
-	build ${CONFIGS}
+		--allow-downgrades \
+		build ${CONFIGS}
 
 ixy/system/reconfigure:
 	RDE_TARGET=ixy-system ${GUIX} system \
+		--allow-downgrades \
 		reconfigure ${CONFIGS}
 
 cow-store:
@@ -188,7 +190,7 @@ mixxx:
 
 _dirs:
 	mkdir -p rde
-	mkdir -p rde ~/.config/cron
+	mkdir -p rde ~/.config/cron ~/.config/guix/science
 
 
 guix: target/profiles/guix-time-marker

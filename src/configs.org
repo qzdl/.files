@@ -1,7 +1,7 @@
 :PROPERTIES:
 :CREATED:  [2022-08-30 Tue 11:12]
 :ID:       12f7748c-7095-4969-8261-94ad0169a24c
-:UPDATED:  [2023-09-24 Sun 16:10]
+:UPDATED:  [2024-01-15 Mon 19:35]
 :END:
 #+property: header-args            :tangle-mode (identity #o444) :noweb yes
 #+property: header-args:sh         :tangle-mode (identity #o755)
@@ -13,12 +13,11 @@
 
 
 
-
 * header
 :PROPERTIES:
 :ID:       d5a65665-c696-493b-a426-89a0ce6c1fbd
 :CREATED:  [2023-07-12 Wed 19:42]
-:UPDATED:  [2023-07-12 Wed 21:17]
+:UPDATED:  [2023-09-26 Tue 16:15]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -113,7 +112,12 @@ all the host/user specific things.
    #:user-name my-user
    #:full-name "Samuel Culpepper"
    #:email "samuel@samuelculpepper.com"
-   #:user-groups '("lp" "wheel" "video")))
+   #:user-groups '(;; basic groups
+                   "lp" "wheel" "video"
+                   ;;; zsa
+                   ;;"plugdev"
+                   )
+   ))
 
 (define-public my-feature-gnupg
   (feature-gnupg
@@ -125,7 +129,7 @@ all the host/user specific things.
 :PROPERTIES:
 :ID:       7c9c9408-15b7-4d3e-be98-9b2bda19e7d5
 :CREATED:  [2022-09-28 Wed 16:24]
-:UPDATED:  [2023-07-23 Sun 11:43]
+:UPDATED:  [2023-09-23 Sat 21:22]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -133,35 +137,15 @@ all the host/user specific things.
 :PROPERTIES:
 :ID:       c5578b40-1344-4d48-9b24-5c8f13fa3f77
 :CREATED:  [2022-07-29 Fri 18:22]
-:UPDATED:  [2022-09-28 Wed 16:23]
+:UPDATED:  [2023-09-24 Sun 00:27]
 :ROAM_EXCLUDE: t
 :END:
 
-*** summary
-:PROPERTIES:
-:ID:       e6d22953-49ae-49f2-9e31-5c6a976a95bc
-:CREATED:  [2023-07-23 Sun 11:33]
-:UPDATED:  [2023-07-23 Sun 11:33]
-:ROAM_EXCLUDE: t
-:END:
-
-features
-home / os
-hosts
-
-*** src
-:PROPERTIES:
-:ID:       66e59079-22ae-40d6-baf3-2f6ee70f5f0e
-:CREATED:  [2023-07-23 Sun 11:43]
-:UPDATED:  [2023-07-23 Sun 11:43]
-:ROAM_EXCLUDE: t
-:END:
-
-**** header
+*** header
 :PROPERTIES:
 :ID:       53756386-28a4-4f37-b819-4ce10572406c
 :CREATED:  [2023-07-23 Sun 11:33]
-:UPDATED:  [2023-07-23 Sun 11:33]
+:UPDATED:  [2023-10-31 Tue 13:07]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -189,7 +173,7 @@ hosts
 :PROPERTIES:
 :ID:       6bb15998-32c1-4674-890a-85180a89d66a
 :CREATED:  [2022-07-29 Fri 18:22]
-:UPDATED:  [2023-07-12 Wed 21:16]
+:UPDATED:  [2023-09-26 Tue 16:12]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -207,6 +191,7 @@ hosts
 
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages fonts)
+  #:use-module (gnu packages video)
   #:use-module (gnu packages wm)
   #:use-module (gnu packages)
 
@@ -214,6 +199,7 @@ hosts
   #:use-module (gnu services desktop)
   #:use-module (gnu services ssh)
   #:use-module (gnu services xorg)
+  #:use-module (gnu services nfs)
 
   #:use-module (gnu system file-systems)
   #:use-module (gnu system keyboard)
@@ -227,6 +213,7 @@ hosts
   #:use-module (ice-9 match)
   #:use-module (ice-9 pretty-print)
 
+  #:use-module (rde features)
   #:use-module (rde features base)
   #:use-module (rde features bittorrent)
   #:use-module (rde features bluetooth)
@@ -244,12 +231,13 @@ hosts
   #:use-module (rde features messaging)
   #:use-module (rde features networking)
   #:use-module (rde features password-utils)
+  #:use-module (rde features python)
   #:use-module (rde features shells)
   #:use-module (rde features shellutils)
   #:use-module (rde features ssh)
   #:use-module (rde features system)
   #:use-module (rde features terminals)
-  #:use-module (rde features tmux)
+  #:use-module (rde features uml)
   #:use-module (rde features version-control)
   #:use-module (rde features video)
   #:use-module (rde features virtualization)
@@ -257,7 +245,6 @@ hosts
   #:use-module (rde features wm)
   #:use-module (rde features xdg)
   #:use-module (rde features xdisorg)
-  #:use-module (rde features)
   ;;#:use-module (rde features irc)
 
   #:use-module (rde gexp)
@@ -299,7 +286,7 @@ hosts
 :ROAM_EXCLUDE: t
 :END:
 
-******* mailing list
+****** mailing list
 :PROPERTIES:
 :ID:       74689f33-9e2f-4cf1-bbdf-317a29e66572
 :CREATED:  [2022-07-29 Fri 17:48]
@@ -318,7 +305,7 @@ hosts
             (urls urls)))))
 #+end_src
 
-******* mail serializer (bravehost | gmail-tls)
+****** mail serializer (bravehost | gmail-tls)
 :PROPERTIES:
 :ID:       fb637534-e1ae-493b-bf5e-0cdc5ec1cc2f
 :CREATED:  [2022-08-29 Mon 17:06]
@@ -364,7 +351,7 @@ hosts
 :END:
 
 
-******** keyboard
+******* keyboard
 :PROPERTIES:
 :ID:       2ff244bf-5916-4a3b-afa6-6b2e34cb7e21
 :CREATED:  [2022-07-29 Fri 17:48]
@@ -372,7 +359,7 @@ hosts
 :ROAM_EXCLUDE: t
 :END:
 
-********** thinkpad
+******** thinkpad
 :PROPERTIES:
 :ID:       f0d98fbe-0033-47e3-81c3-c592f70c0b8a
 :CREATED:  [2022-07-29 Fri 17:48]
@@ -388,7 +375,7 @@ hosts
    #:options '("ctrl:nocaps")))
 #+end_src
 
-**** state
+*** state
 :PROPERTIES:
 :ID:       bb13a7c7-56b3-42cb-9716-6b56cef8968c
 :CREATED:  [2023-07-23 Sun 11:33]
@@ -396,14 +383,14 @@ hosts
 :ROAM_EXCLUDE: t
 :END:
 
-***** shell
+**** shell
 :PROPERTIES:
 :ID:       5dadad59-f7c7-425c-8108-f486062baeb0
 :CREATED:  [2023-07-23 Sun 11:33]
 :UPDATED:  [2023-07-23 Sun 11:33]
 :ROAM_EXCLUDE: t
 :END:
-****** zshrc
+***** zshrc
 :PROPERTIES:
 :ID:       a95216e5-aecd-4a61-b0c3-3bf266189a6d
 :CREATED:  [2022-07-29 Fri 17:48]
@@ -437,7 +424,7 @@ hosts
    ))
 #+end_src
 
-***** org dirs
+**** org dirs
 :PROPERTIES:
 :ID:       844e60fb-8235-4249-8aa8-27c8348c5dcb
 :CREATED:  [2022-07-29 Fri 17:48]
@@ -450,7 +437,7 @@ hosts
   (string-append my-org-directory "/roam"))
 #+end_src
 
-***** flag: gaming?
+**** flag: gaming?
 :PROPERTIES:
 :ID:       a5883df9-7c45-442b-82a4-fe57ac98f7f8
 :CREATED:  [2022-07-29 Fri 17:48]
@@ -461,14 +448,14 @@ hosts
 (define gaming? #f)
 #+end_src
 
-**** packages
+*** packages
 :PROPERTIES:
 :ID:       5508a976-f9ad-457c-b4bb-46dbf3b73fb0
 :CREATED:  [2022-07-29 Fri 17:36]
-:UPDATED:  [2023-07-23 Sun 11:33]
+:UPDATED:  [2023-09-24 Sun 16:03]
 :END:
 
-***** pkgs, pkgs-vanilla                                                       :func:
+**** pkgs, pkgs-vanilla                                                        :func:
 :PROPERTIES:
 :ID:       5fb5abba-de52-453a-8cfb-875f6d6897ba
 :CREATED:  [2022-08-08 Mon 11:41]
@@ -498,7 +485,7 @@ hosts
   (map get-inferior-pkg lst))
 #+end_src
 
-***** my packages
+**** my packages
 :PROPERTIES:
 :ID:       98d207f1-31fa-40cb-9deb-c39e0026ef22
 :CREATED:  [2022-08-08 Mon 11:38]
@@ -506,7 +493,7 @@ hosts
 :ROAM_EXCLUDE: t
 :END:
 
-****** imports
+***** imports
 :PROPERTIES:
 :ID:       7cdd0670-d06b-4310-9239-e39c1e938624
 :CREATED:  [2022-08-08 Mon 11:39]
@@ -531,6 +518,13 @@ hosts
 
 #+end_src
 
+***** emacs
+:PROPERTIES:
+:CREATED:  [2023-09-24 Sun 15:48]
+:UPDATED:  [2023-09-24 Sun 15:48]
+:ID:       8e9b8179-cf15-4672-a15b-c6f020e0e7e8
+:ROAM_EXCLUDE: t
+:END:
 ****** emacs-sql-indent
 :PROPERTIES:
 :ID:       1bca3f7a-3f6b-4ffa-bf10-0856b0eb8a01
@@ -806,115 +800,6 @@ Kubernetes clusters within Emacs.")
    (license license:gpl3+)))
 #+end_src
 
-****** python-pylsp-mypy
-:PROPERTIES:
-:ID:       6c17b978-44b6-412a-bf36-ea7854089c96
-:CREATED:  [2022-10-13 Thu 13:17]
-:UPDATED:  [2022-10-13 Thu 13:23]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src scheme
-(use-modules (guix build-system python)  ; pypi-uri
-             (gnu packages python-xyz)   ; python-lsp-server
-             (gnu packages python-check) ; python-mypy
-             (gnu packages python-build) ; python-toml
-             (gnu packages check)        ; python coverage
-             )
-
-(define-public python-pylsp-mypy
-  (package
-   (name "python-pylsp-mypy")
-   (version "0.6.3")
-   (source (origin
-            (method url-fetch)
-            (uri (pypi-uri "pylsp-mypy" version))
-            (sha256
-             (base32
-              "1gf865dj9na7jyp1148k27jafwb6bg0rdg9kyv4x4ag8qdlgv9h6"))))
-   (build-system python-build-system)
-   (propagated-inputs (list python-lsp-server
-                            python-mypy
-                            python-toml))
-   (native-inputs (list python-coverage
-                        python-pytest
-                        python-pytest-cov
-                        python-tox))
-   (home-page "https://github.com/python-lsp/pylsp-mypy")
-   (synopsis "Mypy linter for the Python LSP Server")
-   (description "Mypy linter for the Python LSP Server")
-   (license license:gpl3+)))
-#+end_src
-
-****** python-keyring-pass
-:PROPERTIES:
-:ID:       6637fa51-4274-4ac9-b19f-8632f14ae5be
-:CREATED:  [2023-03-12 Sun 12:39]
-:UPDATED:  [2023-03-12 Sun 13:25]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src scheme
-(use-modules
- (guix packages)
- (guix download)
- (guix gexp)
- (guix git-download)
- (guix build-system cargo)
- (guix build-system python)
- (gnu packages)
- (gnu packages python-crypto))
-
-;; TODO upstream to python-crypto
-;; TODO
-;; * keyringrc.cfg
-;; [backend]
-;; default-keyring=keyring_pass.PasswordStoreBackend
-;; [pass]
-;; key-prefix=/path/to/pass/dir
-;; OR, given pythonkeyring >=23.0.0, envar KEYRING_PROPERTY_PASS_KEY_PREFIX
-
-
-(define-public python-keyring-pass
-  (package
-    (name "python-keyring-pass")
-    (version "0.7.0")
-    (source
-      (origin
-        (method url-fetch)
-        (uri (pypi-uri "keyring_pass" version))
-        (sha256
-          (base32 "0rqrsm0gxxvv6vkqyg3snf29m8q44ljsz63f3j2rkizry9csd1fl"))))
-    (build-system python-build-system)
-    (propagated-inputs (list python-keyring))
-    (home-page "https://github.com/nazarewk/keyring_pass")
-    (synopsis
-      "https://www.passwordstore.org/ backend for https://pypi.org/project/keyring/")
-    (description
-      "https://www.passwordstore.org/ backend for https://pypi.org/project/keyring/")
-    (license license:expat)))
-
-;; TODO upgrade to 0.8.0 (needs jaraco-classes==4.0.0)
-;; (define-public python-keyring-pass
-;;   (package
-;;   (name "python-keyring-pass")
-;;   (version "0.8.0")
-;;   (source (origin
-;;             (method url-fetch)
-;;             (uri (pypi-uri "keyring_pass" version))
-;;             (sha256
-;;              (base32
-;;               "0dsjg5wv7n4gshpygnddg0w27fx7whdvwyms9h90xg5hqyxcpsdw"))))
-;;   (build-system python-build-system)
-;;   (propagated-inputs (list python-jaraco-classes python-keyring))
-;;   (home-page "https://github.com/nazarewk/keyring_pass")
-;;   (synopsis
-;;    "https://www.passwordstore.org/ backend for https://pypi.org/project/keyring/")
-;;   (description
-;;    "https://www.passwordstore.org/ backend for https://pypi.org/project/keyring/")
-;;   (license license:expat)))
-#+end_src
-
 ****** emacs-ox-slack
 :PROPERTIES:
 :ID:       a24f5f97-483b-440b-adb7-a1cd7732a212
@@ -1105,7 +990,7 @@ bookmarks-alist) to save and restore places with mode-specific functionality.")
 
 #+RESULTS:
 
-******** dogears-remember
+******* dogears-remember
 :PROPERTIES:
 :ID:       74f332b7-de08-4ca7-b1bb-3e8d017d579c
 :CREATED:  [2023-07-15 Sat 17:30]
@@ -1166,7 +1051,7 @@ bookmarks-alist) to save and restore places with mode-specific functionality.")
 #+RESULTS:
 : dogears-remember
 
-******** dogears-list-mode
+******* dogears-list-mode
 :PROPERTIES:
 :ID:       343eccdc-82d5-460b-b1b4-f7d083aee729
 :UPDATED:  [2023-07-15 Sat 17:38]
@@ -1326,7 +1211,7 @@ found in the documentation online.")
 
 #+RESULTS:
 
-******** import from melpa
+******* import from melpa
 :PROPERTIES:
 :ID:       d6821367-61d5-4369-bb81-66aab6b424f8
 :CREATED:  [2023-04-24 Mon 15:42]
@@ -1345,7 +1230,7 @@ guix import elpa -a melpa ytdl
 :ROAM_EXCLUDE: t
 :END:
 
-******** src
+******* src
 :PROPERTIES:
 :ID:       fe050d49-8d00-476c-8af7-35ab189596a5
 :CREATED:  [2023-06-30 Fri 23:04]
@@ -1385,7 +1270,7 @@ guix import elpa -a melpa ytdl
     (license license:gpl3+)))
 #+end_src
 
-******** import from melpa
+******* import from melpa
 :PROPERTIES:
 :ID:       e8fd13f6-029f-4867-986f-07524f194a65
 :CREATED:  [2023-06-30 Fri 23:04]
@@ -1429,6 +1314,189 @@ guix import elpa -a melpa selectric-mode
     "This minor mode plays the sound of an IBM Selectric typewriter as you type.")
    (license #f)))
 :end:
+
+****** emacs-atomic-chrome
+:PROPERTIES:
+:CREATED:  [2023-09-21 Thu 11:40]
+:UPDATED:  [2023-09-21 Thu 11:40]
+:ID:       861f3467-6792-44cb-bd1b-228b7e5f33bf
+:ROAM_EXCLUDE: t
+:END:
+
+******* import
+:PROPERTIES:
+:CREATED:  [2023-09-21 Thu 11:40]
+:UPDATED:  [2023-09-21 Thu 11:41]
+:ID:       b6b8b785-6cf0-42ce-ab73-0a0071777919
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src shell
+date -uIs;
+guix import elpa -a melpa atomic-chrome
+#+end_src
+
+#+RESULTS:
+:results:
+2023-09-21T09:41:06+00:00
+:end:
+
+******* src
+:PROPERTIES:
+:CREATED:  [2023-09-21 Thu 11:40]
+:UPDATED:  [2023-09-21 Thu 11:43]
+:ID:       3e06e209-1d75-4925-a130-ea418db3ab00
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme
+(define-public emacs-atomic-chrome
+  (package
+   (name "emacs-atomic-chrome")
+   (version "20230304.112")
+   (source (origin
+            (method git-fetch)
+            (uri (git-reference
+                  (url "https://github.com/alpha22jp/atomic-chrome.git")
+                  (commit "f1b077be7e414f457191d72dcf5eedb4371f9309")))
+            (sha256 (base32
+                     "01024ikcy23hkxjpy6qlsa8sj3cyf4p3igx5i31qkq21dm7b8xqv"))))
+   (build-system emacs-build-system)
+   (propagated-inputs (list emacs-let-alist emacs-websocket))
+   (home-page "https://github.com/alpha22jp/atomic-chrome")
+   (synopsis "Edit Chrome text area with Emacs using Atomic Chrome")
+   (description
+    "This is the Emacs version of Atomic Chrome which is an extension for Google
+Chrome browser that allows you to edit text areas of the browser in Emacs.  It's
+similar to Edit with Emacs, but has some advantages as below with the help of
+websocket. * Live update The input on Emacs is reflected to the browser
+instantly and continuously. * Bidirectional communication You can edit both on
+the browser and Emacs, they are synced to the same.  Firefox is supported via
+the @code{GhostText} browser addon.")
+   (license license:gpl3+)))
+#+end_src
+***** python
+:PROPERTIES:
+:CREATED:  [2023-09-24 Sun 15:48]
+:UPDATED:  [2023-09-24 Sun 15:48]
+:ID:       4a437daf-f5c1-44ec-8d30-6033f1992ac4
+:ROAM_EXCLUDE: t
+:END:
+****** python-pylsp-mypy
+:PROPERTIES:
+:ID:       6c17b978-44b6-412a-bf36-ea7854089c96
+:CREATED:  [2022-10-13 Thu 13:17]
+:UPDATED:  [2022-10-13 Thu 13:23]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme
+(use-modules (guix build-system python)  ; pypi-uri
+             (gnu packages python-xyz)   ; python-lsp-server
+             (gnu packages python-check) ; python-mypy
+             (gnu packages python-build) ; python-toml
+             (gnu packages check)        ; python coverage
+             )
+
+(define-public python-pylsp-mypy
+  (package
+   (name "python-pylsp-mypy")
+   (version "0.6.3")
+   (source (origin
+            (method url-fetch)
+            (uri (pypi-uri "pylsp-mypy" version))
+            (sha256
+             (base32
+              "1gf865dj9na7jyp1148k27jafwb6bg0rdg9kyv4x4ag8qdlgv9h6"))))
+   (build-system python-build-system)
+   (propagated-inputs (list python-lsp-server
+                            python-mypy
+                            python-toml))
+   (native-inputs (list python-coverage
+                        python-pytest
+                        python-pytest-cov
+                        python-tox))
+   (home-page "https://github.com/python-lsp/pylsp-mypy")
+   (synopsis "Mypy linter for the Python LSP Server")
+   (description "Mypy linter for the Python LSP Server")
+   (license license:gpl3+)))
+#+end_src
+
+****** python-keyring-pass
+:PROPERTIES:
+:ID:       6637fa51-4274-4ac9-b19f-8632f14ae5be
+:CREATED:  [2023-03-12 Sun 12:39]
+:UPDATED:  [2023-03-12 Sun 13:25]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme
+(use-modules
+ (guix packages)
+ (guix download)
+ (guix gexp)
+ (guix git-download)
+ (guix build-system cargo)
+ (guix build-system python)
+ (gnu packages)
+ (gnu packages python-crypto))
+
+;; TODO upstream to python-crypto
+;; TODO
+;; * keyringrc.cfg
+;; [backend]
+;; default-keyring=keyring_pass.PasswordStoreBackend
+;; [pass]
+;; key-prefix=/path/to/pass/dir
+;; OR, given pythonkeyring >=23.0.0, envar KEYRING_PROPERTY_PASS_KEY_PREFIX
+
+
+(define-public python-keyring-pass
+  (package
+    (name "python-keyring-pass")
+    (version "0.7.0")
+    (source
+      (origin
+        (method url-fetch)
+        (uri (pypi-uri "keyring_pass" version))
+        (sha256
+          (base32 "0rqrsm0gxxvv6vkqyg3snf29m8q44ljsz63f3j2rkizry9csd1fl"))))
+    (build-system python-build-system)
+    (propagated-inputs (list python-keyring))
+    (home-page "https://github.com/nazarewk/keyring_pass")
+    (synopsis
+      "https://www.passwordstore.org/ backend for https://pypi.org/project/keyring/")
+    (description
+      "https://www.passwordstore.org/ backend for https://pypi.org/project/keyring/")
+    (license license:expat)))
+
+;; TODO upgrade to 0.8.0 (needs jaraco-classes==4.0.0)
+;; (define-public python-keyring-pass
+;;   (package
+;;   (name "python-keyring-pass")
+;;   (version "0.8.0")
+;;   (source (origin
+;;             (method url-fetch)
+;;             (uri (pypi-uri "keyring_pass" version))
+;;             (sha256
+;;              (base32
+;;               "0dsjg5wv7n4gshpygnddg0w27fx7whdvwyms9h90xg5hqyxcpsdw"))))
+;;   (build-system python-build-system)
+;;   (propagated-inputs (list python-jaraco-classes python-keyring))
+;;   (home-page "https://github.com/nazarewk/keyring_pass")
+;;   (synopsis
+;;    "https://www.passwordstore.org/ backend for https://pypi.org/project/keyring/")
+;;   (description
+;;    "https://www.passwordstore.org/ backend for https://pypi.org/project/keyring/")
+;;   (license license:expat)))
+#+end_src
+***** misc
+:PROPERTIES:
+:CREATED:  [2023-09-24 Sun 15:48]
+:UPDATED:  [2023-09-24 Sun 15:48]
+:ID:       5f3e1360-0ee3-495a-8f2b-18e3ca5d7045
+:ROAM_EXCLUDE: t
+:END:
 
 ****** perl-graph-easy
 :PROPERTIES:
@@ -1591,7 +1659,9 @@ done
 
 
 :end:
-**** features
+
+
+*** features
 :PROPERTIES:
 :ID:       be090096-e0cd-43f2-a24a-cff37457f33a
 :CREATED:  [2022-07-29 Fri 18:24]
@@ -1599,7 +1669,7 @@ done
 :ROAM_EXCLUDE: t
 :END:
 
-***** my features
+**** my features
 :PROPERTIES:
 :ID:       b290c986-542c-46ef-9729-defbd20da2ea
 :CREATED:  [2022-08-29 Mon 17:10]
@@ -1607,7 +1677,7 @@ done
 :ROAM_EXCLUDE: t
 :END:
 
-******* bluetooth
+***** bluetooth
 :PROPERTIES:
 :ID:       a65bf448-712a-4f32-840c-b7524c7a7120
 :CREATED:  [2022-08-29 Mon 17:10]
@@ -1653,7 +1723,7 @@ done
    (system-services-getter bluetooth-home-services)))
 #+end_src
 
-******* TODO redshift
+***** TODO redshift
 :PROPERTIES:
 :ID:       2fb33148-9ba8-4a2c-9d81-df60039c8267
 :CREATED:  [2023-04-26 Wed 20:39]
@@ -1661,7 +1731,7 @@ done
 :ROAM_EXCLUDE: t
 :END:
 
-********* feature
+****** feature
 :PROPERTIES:
 :ID:       a8f7a40d-54a1-4b3f-ba76-396bf25c6d82
 :CREATED:  [2023-04-26 Wed 21:22]
@@ -1699,7 +1769,7 @@ done
 
 #+end_src
 
-********* TODO home-redshift-service
+****** TODO home-redshift-service
 :PROPERTIES:
 :ID:       92ae8438-7458-4873-b290-470630f04d67
 :CREATED:  [2023-04-26 Wed 20:39]
@@ -1784,7 +1854,7 @@ done
 Install and configure redshift, an adaptive light-temperature controller.")))
 #+end_src
 
-****** COMMENT debug; pre features
+***** COMMENT debug; pre features
 :PROPERTIES:
 :ID:       36dc9e54-a5c8-43c8-a464-6349186edd50
 :CREATED:  [2022-07-29 Fri 17:48]
@@ -1796,7 +1866,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 (pretty-print "pre-%user-features")
 #+end_src
 
-***** abcdw features
+**** abcdw features
 :PROPERTIES:
 :ID:       1532c6ba-0d0c-499e-bddd-ae1caa1dc778
 :CREATED:  [2022-07-29 Fri 17:48]
@@ -1820,7 +1890,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
      #:keyboard-layout %thinkpad-layout))))
 #+end_src
 
-******* debug: print features
+***** COMMENT debug: print features
 :PROPERTIES:
 :ID:       4d60cafe-ff70-4540-a5ed-2e9b1a7b4b3e
 :CREATED:  [2022-07-29 Fri 17:48]
@@ -1831,7 +1901,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 ;;(map pretty-print %user-features)
 #+end_src
 
-******* TODO future features
+***** TODO future features
 :PROPERTIES:
 :ID:       ad67e350-c601-49f4-ba21-ca6486ed96fb
 :CREATED:  [2022-07-29 Fri 17:48]
@@ -1849,7 +1919,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 
 #+RESULTS:
 
-****** COMMENT debug: pre main-features
+***** COMMENT debug: pre main-features
 :PROPERTIES:
 :ID:       152578fa-8848-40dc-a0e3-a1a51825a5f7
 :CREATED:  [2022-07-29 Fri 18:24]
@@ -1860,7 +1930,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 (pretty-print "pre-%main-features")
 #+end_src
 
-***** %main-features
+**** %main-features
 :PROPERTIES:
 :ID:       3455e06a-0a2b-4ca9-aca6-2ee2fa05f16f
 :CREATED:  [2022-07-29 Fri 17:53]
@@ -1884,7 +1954,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 
 #+end_src
 
-***** features
+**** features
 :PROPERTIES:
 :ID:       ba479dce-2f41-467e-b177-b38d2379f1a7
 :CREATED:  [2022-08-01 Mon 11:05]
@@ -1893,14 +1963,14 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 :END:
 
 
-******* services
+***** services
 :PROPERTIES:
 :ID:       476030a6-84df-46c8-931d-03b86769879d
 :CREATED:  [2023-07-23 Sun 11:33]
 :UPDATED:  [2023-07-23 Sun 11:33]
 :ROAM_EXCLUDE: t
 :END:
-********* custom-services
+****** custom-services
 :PROPERTIES:
 :ID:       52dbdae7-459f-4950-9961-c2a9cd035844
 :CREATED:  [2022-08-09 Tue 12:44]
@@ -1928,7 +1998,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
            ))))
 #+end_src
 
-********* services-home
+****** services-home
 :PROPERTIES:
 :ID:       32e2ffde-ff51-4a10-9256-e032d58629bf
 :CREATED:  [2022-09-28 Wed 15:48]
@@ -1936,7 +2006,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 :ROAM_EXCLUDE: t
 :END:
 
-*********** envars
+******* envars
 :PROPERTIES:
 :ID:       5b5d963a-b70c-4867-87b8-8beb1633fa02
 :CREATED:  [2022-09-28 Wed 15:47]
@@ -2043,7 +2113,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
                ":"))))
 #+end_src
 
-*********** zsh : profile, *rc
+******* zsh : profile, *rc
 :PROPERTIES:
 :ID:       533771da-9686-48f0-85ed-e24da7b726d6
 :CREATED:  [2022-09-28 Wed 15:41]
@@ -2070,7 +2140,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 ;;      #$(file-append (@ (gnu packages base) coreutils) "/bin/ls"))))
 #+end_src
 
-*********** mcron                                                              :jobs:
+******* mcron                                                                  :jobs:
 :PROPERTIES:
 :ID:       c3c092d2-4cee-48eb-abc8-e76e393b5967
 :CREATED:  [2022-09-28 Wed 15:42]
@@ -2093,7 +2163,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
  )
 #+end_src
 
-*********** notes-commit                                                       :1min:
+******** notes-commit                                                          :1min:
 :PROPERTIES:
 :ID:       c8903598-d72e-4539-884b-a60096be7fbe
 :CREATED:  [2022-09-28 Wed 15:42]
@@ -2144,7 +2214,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 ;;    port)))
 #+end_src
 
-*********** fulltext index (recoll)                                              :1h:
+******** fulltext index (recoll)                                                 :1h:
 :PROPERTIES:
 :ID:       ccd773a9-5a5e-41da-b050-6fa461c9a427
 :CREATED:  [2022-09-28 Wed 15:42]
@@ -2163,7 +2233,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
        #:user #$my-user)
 #+end_src
 
-*********** generate source tags                                                :12h:
+******** generate source tags                                                   :12h:
 :PROPERTIES:
 :ID:       0681c613-5415-46d7-a079-e940c503941c
 :CREATED:  [2022-09-28 Wed 15:43]
@@ -2182,7 +2252,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
        #:user #$my-user)
 #+end_src
 
-*********** hourly reminder
+******** hourly reminder
 :PROPERTIES:
 :ID:       fe0efa12-ae27-4652-aa9a-89b0f31b6615
 :CREATED:  [2023-04-15 Sat 12:53]
@@ -2190,7 +2260,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 :ROAM_EXCLUDE: t
 :END:
 
-************* things about which to be reminded
+********* things about which to be reminded
 :PROPERTIES:
 :ID:       2bc6f2f3-19b0-452b-9655-ecd09611c5a9
 :CREATED:  [2023-04-15 Sat 14:00]
@@ -2205,7 +2275,7 @@ breathe.  do some dips
 breathe.  do some hangboarding
 #+end_src
 
-************* job
+********* job
 :PROPERTIES:
 :ID:       170786cc-da2d-4add-be2a-038b7dc23af4
 :CREATED:  [2023-04-15 Sat 14:00]
@@ -2222,7 +2292,7 @@ breathe.  do some hangboarding
        #:user #$my-user)
 #+end_src
 
-*********** external data; updates
+******** external data; updates
 :PROPERTIES:
 :ID:       17e87570-2fa4-4f2e-95df-ef229c8ec1aa
 :CREATED:  [2022-10-04 Tue 16:19]
@@ -2230,7 +2300,7 @@ breathe.  do some hangboarding
 :ROAM_EXCLUDE: t
 :END:
 
-************* TODO forge-pull
+********* TODO forge-pull
 :PROPERTIES:
 :ID:       454cd7fc-d86d-4f4c-a685-6f9d13963db7
 :CREATED:  [2022-10-04 Tue 16:19]
@@ -2265,7 +2335,7 @@ breathe.  do some hangboarding
 #+RESULTS:
 : qz/job/forge-pull
 
-************* TODO jira-pull
+********* TODO jira-pull
 :PROPERTIES:
 :ID:       e1bfd63f-ae9c-4043-a2e2-629ffdfa23d5
 :CREATED:  [2022-10-04 Tue 16:19]
@@ -2273,14 +2343,14 @@ breathe.  do some hangboarding
 :ROAM_EXCLUDE: t
 :END:
 
-************* TODO magit-pull
+********* TODO magit-pull
 :PROPERTIES:
 :ID:       2e315ba6-5aa8-40bb-b497-55808aea22e5
 :CREATED:  [2023-07-13 Thu 09:50]
 :UPDATED: [2023-07-13 Thu 09:50]
 :END:
 
-************* TODO org-roam-indirect-link-cache
+********* TODO org-roam-indirect-link-cache
 :PROPERTIES:
 :ID:       9728dd0c-2a6b-4fe0-8307-7cb5bdbd4091
 :CREATED:  [2023-07-13 Thu 09:50]
@@ -2288,7 +2358,7 @@ breathe.  do some hangboarding
 :ROAM_EXCLUDE: t
 :END:
 
-************* TODO org-id-locations
+********* TODO org-id-locations
 :PROPERTIES:
 :ID:       2dafc686-0a0c-4360-987a-d254df07e00a
 :CREATED:  [2023-07-14 Fri 18:35]
@@ -2325,7 +2395,38 @@ wc /tmp/id-locations-files
   3738   3738 231641 /tmp/id-locations-files
 :end:
 
-*********** TODO xdg-desktop-portal-wlr :: screencast with slurpy
+********** org-id-locations X org-roam
+:PROPERTIES:
+:CREATED:  [2023-09-26 Tue 16:10]
+:UPDATED:  [2023-09-26 Tue 16:10]
+:ID:       95fd2397-3058-48ac-9ce5-a7cdb17dbf37
+:ROAM_EXCLUDE: t
+:END:
+
+*********** intangible errors
+:PROPERTIES:
+:CREATED:  [2023-09-26 Tue 16:10]
+:UPDATED:  [2023-09-26 Tue 16:10]
+:ID:       0cd269f0-1f01-4358-8784-c2cac22ae659
+:ROAM_EXCLUDE: t
+:END:
+
+*********** blocks ~make tangle~
+:PROPERTIES:
+:CREATED:  [2023-09-26 Tue 16:10]
+:UPDATED:  [2023-09-26 Tue 16:10]
+:ID:       b2f6a4f4-76a0-4e39-8dce-268100da207a
+:ROAM_EXCLUDE: t
+:END:
+
+******* TODO xdg-desktop-portal-wlr
+:PROPERTIES:
+:CREATED:  [2023-09-24 Sun 15:48]
+:UPDATED:  [2023-09-24 Sun 15:48]
+:ID:       d91cb34e-6eb2-43f3-8d53-1710b7dc225f
+:ROAM_EXCLUDE: t
+:END:
+******** screencast with slurpy
 :PROPERTIES:
 :ID:       7d5b1d90-1d2b-4a25-b7d1-f28376cb1f3d
 :CREATED:  [2023-07-05 Wed 12:41]
@@ -2360,15 +2461,15 @@ chooser_type=simple"
                 "303030AA"))
 #+end_src
 
-********* services-sys
+****** services-sys
 :PROPERTIES:
 :ID:       c2ee7fa1-59a9-4aa5-9049-28949a17c807
 :CREATED:  [2022-09-28 Wed 15:47]
-:UPDATED:  [2023-07-13 Thu 09:50]
+:UPDATED:  [2023-08-31 Thu 10:12]
 :ROAM_EXCLUDE: t
 :END:
 
-*********** prometheus-node-exporter                                        :metrics:
+******* prometheus-node-exporter                                            :metrics:
 :PROPERTIES:
 :ID:       e14e8d70-c704-415d-88ac-62f72ee03df9
 :CREATED:  [2022-09-28 Wed 15:47]
@@ -2383,7 +2484,7 @@ chooser_type=simple"
 
 #+end_src
 
-*********** mcron                                                              :jobs:
+******* mcron                                                                  :jobs:
 :PROPERTIES:
 :ID:       b83cdd83-78d4-464f-bb8f-74a481713984
 :CREATED:  [2022-09-28 Wed 15:47]
@@ -2402,7 +2503,7 @@ chooser_type=simple"
   ))
 #+end_src
 
-*********** locate
+******* locate
 :PROPERTIES:
 :ID:       f52c8582-7b64-4dc0-a111-ea259eb5a3d9
 :CREATED:  [2022-09-28 Wed 15:51]
@@ -2422,7 +2523,15 @@ chooser_type=simple"
        "updatedb")
 #+end_src
 
-*********** OLD udev-nvidia                                                :inactive:
+******* misc
+:PROPERTIES:
+:CREATED:  [2023-09-24 Sun 15:55]
+:UPDATED:  [2023-09-24 Sun 15:55]
+:ID:       a00babb5-1422-43bf-8bb9-06a9d85a73c1
+:ROAM_EXCLUDE: t
+:END:
+
+******** OLD udev-nvidia                                                   :inactive:
 :PROPERTIES:
 :ID:       e005dec1-7261-4fcd-84b6-49209ea7d7b0
 :CREATED:  [2022-09-28 Wed 15:52]
@@ -2438,90 +2547,7 @@ chooser_type=simple"
    (list nvidia-driver)))
 #+end_src
 
-*********** NEW nvidia-service
-:PROPERTIES:
-:ID:       90f44378-4708-46cb-9a88-a5ef957fca5c
-:CREATED:  [2023-05-28 Sun 15:03]
-:UPDATED:  [2023-05-28 Sun 15:03]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src scheme :noweb-ref services-sys
-
-;;(service nvidia-service-type)
-#+end_src
-
-*********** udev-sdmount
-:PROPERTIES:
-:ID:       c3963cdf-a521-4647-b76c-4128b42457ce
-:CREATED:  [2023-03-14 Tue 17:49]
-:UPDATED:  [2023-03-14 Tue 18:21]
-:END:
-
-*********** exposition
-:PROPERTIES:
-:ID:       b665d4a3-0e73-45fb-acf1-747ee64d49ce
-:CREATED:  [2023-03-14 Tue 18:18]
-:UPDATED:  [2023-03-14 Tue 18:21]
-:ROAM_EXCLUDE: t
-:END:
-
-In plain english:
-
-When a block device, such as an SD card, is plugged in, if it's in a
-predefined list of devices (e.g by their filesystem UUIDs) copy the contents
-to the host filesystem, deleting from the source upon completion.
-
-questions:
-- is it really worth namespacing the 'dump' by date?  this would mean rsync
-  cannot dedupe, but protects against residual corrupted data from the SD
-  card.
-
-************* shell example
-:PROPERTIES:
-:ID:       fb07c83c-8e9d-417a-9f85-4d8cd4a8184c
-:CREATED:  [2023-03-14 Tue 18:18]
-:UPDATED:  [2023-03-14 Tue 18:18]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src shell
-# note, uuid is fabricated
-
-id="cf27c7d8-74f7-46ee-9529-513870eef822"
-i="/mnt/dump/${id}"
-o="/media/dump/${id}/$(date +%s)"
-
-mount UUID="${id}" "$i"
-mkdir -p "${o}"
-rsync \
-    --archive \
-    --recursive \
-    --remove-source-files \
-    "${i}" \
-    "${o}"
-
-#+end_src
-*********** src
-:PROPERTIES:
-:ID:       941f6f6c-707f-4419-b655-3dfa484d17ef
-:CREATED:  [2023-03-14 Tue 18:18]
-:UPDATED:  [2023-03-14 Tue 18:18]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src scheme :noweb-ref services-sys
-(udev-rules-service
-      'ydotool
-      (udev-rule
-       "80-uinput.rules"
-       ;; TODO: Take it from ydotool package
-       (string-append
-        "KERNEL==\"uinput\", MODE==\"0660\", "
-        "GROUP=\"input\", OPTIONS+=\"static_node=uinput\"")))
-
-#+end_src
-*********** OLD X11 gdm with nvidia                                        :inactive:
+******** OLD X11 gdm with nvidia                                           :inactive:
 :PROPERTIES:
 :ID:       a91bb43f-465e-4a4a-99fa-a8b4a5ba03e6
 :CREATED:  [2022-09-28 Wed 15:52]
@@ -2541,8 +2567,188 @@ rsync \
                                    %default-xorg-modules))
                          (drivers (list "nvidia")))))))
 #+end_src
+******** NEW nvidia-service
+:PROPERTIES:
+:ID:       90f44378-4708-46cb-9a88-a5ef957fca5c
+:CREATED:  [2023-05-28 Sun 15:03]
+:UPDATED:  [2023-05-28 Sun 15:03]
+:ROAM_EXCLUDE: t
+:END:
 
-*********** postgresql (v10)
+#+begin_src scheme :noweb-ref services-sys
+
+;;(service nvidia-service-type)
+#+end_src
+
+
+******* udev
+:PROPERTIES:
+:CREATED:  [2023-09-15 Fri 10:23]
+:UPDATED:  [2023-09-15 Fri 10:24]
+:ID:       0127c2bd-17af-496e-9053-1aea475b86aa
+:ROAM_EXCLUDE: t
+:END:
+******** for zsa keyboards
+:PROPERTIES:
+:CREATED:  [2023-09-24 Sun 15:55]
+:UPDATED:  [2023-09-24 Sun 15:55]
+:ID:       cb6e1e4a-c594-4955-aa32-4a07bc04620e
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme :noweb-ref services-sys
+(udev-rules-service
+ 'zsa
+ (udev-rule
+  "50-zsa.rules"
+  (string-append
+   ;; source :: https://github.com/zsa/wally/wiki/Linux-install
+   ;; requires USER to be in GROUP `plugdev'
+   "# Rules for Oryx web flashing and live training"
+   "KERNEL==\"hidraw*\", ATTRS{idVendor}==\"16c0\", MODE=\"0664\", GROUP=\"plugdev\""
+   "KERNEL==\"hidraw*\", ATTRS{idVendor}==\"3297\", MODE=\"0664\", GROUP=\"plugdev\""
+
+   "# Legacy rules for live training over webusb (Not needed for firmware v21+)"
+   "  # Rule for all ZSA keyboards"
+   "  SUBSYSTEM==\"usb\", ATTR{idVendor}==\"3297\", GROUP=\"plugdev\""
+   "  # Rule for the Moonlander"
+   "  SUBSYSTEM==\"usb\", ATTR{idVendor}==\"3297\", ATTR{idProduct}==\"1969\", GROUP=\"plugdev\""
+   "  # Rule for the Ergodox EZ"
+   "  SUBSYSTEM==\"usb\", ATTR{idVendor}==\"feed\", ATTR{idProduct}==\"1307\", GROUP=\"plugdev\""
+   "  # Rule for the Planck EZ"
+   "  SUBSYSTEM==\"usb\", ATTR{idVendor}==\"feed\", ATTR{idProduct}==\"6060\", GROUP=\"plugdev\""
+
+   "# Wally Flashing rules for the Ergodox EZ"
+   "ATTRS{idVendor}==\"16c0\", ATTRS{idProduct}==\"04[789B]?\", ENV{ID_MM_DEVICE_IGNORE}=\"1\""
+   "ATTRS{idVendor}==\"16c0\", ATTRS{idProduct}==\"04[789A]?\", ENV{MTP_NO_PROBE}=\"1\""
+   "SUBSYSTEMS==\"usb\", ATTRS{idVendor}==\"16c0\", ATTRS{idProduct}==\"04[789ABCD]?\", MODE:=\"0666\""
+   "KERNEL==\"ttyACM*\", ATTRS{idVendor}==\"16c0\", ATTRS{idProduct}==\"04[789B]?\", MODE:=\"0666\""
+   "# Keymapp / Wally Flashing rules for the Moonlander and Planck EZ"
+   "SUBSYSTEMS==\"usb\", ATTRS{idVendor}==\"0483\", ATTRS{idProduct}==\"df11\", MODE:=\"0666\", SYMLINK+=\"stm32_dfu\""
+   "# Keymapp Flashing rules for the Voyager"
+   "SUBSYSTEMS==\"usb\", ATTRS{idVendor}==\"3297\", MODE:=\"0666\", SYMLINK+=\"ignition_dfu\""
+   )))
+#+end_src
+******** udev-sdmount
+:PROPERTIES:
+:ID:       c3963cdf-a521-4647-b76c-4128b42457ce
+:CREATED:  [2023-03-14 Tue 17:49]
+:UPDATED:  [2023-09-24 Sun 16:17]
+:END:
+
+********* exposition
+:PROPERTIES:
+:ID:       b665d4a3-0e73-45fb-acf1-747ee64d49ce
+:CREATED:  [2023-03-14 Tue 18:18]
+:UPDATED:  [2023-03-14 Tue 18:21]
+:ROAM_EXCLUDE: t
+:END:
+
+In plain english:
+
+When a block device, such as an SD card, is plugged in, if it's in a
+predefined list of devices (e.g by their filesystem UUIDs) copy the contents
+to the host filesystem, deleting from the source upon completion.
+
+questions:
+- is it really worth namespacing the 'dump' by date?  this would mean rsync
+  cannot dedupe, but protects against residual corrupted data from the SD
+  card.
+
+********** shell example
+:PROPERTIES:
+:ID:       fb07c83c-8e9d-417a-9f85-4d8cd4a8184c
+:CREATED:  [2023-03-14 Tue 18:18]
+:UPDATED:  [2023-03-14 Tue 18:18]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src shell
+# note, uuid is fabricated
+
+id="cf27c7d8-74f7-46ee-9529-513870eef822a"
+i="/mnt/dump/${id}"
+o="/media/dump/${id}/$(date +%s)"
+
+mount UUID="${id}" "$i"
+mkdir -p "${o}"
+rsync \
+    --archive \
+    --recursive \
+    --remove-source-files \
+    "${i}" \
+    "${o}"
+
+#+end_src
+
+*********** for zv
+:PROPERTIES:
+:ID:       0b749391-8852-4eab-abc7-89f96d2b2b64
+:CREATED:  [2023-07-25 Tue 17:45]
+:UPDATED:  [2023-07-25 Tue 17:45]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src shell
+i="/mnt/zv"
+o="/mnt/chopi/zv/$(date +%s)"
+
+mkdir -p "${o}"
+sudo rsync \
+    --archive \
+    --recursive \
+    --remove-source-files \
+    "${i}" \
+    "${o}" &&  echo i am fucking done copying |  espeak
+#+end_src
+********* TODO src
+:PROPERTIES:
+:ID:       941f6f6c-707f-4419-b655-3dfa484d17ef
+:CREATED:  [2023-03-14 Tue 18:18]
+:UPDATED:  [2023-09-24 Sun 16:17]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme :noweb-ref null
+(udev-rules-service
+      'ydotool
+      (udev-rule
+       "80-uinput.rules"
+       ;; TODO: Take it from ydotool package
+       (string-append
+        "KERNEL==\"uinput\", MODE==\"0660\", "
+        "GROUP=\"input\", OPTIONS+=\"static_node=uinput\"")))
+
+#+end_src
+******** ydotool
+:PROPERTIES:
+:CREATED:  [2023-09-24 Sun 16:26]
+:UPDATED:  [2023-09-24 Sun 16:26]
+:ID:       6f388634-1b6c-4dc3-b4cb-c4f25122db50
+:ROAM_EXCLUDE: t
+:END:
+
+
+#+begin_src scheme :noweb-ref services-sys
+(udev-rules-service
+      'ydotool
+      (udev-rule
+       "80-uinput.rules"
+       ;; TODO: Take it from ydotool package
+       (string-append
+        "KERNEL==\"uinput\", MODE==\"0660\", "
+        "GROUP=\"input\", OPTIONS+=\"static_node=uinput\"")))
+
+#+end_src
+
+******* db
+:PROPERTIES:
+:CREATED:  [2023-09-24 Sun 15:48]
+:UPDATED:  [2023-09-24 Sun 15:48]
+:ID:       6e163dec-f54c-4171-ae29-45f6bcf2e9a0
+:ROAM_EXCLUDE: t
+:END:
+
+******** postgresql (v10)
 :PROPERTIES:
 :ID:       f3e1e339-0500-410e-87b2-ed61fc47f9a0
 :CREATED:  [2023-07-17 Mon 10:10]
@@ -2573,7 +2779,7 @@ host	all	all	0.0.0.0/0       md5
             (postgresql (@ (gnu packages databases) postgresql-10)))))
 #+end_src
 
-*********** postgresql: timescaledb                                        :inactive:
+******** postgresql: timescaledb                                           :inactive:
 :PROPERTIES:
 :ID:       54345225-6b45-4465-9646-6bdc81ac41a1
 :CREATED:  [2022-09-28 Wed 15:54]
@@ -2593,7 +2799,7 @@ host	all	all	0.0.0.0/0       md5
 ;;             (postgresql (@ (gnu packages databases) postgresql-14)))))
 #+end_src
 
-*********** postgresql: roles
+********* postgresql: roles
 :PROPERTIES:
 :ID:       4af4ec02-7bd3-416f-a4a3-e311cd752192
 :CREATED:  [2022-09-28 Wed 15:54]
@@ -2619,7 +2825,7 @@ host	all	all	0.0.0.0/0       md5
                           (create-database? #t)))))))
 #+end_src
 
-*********** openssh server
+******** openssh server
 :PROPERTIES:
 :ID:       1cda9c5a-ef77-4735-aac7-b732054413c3
 :CREATED:  [2022-09-28 Wed 15:54]
@@ -2639,11 +2845,36 @@ host	all	all	0.0.0.0/0       md5
           ))
 #+end_src
 
-********* base-services
+******** nfs
+:PROPERTIES:
+:ID:       8b00d302-567c-4773-a98f-0d4682d3b368
+:CREATED:  [2023-08-15 Tue 13:11]
+:UPDATED:  [2023-09-24 Sun 15:48]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme :noweb-ref services-sys
+;; (gnu services nfs)
+(service nfs-service-type
+         (nfs-configuration
+                (exports
+                 '(("/export"
+                    "*(ro,insecure,no_subtree_check,crossmnt,fsid=0)")))))
+#+end_src
+
+******* base-services
 :PROPERTIES:
 :ID:       8f7a4a2a-c195-4d06-8d76-25a5671ad941
 :CREATED:  [2022-08-01 Mon 10:52]
 :UPDATED:  [2023-03-28 Tue 15:53]
+:ROAM_EXCLUDE: t
+:END:
+
+******** guix substitutes, keys
+:PROPERTIES:
+:CREATED:  [2023-09-24 Sun 15:55]
+:UPDATED:  [2023-09-24 Sun 15:55]
+:ID:       ec8eeefc-ca70-418c-ad18-d47dd7ab148b
 :ROAM_EXCLUDE: t
 :END:
 #+begin_src scheme :noweb-ref main
@@ -2664,7 +2895,7 @@ host	all	all	0.0.0.0/0       md5
 "))))
 #+end_src
 
-********* desktop-services
+******* desktop-services
 :PROPERTIES:
 :ID:       f2840489-2e7e-483b-960c-3bc8e3b41412
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -2675,7 +2906,7 @@ host	all	all	0.0.0.0/0       md5
 (unless gaming? (feature-desktop-services))
 #+end_src
 
-******* docker
+****** docker
 :PROPERTIES:
 :ID:       07f0f4f4-500d-488f-b678-88865aa775e0
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -2686,7 +2917,7 @@ host	all	all	0.0.0.0/0       md5
 #+begin_src scheme :noweb-ref main
 (feature-docker)
 #+end_src
-******* qemu
+****** qemu
 :PROPERTIES:
 :ID:       92a2bcf9-b388-4331-85c3-14a24657f0b4
 :CREATED:  [2022-09-29 Thu 11:37]
@@ -2696,7 +2927,7 @@ host	all	all	0.0.0.0/0       md5
 #+begin_src scheme :noweb-ref main
 (feature-qemu)
 #+end_src
-******* backlight
+****** backlight
 :PROPERTIES:
 :ID:       10a02289-4033-4be5-a364-555a29d77849
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -2707,7 +2938,7 @@ host	all	all	0.0.0.0/0       md5
 (feature-backlight #:step 5)
 #+end_src
 
-******* pipewire
+****** pipewire
 :PROPERTIES:
 :ID:       9a824aa7-0fed-4f84-a076-f2a5efc8f1b9
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -2718,11 +2949,11 @@ host	all	all	0.0.0.0/0       md5
 (unless gaming? (feature-pipewire))
 #+end_src
 
-******* fonts
+****** fonts
 :PROPERTIES:
 :ID:       e4de9c1d-4566-4a53-b77b-6e2ad7662d58
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2023-07-16 Sun 18:23]
+:UPDATED:  [2023-10-23 Mon 14:51]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -2733,10 +2964,10 @@ host	all	all	0.0.0.0/0       md5
   (name "Iosevka")
   (package (@ (gnu packages fonts) font-iosevka))
   (size 14)
-  (weight 'regular)))
+  (weight 'light)))
 #+end_src
 
-******* shell
+****** shell
 :PROPERTIES:
 :ID:       d6f26fbc-df9f-4a1f-8875-78fd654ecb64
 :CREATED:  [2022-09-28 Wed 15:41]
@@ -2744,7 +2975,7 @@ host	all	all	0.0.0.0/0       md5
 :ROAM_EXCLUDE: t
 :END:
 
-******* vterm
+****** vterm
 :PROPERTIES:
 :ID:       8bd59de0-c2f4-42fb-9f31-4c8890e9e68a
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -2755,7 +2986,7 @@ host	all	all	0.0.0.0/0       md5
 (feature-vterm)
 #+end_src
 
-******* bash
+****** bash
 :PROPERTIES:
 :ID:       c5e6bc9f-9c77-46b2-a41e-883d81ae1fc5
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -2766,7 +2997,7 @@ host	all	all	0.0.0.0/0       md5
 (feature-bash)
 #+end_src
 
-******* direnv
+****** direnv
 :PROPERTIES:
 :ID:       4ce3bb66-ccbb-4cf3-b92d-2e3bda91adf7
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -2777,7 +3008,7 @@ host	all	all	0.0.0.0/0       md5
 (feature-direnv)
 #+end_src
 
-******* zsh
+****** zsh
 :PROPERTIES:
 :ID:       62082caa-8650-4eca-b90d-be7f82439d55
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -2789,11 +3020,11 @@ host	all	all	0.0.0.0/0       md5
  #:enable-zsh-autosuggestions? #t)
 #+end_src
 
-******* ssh
+****** ssh
 :PROPERTIES:
 :ID:       855bb3df-f74b-4fff-9122-7c334a878dcc
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2023-07-05 Wed 12:32]
+:UPDATED:  [2023-09-24 Sun 16:44]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -2839,11 +3070,11 @@ host	all	all	0.0.0.0/0       md5
 #+end_src
 
 
-******* git
+****** git
 :PROPERTIES:
 :ID:       dcd3cd89-5c4d-41e3-9ed5-324a48dc3546
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2023-03-04 Sat 16:41]
+:UPDATED:  [2023-09-24 Sun 16:43]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -2852,6 +3083,9 @@ host	all	all	0.0.0.0/0       md5
  #:extra-config
  '((pull
     ((rebase . #t)))
+   (diff
+    ((context . 4)  ;; magit default=3;  4 shows org prop-drawer & heading.
+     ))
    ;; (slurp-file-like (local-file "./etc/git/work_config"))
    ;; '(#~"[includeIf \"gitdir:~/git/ns\"]
    ;;     [user]
@@ -2861,7 +3095,7 @@ host	all	all	0.0.0.0/0       md5
    ))
 #+end_src
 
-********* config_work
+******* config_work
 :PROPERTIES:
 :ID:       1f073518-b77a-460c-abc8-bc265c4f9e6c
 :CREATED:  [2022-11-03 Thu 15:18]
@@ -2876,7 +3110,7 @@ host	all	all	0.0.0.0/0       md5
         email = "sculpepper@newstore.com"
 #+end_src
 
-******* network
+****** network
 :PROPERTIES:
 :ID:       d9d8aa24-494b-4906-b5ab-0dd56c0bf070
 :CREATED:  [2022-09-28 Wed 15:41]
@@ -2933,7 +3167,7 @@ host	all	all	0.0.0.0/0       md5
 (feature-transmission #:auto-start? #f)
 #+end_src
 
-******* wm
+****** wm
 :PROPERTIES:
 :ID:       ffb41d6f-7d79-4bee-8f4a-809240572cf9
 :CREATED:  [2022-09-28 Wed 15:41]
@@ -2948,11 +3182,11 @@ host	all	all	0.0.0.0/0       md5
 :ROAM_EXCLUDE: t
 :END:
 
-********* sway
+******** sway
 :PROPERTIES:
 :ID:       05be317e-8f65-4a14-a83f-db104b19788f
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2023-07-19 Wed 17:48]
+:UPDATED:  [2023-09-25 Mon 18:29]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -2977,21 +3211,30 @@ host	all	all	0.0.0.0/0       md5
      (for_window "[app_id=\"pinentry-qt\"]" floating enable, border pixel)
 
      (for_window "[title=\"Nightly - Sharing Indicator\"]" floating enable, border pixel)
-     (for_window "[title=\"Emacs (Client) [pass]\"]" floating enable, border pixel)
-     (for_window "[title=\"Application Launcher - Emacs Client\"]" floating enable, border pixel)
-     (for_window "[title=\"pass - Emacs Client\"]" floating enable, border pixel)
+     ;; (for_window "[title=\"Emacs (Client) [pass]\"]" floating enable, border pixel)
+     ;; (for_window "[title=\"Application Launcher - Emacs Client\"]" floating enable, border pixel)
+     ;; (for_window "[title=\"pass - Emacs Client\"]" floating enable, border pixel)
 
      (bindsym $mod+Ctrl+o opacity set 1)
      (bindsym $mod+Ctrl+p opacity minus 0.1)
 
      ;;(bindsym $mod+x exec $menu)
-     (gaps inner 40)
+     (gaps inner 30)
      (bindsym $mod+Period exec "tessen -a copy")
 
      (input type:touchpad
             ;; TODO: Move it to feature-sway or feature-mouse?
-            (;; (natural_scroll enabled)
+            ((accel_profile flat)
+             (pointer_accel "0.2")
+             (natural_scroll enabled) ;; tablet / phone mindset
              (tap enabled)))
+     ;; nub life
+     (input "2:10:TPPS/2_Elan_TrackPoint"
+            ((pointer_accel "0.2")
+             (accel_profile flat)))
+
+     ;; middle mouse
+     (bindsym $mod+button2 "[con_mark=_prev]" focus)
 
      (bindsym $mod+bracketright exec "pactl set-sink-volume @DEFAULT_SINK@ +5%")
      (bindsym $mod+bracketleft exec "pactl set-sink-volume @DEFAULT_SINK@ -5%")
@@ -3003,7 +3246,28 @@ host	all	all	0.0.0.0/0       md5
 
 #+RESULTS:
 
-********* sway-run-on-tty
+******** sh: track-prev-focus.sh
+:PROPERTIES:
+:CREATED:  [2023-09-24 Sun 18:27]
+:UPDATED:  [2023-09-24 Sun 18:27]
+:ID:       fb0a3ead-e11c-4089-be79-6df1bd8544d3
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src shell :tangle ~/.local/bin/track_prev_focus
+#!/bin/sh
+
+prev_focus=$(swaymsg -r -t get_seats | jq '.[0].focus')
+
+swaymsg -m -t subscribe '["window"]' | \
+  jq --unbuffered 'select(.change == "focus").container.id' | \
+  while read new_focus; do
+    swaymsg "[con_id=${prev_focus}] mark --add _prev" &>/dev/null
+    prev_focus=$new_focus
+  done
+#+end_src
+
+******* sway-run-on-tty
 :PROPERTIES:
 :ID:       1a67a54c-b9c9-4957-8bb7-24633e88c432
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3019,22 +3283,15 @@ host	all	all	0.0.0.0/0       md5
 
 #+end_src
 
-********* TODO sway-tessen
+******** TODO sway X nvidia
 :PROPERTIES:
-:ID:       3649e55b-e0c1-4e97-a561-1c48f55a6c90
-:CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2022-08-01 Mon 12:35]
+:CREATED:  [2023-09-24 Sun 15:57]
+:UPDATED:  [2023-09-24 Sun 15:57]
+:ID:       e5c3e4cf-a444-4d14-8f17-87d85e97188a
 :ROAM_EXCLUDE: t
 :END:
 
-#+begin_src scheme :noweb-ref main
-;; (unless gaming?
-;;   (feature-sway-tessen
-;;    #:menu-arg "rofi"
-;;    #:menu-package rofi-wayland))
-#+end_src
-
-********* sway-screenshot
+******* sway-screenshot
 :PROPERTIES:
 :ID:       af8a8d1a-38ce-4e25-9c34-f1f0c8518394
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3046,7 +3303,7 @@ host	all	all	0.0.0.0/0       md5
 (unless gaming? (feature-sway-screenshot))
 #+end_src
 
-********* waybar
+******* waybar
 :PROPERTIES:
 :ID:       ddc53ffa-d988-47ee-b8cf-0ced515be0a8
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3071,7 +3328,7 @@ host	all	all	0.0.0.0/0       md5
     (waybar-clock))))
 #+end_src
 
-********* swayidle
+******* swayidle
 :PROPERTIES:
 :ID:       95052943-1d47-455f-903f-a40a1b8e086c
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3086,7 +3343,7 @@ host	all	all	0.0.0.0/0       md5
   (feature-swayidle))
 #+end_src
 
-********* swaylock
+******* swaylock
 :PROPERTIES:
 :ID:       3f203601-b2fa-4e25-802a-65a539120fc7
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3107,7 +3364,21 @@ host	all	all	0.0.0.0/0       md5
                     (clock))))
 #+end_src
 
-********* rofi
+******* swaynotificationcenter
+:PROPERTIES:
+:ID:       e28ec2ac-d302-4816-b875-6663016cf7ff
+:CREATED:  [2023-08-31 Thu 10:10]
+:UPDATED:  [2023-08-31 Thu 10:16]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme :noweb-ref main
+;;(feature-swaynotificationcenter)
+
+;; not found...
+#+end_src
+
+******* rofi
 :PROPERTIES:
 :ID:       3edaad94-3afa-47cf-8317-dadea891c9cf
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3121,15 +3392,15 @@ host	all	all	0.0.0.0/0       md5
    #:theme (local-file "config/rofi/themes/base16-default-dark.rasi")))
 #+end_src
 
-********* swaywm
+*********
 :PROPERTIES:
-:ID:       59028f88-810e-467f-9c66-ea94f494e42c
-:CREATED:  [2022-09-28 Wed 15:41]
-:UPDATED:  [2022-09-28 Wed 15:41]
+:CREATED:  [2023-09-24 Sun 16:00]
+:UPDATED:  [2023-09-24 Sun 16:00]
+:ID:       814ad7c1-c78c-4924-b4cf-80aafc8b4882
 :ROAM_EXCLUDE: t
 :END:
 
-******* kanshi
+****** kanshi
 :PROPERTIES:
 :ID:       e9a4d259-45cc-43e9-89e5-69319a169928
 :CREATED:  [2022-10-28 Fri 12:09]
@@ -3158,7 +3429,7 @@ host	all	all	0.0.0.0/0       md5
                   (output HDMI-1 enable)))))
 #+end_src
 
-******* TODO redshift
+****** TODO redshift
 :PROPERTIES:
 :ID:       43d6b991-b37e-4d1c-86e5-36fd0a0e5cdf
 :CREATED:  [2023-04-26 Wed 21:11]
@@ -3173,7 +3444,7 @@ annoying! cannot fathom why this doesn't work
 ;;  #:redshift redshift-wayland)
 #+end_src
 
-******* i3
+****** i3
 :PROPERTIES:
 :ID:       4a57548b-2784-4807-befb-a02d27a02012
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3192,14 +3463,48 @@ annoying! cannot fathom why this doesn't work
 ;;     ;;  )
 #+end_src
 
-******* dev
+***** dev
 :PROPERTIES:
 :ID:       6ec8a5e5-2620-4d95-98a1-f7e382e497ed
 :CREATED:  [2022-09-28 Wed 15:59]
 :UPDATED:  [2022-09-28 Wed 15:59]
 :ROAM_EXCLUDE: t
 :END:
-******* emacs stuff
+
+****** python
+:PROPERTIES:
+:ID:       e76dad31-73f3-4fac-bd9b-d7d3bb95cb63
+:CREATED:  [2023-08-31 Thu 10:10]
+:UPDATED:  [2023-08-31 Thu 10:10]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme  :noweb-ref main
+(feature-python)
+#+end_src
+****** clojure
+:PROPERTIES:
+:ID:       d2a0b255-bfd5-44d4-8a22-817ec9d19769
+:CREATED:  [2022-10-28 Fri 12:16]
+:UPDATED:  [2022-10-28 Fri 13:25]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme :noweb-ref main
+;;(feature-clojure)
+#+end_src
+****** plantuml
+:PROPERTIES:
+:ID:       74fb76ed-4ddc-4f00-b9fd-328d3f60448c
+:CREATED:  [2023-08-31 Thu 10:13]
+:UPDATED:  [2023-08-31 Thu 10:13]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme :noweb-ref main
+(feature-plantuml)
+#+end_src
+***** emacs stuff
 :PROPERTIES:
 :ID:       c0924a65-73cc-4693-ba65-6abd6c6634dd
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3207,11 +3512,11 @@ annoying! cannot fathom why this doesn't work
 :ROAM_EXCLUDE: t
 :END:
 
-********* emacs
+****** emacs
 :PROPERTIES:
 :ID:       d2fc9152-8683-46c1-9ef2-4ca84510bb49
 :CREATED:  [2022-09-28 Wed 16:14]
-:UPDATED:  [2023-07-23 Sun 10:42]
+:UPDATED:  [2023-09-21 Thu 11:41]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -3246,6 +3551,7 @@ annoying! cannot fathom why this doesn't work
    emacs-dogears
    emacs-chatgpt-shell
    emacs-selectric-mode
+   emacs-atomic-chrome
 
    ;;
    ;; emacs-code-review    ; TODO qzdl pkg
@@ -3256,11 +3562,11 @@ annoying! cannot fathom why this doesn't work
  )
 #+end_src
 
-********* packages                                                              :pkg:
+******* packages/misc                                                           :pkg:
 :PROPERTIES:
 :ID:       5f892275-23ad-429c-9651-f48f5e8576ec
 :CREATED:  [2022-09-28 Wed 16:14]
-:UPDATED:  [2023-07-14 Fri 18:29]
+:UPDATED:  [2023-09-23 Sat 21:35]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -3323,6 +3629,7 @@ annoying! cannot fathom why this doesn't work
 "emacs-fountain-mode" ;; TODO feature-emacs-fountain-mode
 "emacs-csv-mode"
 "emacs-org-roam-ui"
+"emacs-ligature"
 ;; TODO feature-emacs-lsp
 ;;"emacs-artbollocks"
 ;;"emacs-vlf" ;; TODO guix: package emacs-vlf
@@ -3331,7 +3638,7 @@ annoying! cannot fathom why this doesn't work
 ;; "emacs-org-autotangle"
 #+end_src
 
-********* TODO emacs-appearance
+****** TODO emacs-appearance
 :PROPERTIES:
 :ID:       e7344b77-dfd0-4bc5-aade-cd6b92dc58da
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3353,7 +3660,7 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs-appearance)
 #+end_src
 
-********* TODO emacs .. etc
+****** TODO emacs .. etc
 :PROPERTIES:
 :ID:       480434ca-5147-45f6-9b00-e47b87345dc2
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3381,7 +3688,7 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs-message)
 #+end_src
 
-********* emacs-smartparens
+****** emacs-smartparens
 :PROPERTIES:
 :ID:       01e9df44-bbc7-483d-b17a-0932d54be330
 :CREATED:  [2022-09-28 Wed 15:37]
@@ -3396,7 +3703,7 @@ annoying! cannot fathom why this doesn't work
 
 #+RESULTS:
 
-********* emacs-eglot
+****** emacs-eglot
 :PROPERTIES:
 :ID:       74c844c2-55fa-4ac3-b394-6c53488e5cf7
 :CREATED:  [2022-09-28 Wed 16:23]
@@ -3404,7 +3711,7 @@ annoying! cannot fathom why this doesn't work
 :ROAM_EXCLUDE: t
 :END:
 
-********* emacs-corfu
+****** emacs-corfu
 :PROPERTIES:
 :ID:       2a3598dc-be14-4f8c-ae66-100d8d3f9552
 :CREATED:  [2022-09-28 Wed 15:36]
@@ -3417,7 +3724,7 @@ annoying! cannot fathom why this doesn't work
  #:corfu-doc-auto #f)
 #+end_src
 
-********* emacs-helpful
+****** emacs-helpful
 :PROPERTIES:
 :ID:       d652de96-8917-4689-bf94-426a509c1a98
 :CREATED:  [2023-04-16 Sun 15:45]
@@ -3429,7 +3736,7 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs-help)
 #+end_src
 
-********* emacs-info
+****** emacs-info
 :PROPERTIES:
 :ID:       96b6b673-2ef5-4981-809e-e48234ee7f5f
 :CREATED:  [2023-04-16 Sun 15:45]
@@ -3441,7 +3748,7 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs-info)
 #+end_src
 
-********* emacs-tempel
+****** emacs-tempel
 :PROPERTIES:
 :ID:       37e931d1-9093-484c-80ad-c7b30f20aa45
 :CREATED:  [2022-09-28 Wed 15:38]
@@ -3458,7 +3765,7 @@ annoying! cannot fathom why this doesn't work
                (ielisp (elisp "src_emacs-lisp{ " r> " }"))))
 #+end_src
 
-********* emacs-erc
+****** emacs-erc
 :PROPERTIES:
 :ID:       1019ae2e-1221-4883-bb1e-35270a6fb25d
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3499,14 +3806,7 @@ annoying! cannot fathom why this doesn't work
      (erc-tls :server "chat.sr.ht" :nick rde-bouncer-nick))))
 #+end_src
 
-********* TODO ... fix import
-:PROPERTIES:
-:ID:       3c8534d1-8a84-4f8f-85d5-0cd6d257b8b9
-:CREATED:  [2023-03-02 Thu 17:58]
-:UPDATED:  [2023-03-02 Thu 17:58]
-:ROAM_EXCLUDE: t
-:END:
-********* emacs-elpher
+****** emacs-elpher
 :PROPERTIES:
 :ID:       7e6b37b2-717b-4be7-9dcc-f0dbe1cfe043
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3518,7 +3818,7 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs-elpher)
 #+end_src
 
-********* emacs-ement
+****** emacs-ement
 :PROPERTIES:
 :ID:       18bb85c9-07d5-4b46-8719-5aac67d10670
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3531,7 +3831,7 @@ annoying! cannot fathom why this doesn't work
 #+end_src
 
 
-********* emacs-pdf-tools
+****** emacs-pdf-tools
 :PROPERTIES:
 :ID:       c1f0a657-91fc-4a27-b33b-df85bfaa9ff1
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3543,7 +3843,7 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs-pdf-tools)
 #+end_src
 
-********* emacs-nov-el
+****** emacs-nov-el
 :PROPERTIES:
 :ID:       1103af98-4018-4f7d-b59d-89e4b844ce2e
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3555,7 +3855,7 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs-nov-el)
 #+end_src
 
-********* emacs-git
+****** emacs-git
 :PROPERTIES:
 :ID:       81f4c2b3-136b-4a37-a40b-3c3b44163bbe
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3568,7 +3868,7 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs-git)
 #+end_src
 
-********* org stuff
+****** org stuff
 :PROPERTIES:
 :ID:       b3d5483b-2e0a-4075-baea-6c0a65e04d8f
 :CREATED:  [2022-09-28 Wed 16:15]
@@ -3576,7 +3876,7 @@ annoying! cannot fathom why this doesn't work
 :ROAM_EXCLUDE: t
 :END:
 
-********* TODO org
+******* TODO org
 :PROPERTIES:
 :ID:       7fca8716-000f-4794-b174-2ed192d51c26
 :CREATED:  [2022-08-01 Mon 12:46]
@@ -3592,7 +3892,7 @@ annoying! cannot fathom why this doesn't work
  )
 #+end_src
 
-********* org-agenda
+******* org-agenda
 :PROPERTIES:
 :ID:       20c53b2d-bf63-48b9-ad00-ab417b2d9742
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3605,7 +3905,7 @@ annoying! cannot fathom why this doesn't work
  #:org-agenda-files '("~/life/roam/inbox.org"))
 #+end_src
 
-********* TODO org-roam
+******* TODO org-roam
 :PROPERTIES:
 :ID:       af1f484c-1958-426b-8377-9a1087079086
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3623,7 +3923,7 @@ annoying! cannot fathom why this doesn't work
  )
 #+end_src
 
-********* TODO org-roam-ui
+******* TODO org-roam-ui
 :PROPERTIES:
 :ID:       12eeeff3-fc57-497a-b344-c34824553904
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3636,7 +3936,7 @@ annoying! cannot fathom why this doesn't work
 ;; (feature-emacs-org-roam-ui)
 #+end_src
 
-********* TODO emacs-ref
+****** TODO emacs-ref
 :PROPERTIES:
 :ID:       a122ca1d-751b-4af2-8abd-6980bb1a761b
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3655,7 +3955,7 @@ annoying! cannot fathom why this doesn't work
 ;;       #:bibliography-directory my-notes-directory)
 #+end_src
 
-********* TODO emacs-es/rest
+****** TODO emacs-es/rest
 :PROPERTIES:
 :ID:       d5965300-1774-44b2-bfc4-f8201622b065
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3671,19 +3971,8 @@ annoying! cannot fathom why this doesn't work
 ;;     ;;  #:package-ob emacs-ob-restclient-latest)
 #+end_src
 
-******* clojure
-:PROPERTIES:
-:ID:       d2a0b255-bfd5-44d4-8a22-817ec9d19769
-:CREATED:  [2022-10-28 Fri 12:16]
-:UPDATED:  [2022-10-28 Fri 13:25]
-:ROAM_EXCLUDE: t
-:END:
 
-#+begin_src scheme :noweb-ref main
-;;(feature-clojure)
-#+end_src
-
-******* mpv
+***** mpv
 :PROPERTIES:
 :ID:       dc8200af-d1cd-4911-8c42-0b01e9361da2
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3695,14 +3984,14 @@ annoying! cannot fathom why this doesn't work
 (feature-mpv)
 #+end_src
 
-******* mail
+***** mail
 :PROPERTIES:
 :ID:       ecb39921-a2d6-4001-8f7c-1a8826ed4b67
 :CREATED:  [2022-09-28 Wed 15:41]
 :UPDATED:  [2022-09-28 Wed 15:41]
 :ROAM_EXCLUDE: t
 :END:
-******* TODO isync                                                             :mail:
+****** TODO isync                                                              :mail:
 :PROPERTIES:
 :ID:       5f12520a-369e-43bf-ab36-64a44c5bfb98
 :CREATED:  [2022-08-01 Mon 10:55]
@@ -3719,7 +4008,7 @@ annoying! cannot fathom why this doesn't work
            (gmail-tls . ,gmail-tls-isync-settings))))
 #+end_src
 
-******* l2md                                                                   :mail:
+****** l2md                                                                    :mail:
 :PROPERTIES:
 :ID:       bd9b236d-db39-449b-8314-77a79ce89fe1
 :CREATED:  [2022-08-01 Mon 10:55]
@@ -3731,7 +4020,7 @@ annoying! cannot fathom why this doesn't work
 (feature-l2md)
 #+end_src
 
-******* msmtp                                                                  :mail:
+****** msmtp                                                                   :mail:
 :PROPERTIES:
 :ID:       c5548269-6010-4a9c-b92f-83b27a722b76
 :CREATED:  [2022-08-01 Mon 10:55]
@@ -3752,7 +4041,7 @@ annoying! cannot fathom why this doesn't work
                   (tls_starttls . off))))))
 #+end_src
 
-******* notmuch                                                                :mail:
+****** notmuch                                                                 :mail:
 :PROPERTIES:
 :ID:       3b57f1e4-e156-4505-8d82-085ef082408c
 :CREATED:  [2022-08-01 Mon 10:55]
@@ -3783,7 +4072,7 @@ annoying! cannot fathom why this doesn't work
   %rde-notmuch-saved-searches))
 #+end_src
 
-******* xdg
+***** xdg
 :PROPERTIES:
 :ID:       2a190f7d-8013-42f2-ab78-49d4f61dd180
 :CREATED:  [2022-08-01 Mon 10:55]
@@ -3805,7 +4094,7 @@ annoying! cannot fathom why this doesn't work
   (templates "$HOME")))
 #+end_src
 
-******* base packages                                                           :pkg:
+***** base packages                                                             :pkg:
 :PROPERTIES:
 :ID:       9490f8c2-7074-4a89-a62e-f82b6bfc2f2b
 :CREATED:  [2022-08-01 Mon 10:55]
@@ -3890,7 +4179,8 @@ annoying! cannot fathom why this doesn't work
 
 #+RESULTS:
 
-******* TODO unsorted
+
+***** TODO unsorted
 :PROPERTIES:
 :ID:       72ecbbb1-860b-471e-a2e8-d96cf8c3dac3
 :CREATED:  [2023-03-30 Thu 12:47]
@@ -3928,7 +4218,7 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs-spelling)
 #+end_src
 
-******* pending
+***** pending
 :PROPERTIES:
 :ID:       5bbe74bc-777b-4dfe-ad73-8650e9ee9ec2
 :CREATED:  [2023-07-04 Tue 10:59]
@@ -3955,7 +4245,7 @@ annoying! cannot fathom why this doesn't work
 (feature-ungoogled-chromium)
 #+end_src
 
-****** COMMENT debug: post-%main-features
+***** COMMENT debug: post-%main-features
 :PROPERTIES:
 :ID:       6a9522fb-fabc-4f94-97e4-2ab8d73905a1
 :CREATED:  [2022-07-29 Fri 17:53]
@@ -3969,14 +4259,14 @@ annoying! cannot fathom why this doesn't work
 
 #+end_src
 
-***** hw/host features
+**** hw/host features
 :PROPERTIES:
 :ID:       b34224fa-7b5c-4292-9a0d-27439812a042
 :CREATED:  [2022-07-29 Fri 17:53]
 :UPDATED:  [2022-07-29 Fri 17:53]
 :ROAM_EXCLUDE: t
 :END:
-******** COMMENT future
+***** COMMENT future
 :PROPERTIES:
 :ID:       23664f9a-bd24-460b-8537-22f9efd3d298
 :CREATED:  [2022-07-29 Fri 18:22]
@@ -3984,7 +4274,7 @@ annoying! cannot fathom why this doesn't work
 :ROAM_EXCLUDE: t
 :END:
 
-********** TODO Switch from UUIDs to partition labels For better reproducibilty and easier setup.
+****** TODO Switch from UUIDs to partition labels For better reproducibilty and easier setup.
 :PROPERTIES:
 :ID:       8983d989-12c3-4e1b-8645-e346571cddcd
 :CREATED:  [2022-07-29 Fri 18:22]
@@ -3992,7 +4282,7 @@ annoying! cannot fathom why this doesn't work
 :ROAM_EXCLUDE: t
 :END:
 
-********** TODO Grub doesn't support luks2 yet.
+****** TODO Grub doesn't support luks2 yet.
 :PROPERTIES:
 :ID:       ea1aa05f-0279-4d55-a733-f40322f3c8f5
 :CREATED:  [2022-07-29 Fri 18:22]
@@ -4000,14 +4290,14 @@ annoying! cannot fathom why this doesn't work
 :ROAM_EXCLUDE: t
 :END:
 
-******** ixy                                                               :host:ixy:
+***** ixy                                                                  :host:ixy:
 :PROPERTIES:
 :ID:       ffec3337-a453-4b25-8919-bdacb6c93562
 :CREATED:  [2022-07-29 Fri 17:53]
 :UPDATED:  [2022-07-29 Fri 17:53]
 :ROAM_EXCLUDE: t
 :END:
-********** mapped devices                                                  :untangle:
+****** mapped devices                                                      :untangle:
 :PROPERTIES:
 :ID:       602eb92a-7d29-4c3a-8ca4-d6e9d61f0e4b
 :CREATED:  [2022-07-29 Fri 17:53]
@@ -4022,7 +4312,7 @@ annoying! cannot fathom why this doesn't work
          (target "sys-root")
          (type luks-device-mapping))))
 #+end_src
-********** file systems                                                    :untangle:
+****** file systems                                                        :untangle:
 :PROPERTIES:
 :ID:       40a378fb-a7a1-456a-b5e8-f15f2f7c7dd3
 :CREATED:  [2022-07-29 Fri 17:53]
@@ -4044,7 +4334,7 @@ annoying! cannot fathom why this doesn't work
 #+end_src
 
 
-********** file systems (from andrew)
+******* file systems (from andrew)
 :PROPERTIES:
 :ID:       4228ac9b-1665-4978-9ded-bfa6e174961c
 :CREATED:  [2022-07-29 Fri 17:53]
@@ -4075,7 +4365,7 @@ annoying! cannot fathom why this doesn't work
 ;;       (device (uuid "8C99-0704" 'fat32))))))
 #+end_src
 
-********** imports
+****** imports
 :PROPERTIES:
 :ID:       5b8720fd-bc7e-4a8d-bbf7-3030b057d1b7
 :CREATED:  [2022-07-29 Fri 17:53]
@@ -4089,11 +4379,11 @@ annoying! cannot fathom why this doesn't work
  ((nongnu system linux-initrd) #:prefix nongnu-sys:))
 #+end_src
 
-********** features                                                        :untangle:
+****** features                                                            :untangle:
 :PROPERTIES:
 :ID:       3e09d87e-4895-4ab0-9109-4693e44ecb2d
 :CREATED:  [2022-07-29 Fri 17:53]
-:UPDATED:  [2023-07-23 Sun 11:24]
+:UPDATED:  [2023-09-26 Tue 15:50]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -4127,7 +4417,8 @@ annoying! cannot fathom why this doesn't work
       )
     ;; removed "modprobe.blacklist=snd_hda_intel,snd_soc_skl"
     #:firmware (list nongnu:linux-firmware
-                     nongnu:sof-firmware)
+                     nongnu:sof-firmware
+                     intel-vaapi-driver)
     #:initrd nongnu-sys:microcode-initrd
     #:kernel-loadable-modules (list v4l2loopback-linux-module
                                     ;;nvidia-module
@@ -4141,7 +4432,7 @@ annoying! cannot fathom why this doesn't work
 (pretty-print "post-%ixy-features")
 #+end_src
 
-********** config
+****** config
 :PROPERTIES:
 :ID:       797b1544-85d0-4a89-b0fe-be6ba45ab847
 :CREATED:  [2022-07-29 Fri 17:53]
@@ -4164,7 +4455,7 @@ annoying! cannot fathom why this doesn't work
      ))))
 #+end_src
 
-********** debug: config args (features)
+****** debug: config args (features)
 :PROPERTIES:
 :ID:       49cef365-d12e-41eb-9e29-b04123e4db0a
 :CREATED:  [2022-07-29 Fri 18:04]
@@ -4179,20 +4470,20 @@ annoying! cannot fathom why this doesn't work
 ;;              %ixy-features))
 #+end_src
 
-********** os
+****** os
 :PROPERTIES:
 :ID:       9fa5b517-515a-4ce0-8b08-3717080553da
 :CREATED:  [2022-07-29 Fri 18:19]
-:UPDATED:  [2022-07-29 Fri 18:19]
+:UPDATED:  [2023-09-24 Sun 16:00]
 :ROAM_EXCLUDE: t
 :END:
+
 #+begin_src scheme
-;; TODISCUSS: Make rde-config-os/he to be a feature instead of getter?
 (define-public ixy-os
   (rde-config-operating-system ixy-config))
 #+end_src
 
-********** debug: os
+******* COMMENT debug: os
 :PROPERTIES:
 :ID:       24fc8fe1-79e9-45c9-a8b8-8e89db1161c5
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4203,7 +4494,7 @@ annoying! cannot fathom why this doesn't work
 (pretty-print "post-ixy-os")
 #+end_src
 
-********** home-environment
+****** home-environment
 :PROPERTIES:
 :ID:       a8b0c3bc-c2f6-4460-8a67-9519d36f204c
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4215,7 +4506,7 @@ annoying! cannot fathom why this doesn't work
   (rde-config-home-environment ixy-config))
 #+end_src
 
-********** debug: post-he
+******* COMMENT debug: post-ixy-he
 :PROPERTIES:
 :ID:       58a97450-1bec-4243-b9b0-938862431fbf
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4226,7 +4517,7 @@ annoying! cannot fathom why this doesn't work
 (pretty-print "post-ixy-he")
 #+end_src
 
-******** TODO live                                                        :host:live:
+***** TODO live                                                           :host:live:
 :PROPERTIES:
 :ID:       f0223612-a7d9-4a9e-a6c9-993ac3cadcb2
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4234,7 +4525,7 @@ annoying! cannot fathom why this doesn't work
 :ROAM_EXCLUDE: t
 :END:
 
-********** filesystem
+****** filesystem
 :PROPERTIES:
 :ID:       fca68375-9c08-4e3d-96e0-7856e9d13268
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4271,7 +4562,7 @@ annoying! cannot fathom why this doesn't work
         ))
 #+end_src
 
-********** config
+****** config
 :PROPERTIES:
 :ID:       6f2c9531-48c8-4bed-b843-e271888e207c
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4315,7 +4606,7 @@ annoying! cannot fathom why this doesn't work
         )))))))
 #+end_src
 
-********** os
+****** os
 :PROPERTIES:
 :ID:       2c7c2f23-a1bd-4db4-8218-72035ff32495
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4327,7 +4618,7 @@ annoying! cannot fathom why this doesn't work
   (rde-config-operating-system live-config))
 #+end_src
 
-********** debug: post live
+****** COMMENT debug: post live
 :PROPERTIES:
 :ID:       735d9883-dafd-4b64-bca8-ba5559995532
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4338,13 +4629,22 @@ annoying! cannot fathom why this doesn't work
 (pretty-print "post-live-config")
 #+end_src
 
-**** dispatcher
+***** TODO boggartonius
+:PROPERTIES:
+:CREATED:  [2023-09-24 Sun 16:02]
+:UPDATED:  [2023-09-24 Sun 16:02]
+:ID:       9e5ab3b1-c3d8-427f-a6c6-7872a15f928b
+:ROAM_EXCLUDE: t
+:END:
+
+*** dispatcher
 :PROPERTIES:
 :ID:       a607e231-867a-4f99-b24d-afc9324611e2
 :CREATED:  [2022-07-29 Fri 18:19]
-:UPDATED:  [2023-07-23 Sun 11:22]
+:UPDATED:  [2023-09-24 Sun 16:03]
 :ROAM_EXCLUDE: t
 :END:
+
 #+begin_src scheme
 (define (dispatcher)
   (let ((rde-target (getenv "RDE_TARGET")))
@@ -4357,7 +4657,15 @@ annoying! cannot fathom why this doesn't work
       (_ ixy-he))))
 #+end_src
 
-****** COMMENT debug: total
+**** COMMENT debug
+:PROPERTIES:
+:CREATED:  [2023-09-24 Sun 16:02]
+:UPDATED:  [2023-09-24 Sun 16:02]
+:ID:       ea0ed25c-c4d7-4c0d-ac5f-a830dbbb1c9d
+:ROAM_EXCLUDE: t
+:END:
+
+***** COMMENT debug: total, whole config
 :PROPERTIES:
 :ID:       0ec86b5a-f300-4373-bb1e-ccd6c7327776
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4378,7 +4686,7 @@ annoying! cannot fathom why this doesn't work
 ;;  (map feature-name (rde-config-features ixy-config)))
 #+end_src
 
-****** COMMENT debug: pre dispatch
+***** COMMENT debug: pre dispatch
 :PROPERTIES:
 :ID:       3ec71f5a-394c-42e9-8f7e-cd40908fe5bd
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4390,7 +4698,7 @@ annoying! cannot fathom why this doesn't work
 (pretty-print "pre-dispatch")
 #+end_src
 
-***** dispatch
+**** dispatch
 :PROPERTIES:
 :ID:       305b2df4-7b0c-4dc5-9c40-3f50e5d289f8
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -4402,7 +4710,7 @@ annoying! cannot fathom why this doesn't work
 (dispatcher)
 #+end_src
 
-**** channels
+*** channels
 :PROPERTIES:
 :ID:       4ef23979-355a-4858-841a-3551e4af3eb2
 :CREATED:  [2022-08-29 Mon 16:40]
@@ -4410,11 +4718,11 @@ annoying! cannot fathom why this doesn't work
 :ROAM_EXCLUDE: t
 :END:
 
-***** channels.scm
+**** channels.scm
 :PROPERTIES:
 :ID:       21ce54e0-18e0-460f-82c7-2b43e243ad45
 :CREATED:  [2022-08-29 Mon 16:40]
-:UPDATED:  [2023-07-12 Wed 20:32]
+:UPDATED:  [2023-08-31 Thu 10:21]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -4441,21 +4749,23 @@ annoying! cannot fathom why this doesn't work
     "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
     (openpgp-fingerprint
      "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
- (channel
-  (name 'guix-binary)
-  (url "https://git.sr.ht/~declantsien/guix-channel")
-  (introduction
-   (make-channel-introduction
-    "0c171cf43849f86516e1ee23aec34e586654a3a7"
-    (openpgp-fingerprint
-     "F695 F39E C625 E081 33B5  759F 0FC6 8703 75EF E2F5")))))
+ ;;; build of /gnu/store/59vmvlzgmksqryyvr45kp43v3wmz36qd-guix-package-cache.drv failed
+ ;; (channel
+ ;;  (name 'guix-binary)
+ ;;  (url "https://git.sr.ht/~declantsien/guix-channel")
+ ;;  (introduction
+ ;;   (make-channel-introduction
+ ;;    "0c171cf43849f86516e1ee23aec34e586654a3a7"
+ ;;    (openpgp-fingerprint
+ ;;     "F695 F39E C625 E081 33B5  759F 0FC6 8703 75EF E2F5"))))
+ )
 #+end_src
 
-***** channels-local.scm                                                   :untangle:
+**** channels-local.scm                                                    :untangle:
 :PROPERTIES:
 :ID:       334b6dee-e142-4020-9417-23b3ff933cb9
 :CREATED:  [2023-07-12 Wed 19:20]
-:UPDATED:  [2023-07-12 Wed 19:23]
+:UPDATED:  [2023-08-31 Thu 09:57]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -4484,14 +4794,56 @@ annoying! cannot fathom why this doesn't work
     "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
     (openpgp-fingerprint
      "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
+ ;; (channel
+ ;;  (name 'guix-binary)
+ ;;  (url "/home/samuel/git/sys/guix-binary")
+ ;;  (introduction
+ ;;   (make-channel-introduction
+ ;;    "0c171cf43849f86516e1ee23aec34e586654a3a7"
+ ;;    (openpgp-fingerprint
+ ;;     "F695 F39E C625 E081 33B5  759F 0FC6 8703 75EF E2F5"))))
+ )
+#+end_src
+
+**** etc
+:PROPERTIES:
+:CREATED:  [2023-10-03 Tue 15:33]
+:UPDATED:  [2023-10-03 Tue 15:33]
+:ID:       82f6ca07-9bc3-49b7-921b-2443cab6785e
+:ROAM_EXCLUDE: t
+:END:
+
+***** science
+:PROPERTIES:
+:CREATED:  [2023-10-03 Tue 15:33]
+:UPDATED:  [2023-10-03 Tue 15:33]
+:ID:       6a85f6fa-3b22-4b7c-bcf8-5ad32fec57a3
+:ROAM_EXCLUDE: t
+:END:
+
+****** channels.scm
+:PROPERTIES:
+:CREATED:  [2023-10-03 Tue 15:33]
+:UPDATED:  [2024-01-15 Mon 12:54]
+:ID:       0aeb9956-8468-4439-9a99-78b2764f3608
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme :tangle ~/.config/guix/science/channels.scm :noweb-ref null
+;; -*- mode: scheme -*-
+(use-modules (guix ci)
+             (guix channels))
+
+(list
+ %default-guix-channel
  (channel
-  (name 'guix-binary)
-  (url "/home/samuel/git/sys/guix-binary")
+  (name 'guix-science)
+  (url "https://github.com/guix-science/guix-science.git")
   (introduction
    (make-channel-introduction
-    "0c171cf43849f86516e1ee23aec34e586654a3a7"
+    "b1fe5aaff3ab48e798a4cce02f0212bc91f423dc"
     (openpgp-fingerprint
-     "F695 F39E C625 E081 33B5  759F 0FC6 8703 75EF E2F5")))))
+     "CA4F 8CF4 37D7 478F DA05  5FD4 4213 7701 1A37 8446")))))
 #+end_src
 
 ** emacs
@@ -4960,7 +5312,7 @@ getting C-u and C-x mixed up; see [[id:d2fc9152-8683-46c1-9ef2-4ca84510bb49][(rd
 :PROPERTIES:
 :ID:       8a2d78b3-5926-4d90-acdd-2f0d0fc01d8c
 :CREATED:  [2023-04-12 Wed 17:34]
-:UPDATED:  [2023-04-12 Wed 17:51]
+:UPDATED:  [2023-09-29 Fri 18:51]
 :ROAM_EXCLUDE: t
 :END:
 #+begin_src emacs-lisp
@@ -4969,6 +5321,21 @@ getting C-u and C-x mixed up; see [[id:d2fc9152-8683-46c1-9ef2-4ca84510bb49][(rd
 
 #+RESULTS:
 : kill-this-buffer
+
+**** {C-M-s-k}         :: kill-buffer-and-window
+:PROPERTIES:
+:CREATED:  [2023-09-29 Fri 18:51]
+:ID:       6c4d41d1-6b79-4181-8d19-b6f63ae83b97
+:ROAM_EXCLUDE: t
+:UPDATED:  [2023-09-29 Fri 18:52]
+:END:
+
+#+begin_src emacs-lisp
+(define-key global-map (kbd "C-M-s-k") 'kill-buffer-and-window)
+#+end_src
+
+#+RESULTS:
+: kill-buffer-and-window
 
 **** {C-z}             :: newline-above
 :PROPERTIES:
@@ -5093,13 +5460,14 @@ hmm, doesn't allow further input
 #+end_src
 
 #+RESULTS:
-| lambda | nil | (interactive) | (let ((case-fold-search isearch-case-fold-search)) (consult-line (if isearch-regexp isearch-string (regexp-quote isearch-string)))) |
+: (closure (t) nil (interactive) (let ((case-fold-search isearch-case-fold-search)) (consult-line (if isearch-regexp isearch-string (regexp-quote isearch-string)))))
 
 ***** regexp as default
 :PROPERTIES:
 :ID:       99f00fd1-d744-4bac-b3a1-11151ce843a3
 :CREATED:  <2022-02-25 Fri 10:09>
 :ROAM_EXCLUDE: t
+:UPDATED:  [2023-08-31 Thu 10:31]
 :END:
 #+begin_src emacs-lisp :noweb-ref kbd
 (global-set-key (kbd "C-s") 'isearch-forward-regexp)
@@ -5203,7 +5571,7 @@ seems like lots of ways to move
 :PROPERTIES:
 :ID:       c3de27b3-951b-4650-a940-bc4021e94663
 :CREATED:  [2023-07-12 Wed 20:46]
-:UPDATED:  [2023-07-15 Sat 18:36]
+:UPDATED:  [2023-08-24 Thu 11:47]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -5237,6 +5605,8 @@ when prefix arg nil,       fold to all levels."
     ;; editing, etc... all too well
     (when (and (boundp 'org-modern-mode) org-modern-mode)
       (org-modern-mode 1))
+    (when (and (boundp 'org-indent-mode) org-indent-mode)
+      (org-indent-indent-buffer))
     ;; FOR SOME JAZZ, PRINT THE OUTLINE
     (org-display-outline-path 'with-self t)))
 #+end_src
@@ -5297,16 +5667,21 @@ call with prefix to really reveal ALL.
 "
   (interactive)
   (cond ((not current-prefix-arg)
+         (message "denoise")
          (qz/org-denoise-point))
         (t
          (run-hook-with-args 'org-pre-cycle-hook 'all)
          (org-show-all '(headings blocks))
          (setq org-cycle-global-status 'all)
          (run-hook-with-args 'org-cycle-hook 'all)
-         (org-cycle-hide-drawers 'all)))
+         (org-cycle-hide-drawers 'all)
+         (when (and (boundp 'org-indent-mode) org-indent-mode)
+           ;; FIXME this is pretty slow -- maybe save-narrow?
+           ;;  (scope 'visible' indent to current subtree)
+           (org-indent-indent-buffer))
+         (recenter qz/recenter-line)))
   ;; FOR SOME JAZZ, PRINT THE OUTLINE
-  (org-display-outline-path 'with-self t)
-  (recenter qz/recenter-line))
+  (org-display-outline-path 'with-self t))
 
 (defalias 'qz/org-unfold 'qz/org-show-all)
 #+end_src
@@ -5318,7 +5693,7 @@ call with prefix to really reveal ALL.
 :PROPERTIES:
 :ID:       936b5274-2c3a-4167-9a67-7f267bb86a0f
 :CREATED:  [2023-07-15 Sat 14:57]
-:UPDATED:  [2023-07-15 Sat 18:52]
+:UPDATED:  [2023-08-24 Thu 11:55]
 :ROAM_EXCLUDE: t
 :END:
 :LOGBOOK:
@@ -5336,19 +5711,38 @@ so,  maybe if I narrow the buffer to the subtree at point; 'qz/org-show-all;
   ;;
   (save-excursion
     (org-back-to-heading)
-    (org-cycle))
+    (org-cycle)
+    (recenter qz/recenter-line))
   (org-cycle-hide-drawers 'all)
-  (recenter qz/recenter-line))
+  (when (and (boundp 'org-indent-mode) org-indent-mode)
+    ;; FIXME this is pretty slow -- maybe save-narrow?
+    ;;  (scope 'visible' indent to current subtree)
+    (org-indent-indent-buffer)))
 #+end_src
 
 #+RESULTS:
 : qz/org-denoise-point
 
+**** {s-S-TAB}         :: org-roam-insert
+:PROPERTIES:
+:CREATED:  [2023-10-08 Sun 17:24]
+:UPDATED:  [2023-10-08 Sun 17:26]
+:ID:       d23dfc37-8e39-41b8-b4ee-60cfcaa34fe7
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp
+(define-key global-map (kbd "C-s-=") 'org-roam-node-insert)
+(define-key global-map (kbd "C-s-+") 'org-roam-node-find)
+#+end_src
+
+#+RESULTS:
+: org-roam-node-find
+
 **** {C-M-|}           :: dwim-indent
 :PROPERTIES:
 :ID:       6b16863f-f6a1-4ba2-82a7-e10a12890eb0
 :CREATED:  [2023-06-19 Mon 18:01]
-:UPDATED:  [2023-06-19 Mon 18:01]
+:UPDATED:  [2023-11-16 Thu 20:45]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -5378,6 +5772,8 @@ org-errors about caching from my dodgy code"
                                     qz/org-babel-indent-exclude-lang
                                     (car (org-babel-get-src-block-info))))))
                     'indent-region)
+                   ((derived-mode-p 'python-mode)
+                    (python-black-buffer))
                    ((and (derived-mode-p 'prog-mode)
                          (mark-whole-buffer))
                     'indent-region)
@@ -5646,7 +6042,7 @@ maybe this is something for lookback regexps (defining our own 'indent-line-func
 (define-key org-mode-map (kbd "C-s-0") 'qz/org-search-from-heading)
 #+end_src
 
-***** TODO ddg links are super borked.  tracking is baked in too
+***** TODO COMMENT ddg links are super borked.  tracking is baked in too
 :PROPERTIES:
 :ID:       453f4d16-d6a3-48a1-818c-89b80aa9a292
 :CREATED:  [2023-07-16 Sun 21:40]
@@ -5726,7 +6122,7 @@ files of note
 #+RESULTS:
 : qz/aws-env
 
-***** choose
+****** choose
 :PROPERTIES:
 :ID:       6663fecd-c4a2-4218-aa18-4bc4bb3e922f
 :ROAM_EXCLUDE: t
@@ -5761,6 +6157,7 @@ files of note
 :ID:       48fa15cd-93c1-49e6-9e4b-c610959c4b11
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
+:UPDATED:  [2023-09-29 Fri 18:57]
 :END:
 #+begin_src emacs-lisp
 (defvar qz/kubectl-context nil
@@ -5771,14 +6168,14 @@ to check, at a shell, run:
 or
 `$ kubectl config current-context")
 #+end_src
-***** choose                                                                   :func:
+****** choose                                                                  :func:
 :PROPERTIES:
 :ID:       48e170f6-acf1-48d3-af8d-bb06069db027
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
 :END:
 #+begin_src emacs-lisp
-(defun qz/choose-kubectl-context (ctx)
+(defun qz/choose-kubectl-context (&optional ctx)
   (interactive)
   (setq qz/kubectl-context
         (or ctx (completing-read "k8s ctx: "
@@ -5790,7 +6187,12 @@ or
 
 ;; optional; quality of life improvement to bury kubectl buffer
 (add-to-list 'display-buffer-alist '("*kubectl*" display-buffer-no-window))
+
+(defalias 'qz/choose-kubernetes-context 'qz/choose-kubectl-context )
 #+end_src
+
+#+RESULTS:
+: qz/choose-kubernetes-context
 
 **** read-tab
 :PROPERTIES:
@@ -6332,6 +6734,40 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.")
 #+RESULTS:
 : insert-gpl
 
+**** recover-and-diff-buffer-with-file
+:PROPERTIES:
+:ID:       4ce295c9-8661-44f1-92d7-1b1cec7cca68
+:CREATED:  [2023-08-28 Mon 14:00]
+:UPDATED:  [2023-08-28 Mon 14:02]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp
+(defun qz/recover-this-file-and-diff-buffer-with-file ()
+  (interactive)
+  (call-interactively 'recover-this-file)
+  (call-interactively 'diff-buffer-with-file))
+#+end_src
+
+#+RESULTS:
+: qz/recover-this-file-and-diff-buffer-with-file
+
+**** pass shorthand :: qz/p
+:PROPERTIES:
+:ID:       d8341d8a-b882-4aba-8d27-a3acefb4fc2d
+:CREATED:  [2023-08-30 Wed 12:08]
+:UPDATED:  [2023-08-30 Wed 12:08]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp
+(defun qz/p (token)
+  (auth-source-pass-get 'secret token))
+#+end_src
+
+#+RESULTS:
+: qz/p
+
 *** programming
 :PROPERTIES:
 :ID:       5fe66077-8fc2-4d04-905d-d0b5ef925a6d
@@ -6527,12 +6963,18 @@ CLOCK: [2022-03-17 Thu 10:06]--[2022-03-17 Thu 11:32] =>  1:26
 
 #+RESULTS:
 : qz/sqlfluff-region
-
-***** org-babel-default-header-args:sql
+***** vars
+:PROPERTIES:
+:ID:       d4ec521b-c430-4fe4-b7f9-9ad06ca33272
+:CREATED:  [2023-08-15 Tue 11:39]
+:UPDATED:  [2023-08-15 Tue 11:39]
+:ROAM_EXCLUDE: t
+:END:
+****** org-babel-default-header-args:sql
 :PROPERTIES:
 :ID:       51e144e6-da9d-4293-974d-9639cbee4173
 :CREATED:  [2022-08-11 Thu 11:01]
-:UPDATED:  [2023-07-21 Fri 14:45]
+:UPDATED:  [2023-09-01 Fri 17:54]
 :END:
 
 #+begin_src emacs-lisp :noweb-ref org
@@ -6544,8 +6986,9 @@ CLOCK: [2022-03-17 Thu 10:06]--[2022-03-17 Thu 11:32] =>  1:26
       qz/bq/bi "`p-t-business-intelligence-0da1`"
       qz/org-babel-default-header-args:sql:bq
       `((:engine . "bq")
-        (:results . "raw")
-        (:var bi . ,qz/bq/bi)
+        (:results . "raw"))
+      qz/sql:bq:etc
+      `((:var bi . ,qz/bq/bi)
         (:var datep . "> timestamp_add(current_date(), interval -$period day)")
         (:var timep . "> timestamp_add(current_timestamp(), interval -$period day)")
         ;; this var 'period' must go "at the end", such that it may be
@@ -6561,13 +7004,13 @@ CLOCK: [2022-03-17 Thu 10:06]--[2022-03-17 Thu 11:32] =>  1:26
 #+end_src
 
 #+RESULTS:
-: ((:engine . "bq") (:results . "raw") (:var bi . "`p-t-business-intelligence-0da1`") (:var datep . "> timestamp_add(current_date(), interval -$period day)") (:var timep . "> timestamp_add(current_timestamp(), interval -$period day)") (:var period . 7) (:var return . "`p-t-business-intelligence-0da1`.t_checkout.vw_item_return") (:var soi . "`p-t-business-intelligence-0da1`.t_order_management.vw_dim_sales_order_item_all_time") (:var so . "`p-t-business-intelligence-0da1`.t_order_management.vw_order") (:var vsoi . "`p-t-order-management-svc-6996`.validation_stream.om_public_sales_order_item") (:var rsoi . "`p-t-order-management-svc-6996`.raw_stream.om_public_sales_order_item") (:var dmsoi . "`p-t-order-management-svc-6996`.dm.dimension_sales_order_item"))
+: ((:var bi . "`p-t-business-intelligence-0da1`") (:var datep . "> timestamp_add(current_date(), interval -$period day)") (:var timep . "> timestamp_add(current_timestamp(), interval -$period day)") (:var period . 7) (:var return . "`p-t-business-intelligence-0da1`.t_checkout.vw_item_return") (:var soi . "`p-t-business-intelligence-0da1`.t_order_management.vw_dim_sales_order_item_all_time") (:var so . "`p-t-business-intelligence-0da1`.t_order_management.vw_order") (:var vsoi . "`p-t-order-management-svc-6996`.validation_stream.om_public_sales_order_item") (:var rsoi . "`p-t-order-management-svc-6996`.raw_stream.om_public_sales_order_item") (:var dmsoi . "`p-t-order-management-svc-6996`.dm.dimension_sales_order_item"))
 
-****** qz/choose-org-babel-default-header-args:sql
+******* qz/choose-org-babel-default-header-args:sql
 :PROPERTIES:
 :ID:       ceff098a-12f2-419f-911c-8ba2dfcebab0
 :CREATED:  [2023-05-10 Wed 11:58]
-:UPDATED:  [2023-07-21 Fri 14:45]
+:UPDATED:  [2023-09-01 Fri 17:54]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -6585,7 +7028,7 @@ CLOCK: [2022-03-17 Thu 10:06]--[2022-03-17 Thu 11:32] =>  1:26
 #+end_src
 
 #+RESULTS:
-: ((:engine . "bq") (:results . "raw") (:var bi . "`p-t-business-intelligence-0da1`") (:var datep . "> timestamp_add(current_date(), interval -$period day)") (:var timep . "> timestamp_add(current_timestamp(), interval -$period day)") (:var period . 7) (:var return . "`p-t-business-intelligence-0da1`.t_checkout.vw_item_return") (:var soi . "`p-t-business-intelligence-0da1`.t_order_management.vw_dim_sales_order_item_all_time") (:var so . "`p-t-business-intelligence-0da1`.t_order_management.vw_order") (:var vsoi . "`p-t-order-management-svc-6996`.validation_stream.om_public_sales_order_item") (:var rsoi . "`p-t-order-management-svc-6996`.raw_stream.om_public_sales_order_item") (:var dmsoi . "`p-t-order-management-svc-6996`.dm.dimension_sales_order_item"))
+: ((:engine . "bq") (:results . "raw"))
 
 ***** bigquery
 :PROPERTIES:
@@ -6674,7 +7117,7 @@ she said im cool!!
 :PROPERTIES:
 :ID:       3ee4f0e6-7ead-44fd-b01a-7537aa93c236
 :CREATED:  [2023-05-05 Fri 14:23]
-:UPDATED:  [2023-07-19 Wed 15:11]
+:UPDATED:  [2023-10-27 Fri 12:11]
 :END:
 
 - see also :: [[id:cbfce57c-9f96-4e68-9585-620f4f249f5a][bq: cli cheatsheet]]
@@ -6728,6 +7171,22 @@ done
     [[file:~/.cache/bq-schema.txt]]
     :end:
 
+********* bq-scrape-given-project
+:PROPERTIES:
+:ID:       058fac72-f6f0-433f-9781-1042e9024bfb
+:CREATED:  [2023-08-15 Tue 11:49]
+:UPDATED:  [2023-10-27 Fri 09:56]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src shell
+for proj in p-t-business-intelligence-0da1 p-t-order-management-svc-6996 p-t-routing-svc-420b ; do
+    gcloud config set project $proj
+    bq-scrape > "${HOME}/.cache/bq-scrape-${proj}.txt"
+done
+# reset
+gcloud config set project p-t-business-intelligence-0da1
+#+end_src
 ******** bq-export-views
 :PROPERTIES:
 :ID:       d54a9751-5a80-42fe-b12e-2ba85b6c7b03
@@ -6824,7 +7283,7 @@ done
 :PROPERTIES:
 :ID:       f61e6ac0-150d-41a9-9cd3-4a4941deaaa5
 :CREATED:  [2023-05-05 Fri 14:23]
-:UPDATED:  [2023-05-05 Fri 14:25]
+:UPDATED:  [2023-10-27 Fri 12:11]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -6838,7 +7297,9 @@ done
                      ;; remove last empty line
                      (s-trim (with-temp-buffer
                                ;; TODO memoize
-                               (insert-file "~/.cache/bq-schema.txt")
+                               (mapc 'insert-file
+                                     '("~/.cache/bq-scrape-p-t-business-intelligence-0da1.txt"
+                                       "~/.cache/bq-scrape-p-t-order-management-svc-6996.txt"))
                                (buffer-string)))))))
     (consult--read
      d
@@ -6866,9 +7327,9 @@ done
                                (insert-file "~/.cache/bq-schema.txt")
                                (buffer-string)))))))
     (insert (completing-read
-"choose attr: "
-(mapcar 'car d))
-     )))
+             "choose attr: "
+             (mapcar 'car d))
+            )))
 
 
 #+end_src
@@ -6893,9 +7354,10 @@ done
 :PROPERTIES:
 :ID:       0ec7d6ff-d6f7-4ad9-91e6-0c7e33a52e65
 :CREATED:  [2023-07-15 Sat 16:56]
-:UPDATED:  [2023-07-15 Sat 16:56]
+:UPDATED:  [2023-10-24 Tue 16:45]
 :ROAM_EXCLUDE: t
 :END:
+
 
 #+begin_src emacs-lisp
 (setq temp-buffer-show-function 'hkey-help-show
@@ -6905,6 +7367,25 @@ done
 
 #+RESULTS:
 : (completion-list-mode-finish help-mode-finish)
+******* TODO why?  what sort of error does this help to resolve?  maybe help-plus?
+:PROPERTIES:
+:CREATED:  [2023-10-24 Tue 16:46]
+:UPDATED:  [2023-10-24 Tue 16:46]
+:ID:       97876050-eea8-41fe-9622-4004706ea459
+:ROAM_EXCLUDE: t
+:END:
+
+***** auto-mode for ~.tml~ (thoughtspot proprietary markup)
+:PROPERTIES:
+:CREATED:  [2023-10-24 Tue 16:43]
+:UPDATED:  [2023-10-24 Tue 16:45]
+:ID:       076bc272-8e95-4cfe-a373-88211c6b681c
+:END:
+
+#+begin_src emacs-lisp
+(add-to-list 'auto-mode-alist
+             '("\\.tml\\'" . yaml-mode))
+#+end_src
 
 **** [[id:091ac573-6b34-4e0e-88b8-415785d5ae85][python]]
 :PROPERTIES:
@@ -6955,6 +7436,37 @@ done
 #+begin_src emacs-lisp
 (custom-set-variables '(python-indent-offset 4))
 #+end_src
+
+***** pyx = py
+:PROPERTIES:
+:CREATED:  [2023-10-30 Mon 21:52]
+:UPDATED:  [2023-10-30 Mon 21:52]
+:ID:       22ab8435-5ece-4544-a9e6-6a320ddccfd9
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp
+(add-to-list 'auto-mode-alist
+             '("\\.pyx\\'" . python-mode))
+#+end_src
+
+#+RESULTS:
+: (("\\.pyx\\'" . python-mode) ("\\.tml\\'" . yaml-mode) ("\\(?:\\(?:\\.\\(?:b\\(?:\\(?:abel\\|ower\\)rc\\)\\|json\\(?:ld\\)?\\)\\|composer\\.lock\\)\\'\\)" . json-mode) ("\\.odc\\'" . archive-mode) ("\\.odf\\'" . archive-mode) ("\\.odi\\'" . archive-mode) ("\\.otp\\'" . archive-mode) ("\\.odp\\'" . archive-mode) ("\\.otg\\'" . archive-mode) ("\\.odg\\'" . archive-mode) ("\\.ots\\'" . archive-mode) ("\\.ods\\'" . archive-mode) ("\\.odm\\'" . archive-mode) ("\\.ott\\'" . archive-mode) ("\\.odt\\'" . archive-mode) ("\\.kotl?\\'" . kotl-mode) ("/guix/drvs/[[:alnum:]]\\{2\\}/[[:alnum:]]\\{30\\}-\\(?:[+._[:alnum:]-]+\\)\\.drv\\'" . guix-build-log-mode) ("/gnu/store/\\(?:[+._[:alnum:]-]+\\)\\.drv\\'" . guix-derivation-mode) ("/etc/profile\\'" . guix-env-var-mode) ("/tmp/guix-build-\\(?:[+._[:alnum:]-]+\\)\\.drv-[[:digit:]]+/environment-variables\\'" . guix-env-var-mode) ("/guix/profiles/system\\(?:[+._[:alnum:]-]+\\)*/\\(?:boot\\|parameters\\)\\'" . guix-scheme-mode) ("/gnu/store/\\(?:[0-9a-df-np-sv-z]\\{32\\}\\)-\\(?:activate\\|activate-service\\|boot\\|parameters\\|shepherd\\.conf\\|shepherd\\(?:[+._[:alnum:]-]+\\)\\.scm\\|\\(?:[+._[:alnum:]-]+\\)-guile-builder\\)\\'" . guix-scheme-mode) ("\\.epub\\'" . nov-mode) ("\\.[pP][dD][fF]\\'" . pdf-view-mode) (".*Dockerfile\\'" . dockerfile-mode) ("\\.envrc\\'" . envrc-file-mode) ("\\.dockerfile\\'" . dockerfile-mode) ("/Dockerfile\\(?:\\.[^/\\]*\\)?\\'" . dockerfile-mode) ("\\.tsv\\'" . tsv-mode) ("\\.[Cc][Ss][Vv]\\'" . csv-mode) ("\\.fountain\\'" . fountain-mode) ("\\.lua\\'" . lua-mode) ("\\.pgn\\'" . chess-pgn-mode) ("\\.\\(e?ya?\\|ra\\)ml\\'" . yaml-mode) ("\\.nomad\\'" . hcl-mode) ("\\.hcl\\'" . hcl-mode) ("\\.tf\\(vars\\)?\\'" . terraform-mode) ("\\.proto\\'" . protobuf-mode) ("\\.\\(plantuml\\|pum\\|plu\\)\\'" . plantuml-mode) ("\\.hva\\'" . latex-mode) ("go\\.mod\\'" . go-dot-mod-mode) ("\\.go\\'" . go-mode) ("\\.\\(?:md\\|markdown\\|mkd\\|mdown\\|mkdn\\|mdwn\\)\\'" . markdown-mode) ("/git-rebase-todo\\'" . git-rebase-mode) ("\\.jl\\'" . julia-mode) ("\\.[Ss][Aa][Ss]\\'" . SAS-mode) ("\\.Sout" . S-transcript-mode) ("\\.[Ss]t\\'" . S-transcript-mode) ("\\.Rd\\'" . Rd-mode) ("DESCRIPTION\\'" . conf-colon-mode) ("/Makevars\\(\\.win\\)?\\'" . makefile-mode) ("\\.[Rr]out" . ess-r-transcript-mode) ("CITATION\\'" . ess-r-mode) ("NAMESPACE\\'" . ess-r-mode) ("\\.[rR]profile\\'" . ess-r-mode) ("\\.[rR]\\'" . ess-r-mode) ("/R/.*\\.q\\'" . ess-r-mode) ("\\.[Jj][Aa][Gg]\\'" . ess-jags-mode) ("\\.[Bb][Mm][Dd]\\'" . ess-bugs-mode) ("\\.[Bb][Oo][Gg]\\'" . ess-bugs-mode) ("\\.[Bb][Uu][Gg]\\'" . ess-bugs-mode) ("\\.gpg\\(~\\|\\.~[0-9]+~\\)?\\'" nil epa-file) ("\\.elc\\'" . elisp-byte-code-mode) ("\\.zst\\'" nil jka-compr) ("\\.dz\\'" nil jka-compr) ("\\.xz\\'" nil jka-compr) ("\\.lzma\\'" nil jka-compr) ("\\.lz\\'" nil jka-compr) ("\\.g?z\\'" nil jka-compr) ("\\.bz2\\'" nil jka-compr) ("\\.Z\\'" nil jka-compr) ("\\.vr[hi]?\\'" . vera-mode) ("\\(?:\\.\\(?:rbw?\\|ru\\|rake\\|thor\\|jbuilder\\|rabl\\|gemspec\\|podspec\\)\\|/\\(?:Gem\\|Rake\\|Cap\\|Thor\\|Puppet\\|Berks\\|Brew\\|Vagrant\\|Guard\\|Pod\\)file\\)\\'" . ruby-mode) ("\\.re?st\\'" . rst-mode) ("\\.py[iw]?\\'" . python-mode) ("\\.m\\'" . octave-maybe-mode) ("\\.less\\'" . less-css-mode) ("\\.scss\\'" . scss-mode) ("\\.cs\\'" . csharp-mode) ("\\.awk\\'" . awk-mode) ("\\.\\(u?lpc\\|pike\\|pmod\\(\\.in\\)?\\)\\'" . pike-mode) ("\\.idl\\'" . idl-mode) ("\\.java\\'" . java-mode) ("\\.m\\'" . objc-mode) ("\\.ii\\'" . c++-mode) ("\\.i\\'" . c-mode) ("\\.lex\\'" . c-mode) ("\\.y\\(acc\\)?\\'" . c-mode) ("\\.h\\'" . c-or-c++-mode) ("\\.c\\'" . c-mode) ("\\.\\(CC?\\|HH?\\)\\'" . c++-mode) ("\\.[ch]\\(pp\\|xx\\|\\+\\+\\)\\'" . c++-mode) ("\\.\\(cc\\|hh\\)\\'" . c++-mode) ("\\.\\(bat\\|cmd\\)\\'" . bat-mode) ("\\.[sx]?html?\\(\\.[a-zA-Z_]+\\)?\\'" . mhtml-mode) ("\\.svgz?\\'" . image-mode) ("\\.svgz?\\'" . xml-mode) ("\\.x[bp]m\\'" . image-mode) ("\\.x[bp]m\\'" . c-mode) ("\\.p[bpgn]m\\'" . image-mode) ("\\.tiff?\\'" . image-mode) ("\\.gif\\'" . image-mode) ("\\.png\\'" . image-mode) ("\\.jpe?g\\'" . image-mode) ("\\.webp\\'" . image-mode) ("\\.te?xt\\'" . text-mode) ("\\.[tT]e[xX]\\'" . tex-mode) ("\\.ins\\'" . tex-mode) ("\\.ltx\\'" . latex-mode) ("\\.dtx\\'" . doctex-mode) ("\\.org\\'" . org-mode) ("\\.dir-locals\\(?:-2\\)?\\.el\\'" . lisp-data-mode) ("\\.eld\\'" . lisp-data-mode) ("eww-bookmarks\\'" . lisp-data-mode) ("tramp\\'" . lisp-data-mode) ("/archive-contents\\'" . lisp-data-mode) ("places\\'" . lisp-data-mode) ("\\.emacs-places\\'" . lisp-data-mode) ("\\.el\\'" . emacs-lisp-mode) ("Project\\.ede\\'" . emacs-lisp-mode) ("\\.\\(scm\\|sls\\|sld\\|stk\\|ss\\|sch\\)\\'" . scheme-mode) ("\\.l\\'" . lisp-mode) ("\\.li?sp\\'" . lisp-mode) ("\\.[fF]\\'" . fortran-mode) ("\\.for\\'" . fortran-mode) ("\\.p\\'" . pascal-mode) ("\\.pas\\'" . pascal-mode) ("\\.\\(dpr\\|DPR\\)\\'" . delphi-mode) ("\\.\\([pP]\\([Llm]\\|erl\\|od\\)\\|al\\)\\'" . perl-mode) ("Imakefile\\'" . makefile-imake-mode) ("Makeppfile\\(?:\\.mk\\)?\\'" . makefile-makepp-mode) ("\\.makepp\\'" . makefile-makepp-mode) ("\\.mk\\'" . makefile-gmake-mode) ("\\.make\\'" . makefile-gmake-mode) ("[Mm]akefile\\'" . makefile-gmake-mode) ("\\.am\\'" . makefile-automake-mode) ("\\.texinfo\\'" . texinfo-mode) ("\\.te?xi\\'" . texinfo-mode) ("\\.[sS]\\'" . asm-mode) ("\\.asm\\'" . asm-mode) ("\\.css\\'" . css-mode) ("\\.mixal\\'" . mixal-mode) ("\\.gcov\\'" . compilation-mode) ("/\\.[a-z0-9-]*gdbinit" . gdb-script-mode) ("-gdb\\.gdb" . gdb-script-mode) ("[cC]hange\\.?[lL]og?\\'" . change-log-mode) ("[cC]hange[lL]og[-.][0-9]+\\'" . change-log-mode) ("\\$CHANGE_LOG\\$\\.TXT" . change-log-mode) ("\\.scm\\.[0-9]*\\'" . scheme-mode) ("\\.[ckz]?sh\\'\\|\\.shar\\'\\|/\\.z?profile\\'" . sh-mode) ("\\.bash\\'" . sh-mode) ("/PKGBUILD\\'" . sh-mode) ("\\(/\\|\\`\\)\\.\\(bash_\\(profile\\|history\\|log\\(in\\|out\\)\\)\\|z?log\\(in\\|out\\)\\)\\'" . sh-mode) ("\\(/\\|\\`\\)\\.\\(shrc\\|zshrc\\|m?kshrc\\|bashrc\\|t?cshrc\\|esrc\\)\\'" . sh-mode) ("\\(/\\|\\`\\)\\.\\([kz]shenv\\|xinitrc\\|startxrc\\|xsession\\)\\'" . sh-mode) ("\\.m?spec\\'" . sh-mode) ("\\.m[mes]\\'" . nroff-mode) ("\\.man\\'" . nroff-mode) ("\\.sty\\'" . latex-mode) ("\\.cl[so]\\'" . latex-mode) ("\\.bbl\\'" . latex-mode) ("\\.bib\\'" . bibtex-mode) ("\\.bst\\'" . bibtex-style-mode) ("\\.sql\\'" . sql-mode) ("\\(acinclude\\|aclocal\\|acsite\\)\\.m4\\'" . autoconf-mode) ("\\.m[4c]\\'" . m4-mode) ("\\.mf\\'" . metafont-mode) ("\\.mp\\'" . metapost-mode) ("\\.vhdl?\\'" . vhdl-mode) ("\\.article\\'" . text-mode) ("\\.letter\\'" . text-mode) ("\\.i?tcl\\'" . tcl-mode) ("\\.exp\\'" . tcl-mode) ("\\.itk\\'" . tcl-mode) ("\\.icn\\'" . icon-mode) ("\\.sim\\'" . simula-mode) ("\\.mss\\'" . scribe-mode) ("\\.f9[05]\\'" . f90-mode) ("\\.f0[38]\\'" . f90-mode) ("\\.indent\\.pro\\'" . fundamental-mode) ("\\.\\(pro\\|PRO\\)\\'" . idlwave-mode) ("\\.srt\\'" . srecode-template-mode) ("\\.prolog\\'" . prolog-mode) ("\\.tar\\'" . tar-mode) ("\\.\\(arc\\|zip\\|lzh\\|lha\\|zoo\\|[jew]ar\\|xpi\\|rar\\|cbr\\|7z\\|squashfs\\|ARC\\|ZIP\\|LZH\\|LHA\\|ZOO\\|[JEW]AR\\|XPI\\|RAR\\|CBR\\|7Z\\|SQUASHFS\\)\\'" . archive-mode) ("\\.oxt\\'" . archive-mode) ("\\.\\(deb\\|[oi]pk\\)\\'" . archive-mode) ("\\`/tmp/Re" . text-mode) ("/Message[0-9]*\\'" . text-mode) ("\\`/tmp/fol/" . text-mode) ("\\.oak\\'" . scheme-mode) ("\\.sgml?\\'" . sgml-mode) ("\\.x[ms]l\\'" . xml-mode) ("\\.dbk\\'" . xml-mode) ("\\.dtd\\'" . sgml-mode) ("\\.ds\\(ss\\)?l\\'" . dsssl-mode) ("\\.js[mx]?\\'" . javascript-mode) ("\\.har\\'" . javascript-mode) ("\\.json\\'" . js-json-mode) ("\\.[ds]?va?h?\\'" . verilog-mode) ("\\.by\\'" . bovine-grammar-mode) ("\\.wy\\'" . wisent-grammar-mode) ("\\.erts\\'" . erts-mode) ("[:/\\]\\..*\\(emacs\\|gnus\\|viper\\)\\'" . emacs-lisp-mode) ("\\`\\..*emacs\\'" . emacs-lisp-mode) ("[:/]_emacs\\'" . emacs-lisp-mode) ("/crontab\\.X*[0-9]+\\'" . shell-script-mode) ("\\.ml\\'" . lisp-mode) ("\\.ld[si]?\\'" . ld-script-mode) ("ld\\.?script\\'" . ld-script-mode) ("\\.xs\\'" . c-mode) ("\\.x[abdsru]?[cnw]?\\'" . ld-script-mode) ("\\.zone\\'" . dns-mode) ("\\.soa\\'" . dns-mode) ("\\.asd\\'" . lisp-mode) ("\\.\\(asn\\|mib\\|smi\\)\\'" . snmp-mode) ("\\.\\(as\\|mi\\|sm\\)2\\'" . snmpv2-mode) ("\\.\\(diffs?\\|patch\\|rej\\)\\'" . diff-mode) ("\\.\\(dif\\|pat\\)\\'" . diff-mode) ("\\.[eE]?[pP][sS]\\'" . ps-mode) ("\\.\\(?:PDF\\|EPUB\\|CBZ\\|FB2\\|O?XPS\\|DVI\\|OD[FGPST]\\|DOCX\\|XLSX?\\|PPTX?\\|pdf\\|epub\\|cbz\\|fb2\\|o?xps\\|djvu\\|dvi\\|od[fgpst]\\|docx\\|xlsx?\\|pptx?\\)\\'" . doc-view-mode-maybe) ("configure\\.\\(ac\\|in\\)\\'" . autoconf-mode) ("\\.s\\(v\\|iv\\|ieve\\)\\'" . sieve-mode) ("BROWSE\\'" . ebrowse-tree-mode) ("\\.ebrowse\\'" . ebrowse-tree-mode) ("#\\*mail\\*" . mail-mode) ("\\.g\\'" . antlr-mode) ("\\.mod\\'" . m2-mode) ("\\.ses\\'" . ses-mode) ("\\.docbook\\'" . sgml-mode) ("\\.com\\'" . dcl-mode) ("/config\\.\\(?:bat\\|log\\)\\'" . fundamental-mode) ("/\\.\\(authinfo\\|netrc\\)\\'" . authinfo-mode) ("\\.\\(?:[iI][nN][iI]\\|[lL][sS][tT]\\|[rR][eE][gG]\\|[sS][yY][sS]\\)\\'" . conf-mode) ("\\.la\\'" . conf-unix-mode) ("\\.ppd\\'" . conf-ppd-mode) ("java.+\\.conf\\'" . conf-javaprop-mode) ("\\.properties\\(?:\\.[a-zA-Z0-9._-]+\\)?\\'" . conf-javaprop-mode) ("\\.toml\\'" . conf-toml-mode) ("\\.desktop\\'" . conf-desktop-mode) ("/\\.redshift\\.conf\\'" . conf-windows-mode) ("\\`/etc/\\(?:DIR_COLORS\\|ethers\\|.?fstab\\|.*hosts\\|lesskey\\|login\\.?de\\(?:fs\\|vperm\\)\\|magic\\|mtab\\|pam\\.d/.*\\|permissions\\(?:\\.d/.+\\)?\\|protocols\\|rpc\\|services\\)\\'" . conf-space-mode) ("\\`/etc/\\(?:acpid?/.+\\|aliases\\(?:\\.d/.+\\)?\\|default/.+\\|group-?\\|hosts\\..+\\|inittab\\|ksysguarddrc\\|opera6rc\\|passwd-?\\|shadow-?\\|sysconfig/.+\\)\\'" . conf-mode) ("[cC]hange[lL]og[-.][-0-9a-z]+\\'" . change-log-mode) ("/\\.?\\(?:gitconfig\\|gnokiirc\\|hgrc\\|kde.*rc\\|mime\\.types\\|wgetrc\\)\\'" . conf-mode) ("/\\.mailmap\\'" . conf-unix-mode) ("/\\.\\(?:asound\\|enigma\\|fetchmail\\|gltron\\|gtk\\|hxplayer\\|mairix\\|mbsync\\|msmtp\\|net\\|neverball\\|nvidia-settings-\\|offlineimap\\|qt/.+\\|realplayer\\|reportbug\\|rtorrent\\.\\|screen\\|scummvm\\|sversion\\|sylpheed/.+\\|xmp\\)rc\\'" . conf-mode) ("/\\.\\(?:gdbtkinit\\|grip\\|mpdconf\\|notmuch-config\\|orbital/.+txt\\|rhosts\\|tuxracer/options\\)\\'" . conf-mode) ("/\\.?X\\(?:default\\|resource\\|re\\)s\\>" . conf-xdefaults-mode) ("/X11.+app-defaults/\\|\\.ad\\'" . conf-xdefaults-mode) ("/X11.+locale/.+/Compose\\'" . conf-colon-mode) ("/X11.+locale/compose\\.dir\\'" . conf-javaprop-mode) ("\\.~?[0-9]+\\.[0-9][-.0-9]*~?\\'" nil t) ("\\.\\(?:orig\\|in\\|[bB][aA][kK]\\)\\'" nil t) ("[/.]c\\(?:on\\)?f\\(?:i?g\\)?\\(?:\\.[a-zA-Z0-9._-]+\\)?\\'" . conf-mode-maybe) ("\\.[1-9]\\'" . nroff-mode) ("\\.art\\'" . image-mode) ("\\.avs\\'" . image-mode) ("\\.bmp\\'" . image-mode) ("\\.cmyk\\'" . image-mode) ("\\.cmyka\\'" . image-mode) ("\\.crw\\'" . image-mode) ("\\.dcr\\'" . image-mode) ("\\.dcx\\'" . image-mode) ("\\.dng\\'" . image-mode) ("\\.dpx\\'" . image-mode) ("\\.fax\\'" . image-mode) ("\\.heic\\'" . image-mode) ("\\.hrz\\'" . image-mode) ("\\.icb\\'" . image-mode) ("\\.icc\\'" . image-mode) ("\\.icm\\'" . image-mode) ("\\.ico\\'" . image-mode) ("\\.icon\\'" . image-mode) ("\\.jbg\\'" . image-mode) ("\\.jbig\\'" . image-mode) ("\\.jng\\'" . image-mode) ("\\.jnx\\'" . image-mode) ("\\.miff\\'" . image-mode) ("\\.mng\\'" . image-mode) ("\\.mvg\\'" . image-mode) ("\\.otb\\'" . image-mode) ("\\.p7\\'" . image-mode) ("\\.pcx\\'" . image-mode) ("\\.pdb\\'" . image-mode) ("\\.pfa\\'" . image-mode) ("\\.pfb\\'" . image-mode) ("\\.picon\\'" . image-mode) ("\\.pict\\'" . image-mode) ("\\.rgb\\'" . image-mode) ("\\.rgba\\'" . image-mode) ("\\.tga\\'" . image-mode) ("\\.wbmp\\'" . image-mode) ("\\.webp\\'" . image-mode) ("\\.wmf\\'" . image-mode) ("\\.wpg\\'" . image-mode) ("\\.xcf\\'" . image-mode) ("\\.xmp\\'" . image-mode) ("\\.xwd\\'" . image-mode) ("\\.yuv\\'" . image-mode) ("\\.tgz\\'" . tar-mode) ("\\.tbz2?\\'" . tar-mode) ("\\.txz\\'" . tar-mode) ("\\.tzst\\'" . tar-mode) ("\\.log\\(?:\\.[0-9]+\\)?\\'" . logview-mode) ("\\.drv\\'" . latex-mode))
+
+***** black formatting args
+:PROPERTIES:
+:CREATED:  [2023-11-16 Thu 20:45]
+:UPDATED:  [2023-11-16 Thu 20:45]
+:ID:       6662a59b-42a0-4240-af44-d4e384e098a7
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp
+(with-eval-after-load 'python-black
+  (setq python-black--base-args '("--quiet" "-l 79" "--preview")))
+#+end_src
+
+#+RESULTS:
+: ("--quiet" "-l 79" "--preview")
 
 **** [[id:0c02b1ad-3964-4b51-ba59-d2de0e05428f][golang]]
 :PROPERTIES:
@@ -7017,7 +7529,7 @@ done
 :PROPERTIES:
 :ID:       eddd1740-904d-4bfe-becc-d662a43f0447
 :CREATED:  [2022-04-05 Tue 12:49]
-:UPDATED:  [2022-04-05 Tue 12:49]
+:UPDATED:  [2023-08-30 Wed 15:07]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -7027,11 +7539,12 @@ it's nice to get a consistent wrap of the result
 (setq org-babel-default-header-args:jq
       '((:results . "output")
         (:compact . "no")
-        (:wrap . "src json")))
+        ;;(:wrap . "src json")
+        ))
 #+end_src
 
 #+RESULTS:
-: ((:results . output) (:compact . no) (:wrap . src baba))
+: ((:results . "output") (:compact . "no"))
 
 **** es-mode
 :PROPERTIES:
@@ -7373,6 +7886,26 @@ rg 'src.(shell|bash|sh).*drawer' $HOME/life/roam | wc -l
 #+RESULTS:
 : ((:results . drawer))
 
+**** js
+:PROPERTIES:
+:ID:       67001cd6-c880-494f-ac0e-d6423ec97c36
+:END:
+
+***** js-indent-level
+:PROPERTIES:
+:ID:       cc5d7bfe-c721-4f21-9c4a-76149acd0513
+:UPDATED:  [2023-08-24 Thu 14:14]
+:END:
+
+this is nice at =2=, matching the defaults of 'json-pretty-print.
+
+#+begin_src emacs-lisp
+(setq js-indent-level 2)
+#+end_src
+
+#+RESULTS:
+: 2
+
 *** packages
 :PROPERTIES:
 :ID:       2fa9d7ef-cfd9-4d3c-aca8-09e1d6243705
@@ -7380,6 +7913,365 @@ rg 'src.(shell|bash|sh).*drawer' $HOME/life/roam | wc -l
 :UPDATED:  [2022-09-28 Wed 16:36]
 :ROAM_EXCLUDE: t
 :END:
+**** chatgpt-shell
+:PROPERTIES:
+:ID:       7c74478a-1c1a-4bb3-8b13-04a30da500dc
+:CREATED:  [2023-04-21 Fri 16:10]
+:UPDATED:  [2023-04-21 Fri 16:10]
+:ROAM_EXCLUDE: t
+:END:
+
+- :: https://github.com/xenodium/chatgpt-shell
+
+#+begin_src emacs-lisp :results silent
+(with-eval-after-load 'chatgpt-shell
+  (setq chatgpt-shell-openai-key
+        (auth-source-pass-get 'secret "chatgpt/api/emacs")
+        dall-e-shell-openai-key chatgpt-shell-openai-key))
+#+end_src
+
+
+**** consult
+:PROPERTIES:
+:ID:       969bce5f-b959-496e-afe4-81f2407592f3
+:CREATED:  <2022-02-22 Tue 15:27>
+:ROAM_EXCLUDE: t
+:END:
+
+***** noweb tangler
+:PROPERTIES:
+:ID:       2c2c7344-4b82-4f3e-9b52-f64699a295c3
+:CREATED:  <2022-02-22 Tue 15:27>
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp
+;; NOWEB CONSULT START
+(with-eval-after-load 'consult
+  <<consult>>
+  )
+;; NOWEB CONSULT END
+#+end_src
+
+***** consult-ripgrep-files                                                    :func:
+:PROPERTIES:
+:ID:       d047d7c0-1031-42b8-b86a-0bcfbb30901a
+:CREATED:  <2022-02-22 Tue 15:27>
+:ROAM_EXCLUDE: t
+:END:
+
+not elegant AT ALL, but the API to ripgrep from consult uses
+'default-directory', so suck it up
+
+#+begin_src emacs-lisp :noweb-ref consult
+(require 's)
+
+(defun qz/consult-ripgrep-files (files)
+  (let* ((consult-ripgrep-args (concat consult-ripgrep-args " -L"))
+         (rg-dir "/tmp/null"))
+    (f-delete rg-dir t)
+    (mkdir rg-dir t)
+    (mapcar (lambda (f)
+              (f-symlink (expand-file-name f)
+                         (format "%s/%s-%s"
+                                 rg-dir (gensym) (s-replace "/" "-" f))))
+            files)
+    (consult-ripgrep rg-dir)))
+#+end_src
+
+#+RESULTS:
+: qz/consult-ripgrep-files
+
+***** {C-c b s}     :: consult-ripgrep-bookmark                        :func:kbd:
+:PROPERTIES:
+:ID:       1ec5c6fe-e672-457a-ab67-82e358244df3
+:CREATED:  <2022-02-22 Tue 15:27>
+:ROAM_EXCLUDE: t
+:END:
+
+consuming
+
+#+begin_src emacs-lisp :noweb-ref consult
+(defun qz/consult-ripgrep-bookmark ()
+  (interactive)
+  (let ((files (mapcar (lambda (b) (cdr (assoc 'filename b)))
+                       bookmark-alist)))
+    (qz/consult-ripgrep-files files)))
+
+(define-key global-map (kbd "C-c b s") 'qz/consult-ripgrep-bookmark)
+#+end_src
+
+#+RESULTS:
+: qz/consult-ripgrep-bookmark
+
+***** {C-x C-M-SPC} :: consult-mark
+:PROPERTIES:
+:ID:       a4470ca2-9b0e-4ab4-a1d0-32b86da18abd
+:CREATED:  [2022-03-31 Thu 11:07]
+:UPDATED:  [2022-03-31 Thu 11:08]
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp :noweb-ref consult
+(define-key global-map (kbd "C-x C-M-SPC") 'consult-global-mark)
+#+end_src
+
+***** {M-s L}       :: consult-line-multi
+:PROPERTIES:
+:ID:       5778ec90-f568-48d3-87cb-9dae958ceeb9
+:CREATED:  [2022-11-17 Thu 13:09]
+:UPDATED:  [2022-11-17 Thu 13:09]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref kbd
+(define-key global-map (kbd "M-s L") 'consult-line-multi)
+#+end_src
+
+#+RESULTS:
+: consult-line-multi
+
+***** {C-c C-j}     :: consult-imenu
+:PROPERTIES:
+:ID:       cc85169e-c54b-4841-bda7-6c3d189c0b34
+:CREATED:  [2023-04-25 Tue 19:54]
+:UPDATED:  [2023-04-25 Tue 19:54]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref kbd
+(define-key global-map (kbd "C-c C-j") 'consult-imenu)
+#+end_src
+
+#+RESULTS:
+: consult-imenu
+
+***** {C-c n C-s}   :: consult-org-agenda-dailies
+:PROPERTIES:
+:ID:       d0a6fa7a-8e86-4384-926a-d590972f9af6
+:CREATED:  [2023-08-28 Mon 15:32]
+:UPDATED:  [2023-08-28 Mon 15:37]
+:ROAM_EXCLUDE: t
+:END:
+
+nice!!!  jump around headings of recent dailies files (where i do most of my thinking)
+
+#+begin_src elisp
+(defun qz/consult-org-agenda-dailies ()
+  (interactive)
+  (let ((org-agenda-files (s-split "\n" (s-trim (shell-command-to-string "
+
+find $HOME/life/roam/daily -type f -name '*.org' -printf '%T+\t%p\n' \
+  | sort | tail -n30 \
+  | awk '{print $2}'
+
+")))))
+    (consult-org-agenda)))
+
+(define-key global-map (kbd "C-c n C-s") 'qz/consult-org-agenda-dailies)
+#+end_src
+
+***** consult--fontify-all as interactive
+:PROPERTIES:
+:ID:       64723a95-781d-4dd7-9273-04882e295203
+:CREATED:  [2023-07-04 Tue 11:14]
+:UPDATED:  [2023-07-04 Tue 16:09]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp
+;;; SRC as of [2023-07-04 Tue 11:12]
+;;
+;; (defun consult--fontify-all ()
+;;   "Ensure that the whole buffer is fontified."
+;;   ;; Font-locking is lazy, i.e., if a line has not been looked at yet, the line
+;;   ;; is not font-locked.  We would observe this if consulting an unfontified
+;;   ;; line.  Therefore we have to enforce font-locking now, which is slow.  In
+;;   ;; order to prevent is hang-up we check the buffer size against
+;;   ;; `consult-fontify-max-size'.
+;;   (when (and consult-fontify-preserve jit-lock-mode
+;;              (< (buffer-size) consult-fontify-max-size))
+;;     (jit-lock-fontify-now)))
+
+(defun qz/fontify-all ()
+  "Useful when using org-modern, which is *abhorrent* when
+ partially font-locked"
+  (interactive)
+  (consult--fontify-all))
+#+end_src
+
+#+RESULTS:
+: qz/fontify-all
+
+***** recoll
+:PROPERTIES:
+:ID:       27a44696-4cf0-47d2-82b2-b830a61cf8f0
+:CREATED:  [2023-03-04 Sat 12:33]
+:UPDATED:  [2023-03-04 Sat 12:33]
+:ROAM_EXCLUDE: t
+:END:
+
+****** fixing command inflexibility
+:PROPERTIES:
+:ID:       3ea06024-8456-4736-b458-05dd9c2aad1d
+:CREATED:  [2023-03-04 Sat 12:33]
+:UPDATED:  [2023-03-04 Sat 12:33]
+:ROAM_EXCLUDE: t
+:END:
+
+recollq is not a binary, from how we (guix) build it.
+
+sadly there is no variable =consult-recoll-program=, and =codeberg=... ???? so
+we're hacking it the hard way
+
+#+begin_src emacs-lisp
+;; original, as of commit TODO
+;;
+;; (defun consult-recoll--command (text)
+;;   "Command used to perform queries for TEXT."
+;;   (setq consult-recoll--current nil)
+;;   (setq consult-recoll--index 0)
+;;   (setq consult-recoll--snippets nil)
+;;   `("recoll" ,@(consult-recoll--search-flags) ,text))
+;;
+;; we need to add the -t arg (to make it exactly like recollq)
+
+(defun consult-recoll--command (text)
+  "Command used to perform queries for TEXT."
+  (setq consult-recoll--current nil)
+  (setq consult-recoll--index 0)
+  (setq consult-recoll--snippets nil)
+  `("recoll" "-t" ,@(consult-recoll--search-flags) ,text))
+#+end_src
+
+#+RESULTS:
+: consult-recoll--command
+
+******* tracing
+:PROPERTIES:
+:ID:       3d2cca36-536d-4a6e-bb45-be6b54fe13ae
+:CREATED:  [2023-03-04 Sat 12:33]
+:UPDATED:  [2023-03-04 Sat 12:33]
+:ROAM_EXCLUDE: t
+:END:
+
+
+#+begin_src emacs-lisp :noweb-ref null
+(trace-function 'consult-recoll--command)
+;; (call-interactively 'toggle-debug-on-quit)
+
+;; (setq consult-recoll--search-flags 'query)
+;; (consult-recoll "ayo")
+
+(custom-set-variables '(consult-recoll--search-flags 'query))
+consult-recoll--search-flags
+(consult-recoll "customer care order")
+
+(untrace-all)
+#+end_src
+
+
+***** project-commands
+:PROPERTIES:
+:ID:       16928472-fd8f-4fe9-9c12-6144d5c05998
+:CREATED:  [2022-11-14 Mon 12:27]
+:UPDATED:  [2022-11-14 Mon 12:29]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref consult
+(with-eval-after-load 'project
+  (define-key project-prefix-map (kbd "M-g") 'consult-ripgrep)
+  (add-to-list 'project-switch-commands '(consult-ripgrep "ripgrep") t))
+#+end_src
+
+#+RESULTS:
+| project-find-file    | Find file      |
+| project-find-regexp  | Find regexp    |
+| project-find-dir     | Find directory |
+| project-vc-dir       | VC-Dir         |
+| project-eshell       | Eshell         |
+| project-compile      | Compile        |
+| magit-project-status | Magit          |
+| consult-ripgrep      | ripgrep        |
+
+***** basic remaps
+:PROPERTIES:
+:ID:       0209d41e-b385-4428-a6c5-a95929250975
+:CREATED:  <2022-02-22 Tue 15:27>
+:ROAM_EXCLUDE: t
+:UPDATED:  [2022-03-31 Thu 11:08]
+:END:
+#+begin_src emacs-lisp :noweb-ref consult
+(mapcar (lambda (bind)
+          (define-key global-map (kbd (car bind)) (cadr bind)))
+        '(("C-x b" consult-buffer)))
+#+end_src
+
+#+RESULTS:
+| consult-buffer |
+
+**** dogears
+:PROPERTIES:
+:ID:       8391d31e-023a-4c80-b19c-47fbb2def264
+:CREATED:  [2023-04-12 Wed 18:11]
+:UPDATED:  [2023-04-16 Sun 15:49]
+:ROAM_EXCLUDE: t
+:END:
+
+***** init
+:PROPERTIES:
+:ID:       759bd7c8-702d-4358-8c43-bc8fe048545d
+:CREATED:  [2023-05-03 Wed 11:39]
+:UPDATED:  [2023-05-03 Wed 11:39]
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp
+(require 'dogears)
+(dogears-mode 1)
+#+end_src
+
+***** dogear upon org-store-link
+:PROPERTIES:
+:ID:       1c1c6905-2462-4aa2-a805-de40854fa3af
+:CREATED:  [2023-05-03 Wed 11:39]
+:UPDATED:  [2023-06-19 Mon 17:19]
+:ROAM_EXCLUDE: t
+:END:
+
+
+#+begin_src emacs-lisp :noweb-ref null
+;; FIXME this shit is broken -- org-store-link
+(defun dogears-safe (&rest ignored)
+  (save-mark-and-excursion
+    (dogears-remember)))
+
+(qz/advice- org-store-link :after dogear-safe)
+
+;; (progn (toggle-debug-on-error) (call-interactively 'org-store-link))
+#+end_src
+
+#+RESULTS:
+| qz/advice-enable--org-store-link--dogear-safe | qz/advice-disable--org-store-link--dogear-safe |
+
+****** why org-store-link doesn't play nicely with advice?
+:PROPERTIES:
+:ID:       53e02e0b-e8db-4fa4-a4bc-12e20d03e17a
+:CREATED:  [2023-06-19 Mon 18:41]
+:UPDATED:  [2023-06-19 Mon 18:41]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src elisp :noweb-ref null
+(defun qz/safe (&rest ignored)
+  )
+
+
+
+(qz/advice- org-store-link :after qz/safe)
+#+end_src
+
+#+RESULTS:
+| qz/advice-enable--org-store-link--qz/safe | qz/advice-disable--org-store-link--qz/safe |
+
 **** embark
 :PROPERTIES:
 :ID:       dfab35d0-222c-4d67-82d8-07a2d068a597
@@ -7422,6 +8314,33 @@ rg 'src.(shell|bash|sh).*drawer' $HOME/life/roam | wc -l
 :END:
 #+begin_src emacs-lisp :noweb-ref embark
 #+end_src
+
+**** eww
+:PROPERTIES:
+:ID:       05495ea8-2e30-4fb2-839c-0f91a347bb25
+:CREATED:  [2023-07-05 Wed 10:12]
+:UPDATED:  [2023-07-05 Wed 10:12]
+:ROAM_EXCLUDE: t
+:END:
+
+***** {C-RET} :: eww-open-in-new-buffer
+:PROPERTIES:
+:ID:       eb34e4cb-5a88-4166-add1-bd1970667e89
+:CREATED:  [2023-07-05 Wed 10:12]
+:UPDATED:  [2023-07-05 Wed 10:12]
+:ROAM_EXCLUDE: t
+:END:
+
+By default, this is clobbered by 'hkey-either.
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'eww
+  (define-key eww-mode-map (kbd "C-<return>") 'eww-open-in-new-buffer)
+  )
+#+end_src
+
+#+RESULTS:
+: eww-open-in-new-buffer
 
 **** git-gutter-transient
 :PROPERTIES:
@@ -7678,305 +8597,6 @@ basic constraints
 
 
 
-
-**** consult
-:PROPERTIES:
-:ID:       969bce5f-b959-496e-afe4-81f2407592f3
-:CREATED:  <2022-02-22 Tue 15:27>
-:ROAM_EXCLUDE: t
-:END:
-
-***** noweb tangler
-:PROPERTIES:
-:ID:       2c2c7344-4b82-4f3e-9b52-f64699a295c3
-:CREATED:  <2022-02-22 Tue 15:27>
-:ROAM_EXCLUDE: t
-:END:
-#+begin_src emacs-lisp
-;; NOWEB CONSULT START
-(with-eval-after-load 'consult
-  <<consult>>
-  )
-;; NOWEB CONSULT END
-#+end_src
-
-***** consult-ripgrep-files                                                    :func:
-:PROPERTIES:
-:ID:       d047d7c0-1031-42b8-b86a-0bcfbb30901a
-:CREATED:  <2022-02-22 Tue 15:27>
-:ROAM_EXCLUDE: t
-:END:
-
-not elegant AT ALL, but the API to ripgrep from consult uses
-'default-directory', so suck it up
-
-#+begin_src emacs-lisp :noweb-ref consult
-(require 's)
-
-(defun qz/consult-ripgrep-files (files)
-  (let* ((consult-ripgrep-args (concat consult-ripgrep-args " -L"))
-         (rg-dir "/tmp/null"))
-    (f-delete rg-dir t)
-    (mkdir rg-dir t)
-    (mapcar (lambda (f)
-              (f-symlink (expand-file-name f)
-                         (format "%s/%s-%s"
-                                 rg-dir (gensym) (s-replace "/" "-" f))))
-            files)
-    (consult-ripgrep rg-dir)))
-#+end_src
-
-#+RESULTS:
-: qz/consult-ripgrep-files
-
-***** {C-c b s}     :: consult-ripgrep-bookmark                        :func:kbd:
-:PROPERTIES:
-:ID:       1ec5c6fe-e672-457a-ab67-82e358244df3
-:CREATED:  <2022-02-22 Tue 15:27>
-:ROAM_EXCLUDE: t
-:END:
-
-consuming
-
-#+begin_src emacs-lisp :noweb-ref consult
-(defun qz/consult-ripgrep-bookmark ()
-  (interactive)
-  (let ((files (mapcar (lambda (b) (cdr (assoc 'filename b)))
-                       bookmark-alist)))
-    (qz/consult-ripgrep-files files)))
-
-(define-key global-map (kbd "C-c b s") 'qz/consult-ripgrep-bookmark)
-#+end_src
-
-#+RESULTS:
-: qz/consult-ripgrep-bookmark
-
-***** {C-x C-M-SPC} :: consult-mark
-:PROPERTIES:
-:ID:       a4470ca2-9b0e-4ab4-a1d0-32b86da18abd
-:CREATED:  [2022-03-31 Thu 11:07]
-:UPDATED:  [2022-03-31 Thu 11:08]
-:ROAM_EXCLUDE: t
-:END:
-#+begin_src emacs-lisp :noweb-ref consult
-(define-key global-map (kbd "C-x C-M-SPC") 'consult-global-mark)
-#+end_src
-
-***** {M-s L}       :: consult-line-multi
-:PROPERTIES:
-:ID:       5778ec90-f568-48d3-87cb-9dae958ceeb9
-:CREATED:  [2022-11-17 Thu 13:09]
-:UPDATED:  [2022-11-17 Thu 13:09]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src emacs-lisp :noweb-ref kbd
-(define-key global-map (kbd "M-s L") 'consult-line-multi)
-#+end_src
-
-#+RESULTS:
-: consult-line-multi
-
-***** {C-c C-j}     :: consult-imenu
-:PROPERTIES:
-:ID:       cc85169e-c54b-4841-bda7-6c3d189c0b34
-:CREATED:  [2023-04-25 Tue 19:54]
-:UPDATED:  [2023-04-25 Tue 19:54]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src emacs-lisp :noweb-ref kbd
-(define-key global-map (kbd "C-c C-j") 'consult-imenu)
-#+end_src
-
-#+RESULTS:
-: consult-imenu
-
-***** consult--fontify-all as interactive
-:PROPERTIES:
-:ID:       64723a95-781d-4dd7-9273-04882e295203
-:CREATED:  [2023-07-04 Tue 11:14]
-:UPDATED:  [2023-07-04 Tue 16:09]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src emacs-lisp
-;;; SRC as of [2023-07-04 Tue 11:12]
-;;
-;; (defun consult--fontify-all ()
-;;   "Ensure that the whole buffer is fontified."
-;;   ;; Font-locking is lazy, i.e., if a line has not been looked at yet, the line
-;;   ;; is not font-locked.  We would observe this if consulting an unfontified
-;;   ;; line.  Therefore we have to enforce font-locking now, which is slow.  In
-;;   ;; order to prevent is hang-up we check the buffer size against
-;;   ;; `consult-fontify-max-size'.
-;;   (when (and consult-fontify-preserve jit-lock-mode
-;;              (< (buffer-size) consult-fontify-max-size))
-;;     (jit-lock-fontify-now)))
-
-(defun qz/fontify-all ()
-  "Useful when using org-modern, which is *abhorrent* when
- partially font-locked"
-  (interactive)
-  (consult--fontify-all))
-#+end_src
-
-#+RESULTS:
-: qz/fontify-all
-
-***** recoll
-:PROPERTIES:
-:ID:       27a44696-4cf0-47d2-82b2-b830a61cf8f0
-:CREATED:  [2023-03-04 Sat 12:33]
-:UPDATED:  [2023-03-04 Sat 12:33]
-:ROAM_EXCLUDE: t
-:END:
-
-****** fixing command inflexibility
-:PROPERTIES:
-:ID:       3ea06024-8456-4736-b458-05dd9c2aad1d
-:CREATED:  [2023-03-04 Sat 12:33]
-:UPDATED:  [2023-03-04 Sat 12:33]
-:ROAM_EXCLUDE: t
-:END:
-
-recollq is not a binary, from how we (guix) build it.
-
-sadly there is no variable =consult-recoll-program=, and =codeberg=... ???? so
-we're hacking it the hard way
-
-#+begin_src emacs-lisp
-;; original, as of commit TODO
-;;
-;; (defun consult-recoll--command (text)
-;;   "Command used to perform queries for TEXT."
-;;   (setq consult-recoll--current nil)
-;;   (setq consult-recoll--index 0)
-;;   (setq consult-recoll--snippets nil)
-;;   `("recoll" ,@(consult-recoll--search-flags) ,text))
-;;
-;; we need to add the -t arg (to make it exactly like recollq)
-
-(defun consult-recoll--command (text)
-  "Command used to perform queries for TEXT."
-  (setq consult-recoll--current nil)
-  (setq consult-recoll--index 0)
-  (setq consult-recoll--snippets nil)
-  `("recoll" "-t" ,@(consult-recoll--search-flags) ,text))
-#+end_src
-
-#+RESULTS:
-: consult-recoll--command
-
-******* tracing
-:PROPERTIES:
-:ID:       3d2cca36-536d-4a6e-bb45-be6b54fe13ae
-:CREATED:  [2023-03-04 Sat 12:33]
-:UPDATED:  [2023-03-04 Sat 12:33]
-:ROAM_EXCLUDE: t
-:END:
-
-
-#+begin_src emacs-lisp :noweb-ref null
-(trace-function 'consult-recoll--command)
-;; (call-interactively 'toggle-debug-on-quit)
-
-;; (setq consult-recoll--search-flags 'query)
-;; (consult-recoll "ayo")
-
-(custom-set-variables '(consult-recoll--search-flags 'query))
-consult-recoll--search-flags
-(consult-recoll "customer care order")
-
-(untrace-all)
-#+end_src
-
-
-***** project-commands
-:PROPERTIES:
-:ID:       16928472-fd8f-4fe9-9c12-6144d5c05998
-:CREATED:  [2022-11-14 Mon 12:27]
-:UPDATED:  [2022-11-14 Mon 12:29]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src emacs-lisp :noweb-ref consult
-(with-eval-after-load 'project
-  (define-key project-prefix-map (kbd "M-g") 'consult-ripgrep)
-  (add-to-list 'project-switch-commands '(consult-ripgrep "ripgrep") t))
-#+end_src
-
-#+RESULTS:
-| project-find-file    | Find file      |
-| project-find-regexp  | Find regexp    |
-| project-find-dir     | Find directory |
-| project-vc-dir       | VC-Dir         |
-| project-eshell       | Eshell         |
-| project-compile      | Compile        |
-| magit-project-status | Magit          |
-| consult-ripgrep      | ripgrep        |
-
-***** basic remaps
-:PROPERTIES:
-:ID:       0209d41e-b385-4428-a6c5-a95929250975
-:CREATED:  <2022-02-22 Tue 15:27>
-:ROAM_EXCLUDE: t
-:UPDATED:  [2022-03-31 Thu 11:08]
-:END:
-#+begin_src emacs-lisp :noweb-ref consult
-(mapcar (lambda (bind)
-          (define-key global-map (kbd (car bind)) (cadr bind)))
-        '(("C-x b" consult-buffer)))
-#+end_src
-
-#+RESULTS:
-| consult-buffer |
-
-**** eww
-:PROPERTIES:
-:ID:       05495ea8-2e30-4fb2-839c-0f91a347bb25
-:CREATED:  [2023-07-05 Wed 10:12]
-:UPDATED:  [2023-07-05 Wed 10:12]
-:ROAM_EXCLUDE: t
-:END:
-
-***** {C-RET} :: eww-open-in-new-buffer
-:PROPERTIES:
-:ID:       eb34e4cb-5a88-4166-add1-bd1970667e89
-:CREATED:  [2023-07-05 Wed 10:12]
-:UPDATED:  [2023-07-05 Wed 10:12]
-:ROAM_EXCLUDE: t
-:END:
-
-By default, this is clobbered by 'hkey-either.
-
-#+begin_src emacs-lisp
-(with-eval-after-load 'eww
-  (define-key eww-mode-map (kbd "C-<return>") 'eww-open-in-new-buffer)
-  )
-#+end_src
-
-#+RESULTS:
-: eww-open-in-new-buffer
-
-**** pdf-view
-:PROPERTIES:
-:ID:       90477387-9ef3-4e7b-8d80-d2344623d521
-:CREATED:  <2022-02-22 Tue 15:27>
-:ROAM_EXCLUDE: t
-:UPDATED:  [2022-09-28 Wed 16:36]
-:END:
-***** midnight-minor-mode ; dark-mode filter on pdfs                         :visual:
-:PROPERTIES:
-:ID:       539f2eb0-e47d-4976-8c96-6c5a7705835a
-:CREATED:  <2022-02-22 Tue 15:27>
-:ROAM_EXCLUDE: t
-:UPDATED:  [2022-04-25 Mon 10:10]
-:END:
-#+begin_src emacs-lisp
-(with-eval-after-load 'pdf-view
-  (add-hook 'pdf-view-mode-hook 'pdf-view-midnight-minor-mode))
-#+end_src
 **** HACK nov-el
 :PROPERTIES:
 :ID:       628a3caa-7fbd-4c56-bc5e-221cfdb2a5da
@@ -8006,6 +8626,163 @@ it's [2022-10-04 Tue]; I have just retrieved the dirtiest hack in a while from t
 
 #+DOWNLOADED: screenshot @ 2022-10-04 18:13:11
 [[file:configs/2022-10-04_18-13-11_screenshot.png]]
+
+**** hl-phrase                                                          :mode:global:
+:PROPERTIES:
+:ID:       ad0691da-c0b2-464b-a031-021d50f6b258
+:CREATED:  [2022-10-26 Wed 11:50]
+:UPDATED:  [2023-04-06 Thu 11:27]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref null
+(global-hi-lock-mode 1)
+#+end_src
+
+#+RESULTS:
+: t
+
+**** ligature / prettify-symbols
+:PROPERTIES:
+:CREATED:  [2023-09-23 Sat 21:35]
+:UPDATED:  [2023-09-23 Sat 23:39]
+:ID:       3f426a34-4e86-4def-8435-26e884a1554a
+:ROAM_EXCLUDE: t
+:END:
+
+***** ligature
+:PROPERTIES:
+:CREATED:  [2023-09-23 Sat 23:51]
+:UPDATED:  [2023-09-23 Sat 23:51]
+:ID:       b8000fbf-e560-42f5-abab-0bdd1276955f
+:ROAM_EXCLUDE: t
+:END:
+****** init
+:PROPERTIES:
+:CREATED:  [2023-09-23 Sat 23:39]
+:UPDATED:  [2023-09-23 Sat 23:39]
+:ID:       1ca0a2a0-48e6-4641-87f3-b0f9d7f5d81f
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp
+(with-eval-after-load 'ligature
+  (ligature-set-ligatures 'prog-mode '("|||>" "<|||" "<==>" "<!--" "####" "~~>" "***" "||=" "||>"
+                                       ":::" "::=" "=:=" "===" "==>" "=!=" "=>>" "=<<" "=/=" "!=="
+                                       "!!." ">=>" ">>=" ">>>" ">>-" ">->" "->>" "-->" "--n-" "-<<"
+                                       "<~~" "<~>" "<*>" "<||" "<|>" "<$>" "<==" "<=>" "<=<" "<->"
+                                       "<--" "<-<" "<<=" "<<-" "<<<" "<+>" "</>" "###" "#_(" "..<"
+                                       "..." "+++" "/==" "///" "_|_" "www" "&&" "^=" "~~" "~@" "~="
+                                       "~>" "~-" "**" "*>" "*/" "||" "|}" "|]" "|=" "|>" "|-" "{|"
+                                       "[|" "]#" "::" ":=" ":>" ":<" "$>" "==" "=>" "!=" "!!" ">:"
+                                       ">=" ">>" ">-" "-~" "-|" "->" "--" "-<" "<~" "<*" "<|" "<:"
+                                       "<$" "<=" "<>" "<-" "<<" "<+" "</" "#{" "#[" "#:" "#=" "#!"
+                                       "##" "#(" "#?" "#_" "%%" ".=" ".-" ".." ".?" "+>" "++" "?:"
+                                       "?=" "?." "??" ";;" "/*" "/=" "/>" "//" "__" "~~" "(*" "*)"
+                                       "\\\\" "://")) ;;
+  ;; Enables ligature checks globally in all buffers. You can also do it
+  ;; per mode with `ligature-mode'.
+  (global-ligature-mode t))
+#+end_src
+
+#+RESULTS:
+: t
+
+#+end_src
+
+***** prettify-symbols
+:PROPERTIES:
+:CREATED:  [2023-09-23 Sat 23:51]
+:UPDATED:  [2023-09-23 Sat 23:53]
+:ID:       44a496b8-e3fa-4e90-9de4-24e4d16dbf3e
+:ROAM_EXCLUDE: t
+:END:
+
+****** pretty logical
+:PROPERTIES:
+:CREATED:  [2023-09-23 Sat 23:53]
+:UPDATED:  [2023-09-29 Fri 14:26]
+:ID:       8921d00d-46bd-4e84-8012-66ca17a640ac
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp
+(setq qz/pretty-logicals
+      (mapcan (lambda (e) (list e (cons (upcase (car e)) (cdr e))))
+              '(("lambda"       . 955)  ; λ  _LAMBDA
+                ("union"        . 8746) ; ∪  _UNION
+                ("union all"    . 8746) ; ""
+                ("and"          . 8743) ; ∧  LOGICAL AND
+                ("or"           . 8744) ; ∨  LOGICAL OR
+                ("intersect"    . 8745) ; ∩  INTERSECTION
+                ("with"         . 9723) ; ◻ IT IS NECESSARY THAT  (dubious)
+                ("select"       . 928)  ; Π  PROJECT
+                ("as"           . 8788) ; ≔  IS DEFINED AS         (dubious)
+                ("from"         . 8704) ; ∀  FOR ALL               (dubious)
+                ("where"        . 963)  ; σ  SELECT
+                ("not"          . 172)  ; ¬  NOT SIGN
+                ("in"           . 8712) ; ∈  MEMBER OF
+                ("contains"     . 8712) ; ""
+                ("not in"       . 8713) ; ∉ NOT MEMBER OF
+                ("not contains" . 8712) ; ""
+                ;; ∴ therefore
+                ;; ∵ because
+                ;; ∃
+                ;; ∃ EXISTS ONE (UNIQUE)
+                ;; ∄ not exists
+                ;; σ_φ(R)
+                ;;not
+                ))
+      qz/pretty-text
+      '(("[...]" . 8943) ; ⋯  MIDLINE HORIZONTAL ELLIPSIS
+        ;;("clocking" . 128339)
+        ))
+
+(defun my-pretty--add (s)
+  "extend prettify-symbols-alist qwith s"
+  (setq prettify-symbols-alist (seq-uniq (append prettify-symbols-alist s))))
+
+(defun my-pretty-logicals ()
+  (my-pretty--add qz/pretty-logicals))
+
+(defun my-pretty-text ()
+  (my-pretty--add qz/pretty-text))
+
+(add-hook 'prog-mode-hook 'my-pretty-logicals)
+(add-hook 'text-mode 'my-pretty-text)
+(global-prettify-symbols-mode 1)
+#+end_src
+
+#+RESULTS:
+: t
+
+******* explore around char point 8746
+:PROPERTIES:
+:CREATED:  [2023-09-24 Sun 00:04]
+:UPDATED:  [2023-09-24 Sun 00:04]
+:ID:       ab211c47-a1e5-4674-92c0-9b4f65a8dfdd
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp
+(cl-loop for c from (- 8746 10) to (+ 8746 50)
+         collect (cons c (char-to-string c)))
+#+end_src
+
+#+RESULTS:
+: ((8736 . "∠") (8737 . "∡") (8738 . "∢") (8739 . "∣") (8740 . "∤") (8741 . "∥") (8742 . "∦") (8743 . "∧") (8744 . "∨") (8745 . "∩") (8746 . "∪") (8747 . "∫") (8748 . "∬") (8749 . "∭") (8750 . "∮") (8751 . "∯") (8752 . "∰") (8753 . "∱") (8754 . "∲") (8755 . "∳") (8756 . "∴") (8757 . "∵") (8758 . "∶") (8759 . "∷") (8760 . "∸") (8761 . "∹") (8762 . "∺") (8763 . "∻") (8764 . "∼") (8765 . "∽") (8766 . "∾") (8767 . "∿") (8768 . "≀") (8769 . "≁") (8770 . "≂") (8771 . "≃") (8772 . "≄") (8773 . "≅") (8774 . "≆") (8775 . "≇") (8776 . "≈") (8777 . "≉") (8778 . "≊") (8779 . "≋") (8780 . "≌") (8781 . "≍") (8782 . "≎") (8783 . "≏") (8784 . "≐") (8785 . "≑") (8786 . "≒") (8787 . "≓") (8788 . "≔") (8789 . "≕") (8790 . "≖") (8791 . "≗") (8792 . "≘") (8793 . "≙") (8794 . "≚") (8795 . "≛") (8796 . "≜"))
+
+**** hl-todo                                                            :mode:global:
+:PROPERTIES:
+:ID:       edde55d4-808b-49e3-8e9f-67c7b55ec0a3
+:CREATED:  [2022-10-21 Fri 12:27]
+:UPDATED:  [2022-10-26 Wed 11:51]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp
+(global-hl-todo-mode 1)
+#+end_src
+
+#+RESULTS:
+: t
 
 **** hyperbole
 :PROPERTIES:
@@ -8041,69 +8818,6 @@ it's [2022-10-04 Tue]; I have just retrieved the dirtiest hack in a while from t
 #+RESULTS:
 : hkey-either
 
-**** dogears
-:PROPERTIES:
-:ID:       8391d31e-023a-4c80-b19c-47fbb2def264
-:CREATED:  [2023-04-12 Wed 18:11]
-:UPDATED:  [2023-04-16 Sun 15:49]
-:ROAM_EXCLUDE: t
-:END:
-
-***** init
-:PROPERTIES:
-:ID:       759bd7c8-702d-4358-8c43-bc8fe048545d
-:CREATED:  [2023-05-03 Wed 11:39]
-:UPDATED:  [2023-05-03 Wed 11:39]
-:ROAM_EXCLUDE: t
-:END:
-#+begin_src emacs-lisp
-(require 'dogears)
-(dogears-mode 1)
-#+end_src
-
-***** dogear upon org-store-link
-:PROPERTIES:
-:ID:       1c1c6905-2462-4aa2-a805-de40854fa3af
-:CREATED:  [2023-05-03 Wed 11:39]
-:UPDATED:  [2023-06-19 Mon 17:19]
-:ROAM_EXCLUDE: t
-:END:
-
-
-#+begin_src emacs-lisp :noweb-ref null
-;; FIXME this shit is broken -- org-store-link
-(defun dogears-safe (&rest ignored)
-  (save-mark-and-excursion
-    (dogears-remember)))
-
-(qz/advice- org-store-link :after dogear-safe)
-
-;; (progn (toggle-debug-on-error) (call-interactively 'org-store-link))
-#+end_src
-
-#+RESULTS:
-| qz/advice-enable--org-store-link--dogear-safe | qz/advice-disable--org-store-link--dogear-safe |
-
-****** why org-store-link doesn't play nicely with advice?
-:PROPERTIES:
-:ID:       53e02e0b-e8db-4fa4-a4bc-12e20d03e17a
-:CREATED:  [2023-06-19 Mon 18:41]
-:UPDATED:  [2023-06-19 Mon 18:41]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src elisp :noweb-ref null
-(defun qz/safe (&rest ignored)
-  )
-
-
-
-(qz/advice- org-store-link :after qz/safe)
-#+end_src
-
-#+RESULTS:
-| qz/advice-enable--org-store-link--qz/safe | qz/advice-disable--org-store-link--qz/safe |
-
 **** kubernetes
 :PROPERTIES:
 :ID:       97ae5500-35f5-43c9-b2cb-088159ae2f2b
@@ -8111,168 +8825,6 @@ it's [2022-10-04 Tue]; I have just retrieved the dirtiest hack in a while from t
 :UPDATED:  [2022-10-12 Wed 13:43]
 :ROAM_EXCLUDE: t
 :END:
-**** hl-todo                                                            :mode:global:
-:PROPERTIES:
-:ID:       edde55d4-808b-49e3-8e9f-67c7b55ec0a3
-:CREATED:  [2022-10-21 Fri 12:27]
-:UPDATED:  [2022-10-26 Wed 11:51]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src emacs-lisp
-(global-hl-todo-mode 1)
-#+end_src
-
-#+RESULTS:
-: t
-
-**** hl-phrase                                                          :mode:global:
-:PROPERTIES:
-:ID:       ad0691da-c0b2-464b-a031-021d50f6b258
-:CREATED:  [2022-10-26 Wed 11:50]
-:UPDATED:  [2023-04-06 Thu 11:27]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src emacs-lisp :noweb-ref null
-(global-hi-lock-mode 1)
-#+end_src
-
-#+RESULTS:
-: t
-
-**** chatgpt-shell
-:PROPERTIES:
-:ID:       7c74478a-1c1a-4bb3-8b13-04a30da500dc
-:CREATED:  [2023-04-21 Fri 16:10]
-:UPDATED:  [2023-04-21 Fri 16:10]
-:ROAM_EXCLUDE: t
-:END:
-
-- :: https://github.com/xenodium/chatgpt-shell
-
-#+begin_src emacs-lisp :results silent
-(with-eval-after-load 'chatgpt-shell
-  (setq chatgpt-shell-openai-key
-        (auth-source-pass-get 'secret "chatgpt/api/emacs")
-        dall-e-shell-openai-key chatgpt-shell-openai-key))
-#+end_src
-
-
-**** mpv
-:PROPERTIES:
-:ID:       7c3d77d7-f5e5-4c69-b260-b7ebd51be79b
-:CREATED:  [2023-04-25 Tue 12:27]
-:UPDATED:  [2023-04-25 Tue 12:27]
-:ROAM_EXCLUDE: t
-:END:
-
-***** etc
-:PROPERTIES:
-:ID:       cf6bc373-1f5e-4a19-ac68-e78e1dc23580
-:CREATED:  [2023-04-25 Tue 12:27]
-:UPDATED:  [2023-04-25 Tue 12:27]
-:ROAM_EXCLUDE: t
-:END:
-
-
-***** helpers
-:PROPERTIES:
-:ID:       a571d35b-a8e0-4733-9bb7-86bab3a8f574
-:CREATED:  [2023-04-25 Tue 12:27]
-:UPDATED:  [2023-05-03 Wed 16:16]
-:ROAM_EXCLUDE: t
-:END:
-
-- nicked & consolidated from ::
-https://github.com/NapoleonWils0n/cerberus/blob/master/emacs/mpv-timer.org
-
-#+begin_src emacs-lisp
-(defun mpv-osd ()
-  "Show the osd"
-  (interactive)
-  (mpv--enqueue '("set_property" "osd-level" "3") 'ignore))
-
-(defun mpv-screenshot ()
-  "Take a screenshot"
-  (interactive)
-  (mpv--enqueue '("screenshot") 'ignore))
-
-
-
-(defun mpv-frame-step ()
-  "Step one frame forward."
-  (interactive)
-  (mpv--enqueue '("frame-step") 'ignore))
-
-
-(defun mpv-frame-back-step ()
-  "Step one frame backward."
-  (interactive)
-  (mpv--enqueue '("frame-back-step") 'ignore))
-
-
-#+end_src
-
-***** TODO quick-cutting
-:PROPERTIES:
-:ID:       d3c85696-80f3-4299-8218-544814daa267
-:CREATED:  [2023-04-25 Tue 12:27]
-:UPDATED:  [2023-04-25 Tue 12:27]
-:ROAM_EXCLUDE: t
-:END:
-
--kwq
-:: https://github.com/NapoleonWils0n/cerberus/blob/master/emacs/edit-videos-with-ffmpeg-mpv-emacs.org
-
-**** project
-:PROPERTIES:
-:ID:       9ba6a6bd-ef23-4909-bb86-15c5cecf6714
-:ROAM_EXCLUDE: t
-:END:
-
-***** TODO project-vterm
-:PROPERTIES:
-:ID:       01fb88ae-fd1b-478e-af85-552a50e5f5e2
-:ROAM_EXCLUDE: t
-:UPDATED:  [2023-06-13 Tue 14:52]
-:END:
-
-#+begin_src emacs-lisp
-(with-eval-after-load
-    'project
-  (defun project-vterm ()
-    "Start vterm in the current project's root directory.
-If a buffer already exists for running vterm in the project's root,
-switch to it.  Otherwise, create a new vterm buffer.
-With \\[universal-argument] prefix arg, create a new vterm buffer even
-if one already exists."
-    (interactive)
-    (let* ((default-directory (project-root (project-current t)))
-           (vterm-buffer-name (project-prefixed-buffer-name "vterm"))
-           (vterm-buffer (get-buffer vterm-buffer-name)))
-      (if (and vterm-buffer (not current-prefix-arg))
-          (pop-to-buffer-same-window vterm-buffer)
-        (vterm t))))
-  (define-key project-prefix-map (kbd "t") 'project-vterm)
-  (add-to-list 'project-switch-commands
-               '(project-vterm
-                 "Start vterm in the current project's root directory.")))
-#+end_src
-
-#+RESULTS:
-| project-vterm        | Start vterm in the current project's root directory. |
-| consult-ripgrep      | Search for regexp with rg                            |
-| consult-find         | Find file consult                                    |
-| project-find-file    | Find file                                            |
-| project-find-regexp  | Find regexp                                          |
-| project-find-dir     | Find directory                                       |
-| project-vc-dir       | VC-Dir                                               |
-| project-eshell       | Eshell                                               |
-| project-compile      | Compile                                              |
-| magit-project-status | Magit                                                |
-| consult-ripgrep      | ripgrep                                              |
-
 **** moldable-emacs
 :PROPERTIES:
 :ID:       f4532c31-7054-42c9-a0b0-c4279cccebca
@@ -8362,6 +8914,216 @@ Optionally you can pass a BUFFER to use instead of the `current-buffer'."
 
 #+RESULTS:
 : nil
+**** mpv
+:PROPERTIES:
+:ID:       7c3d77d7-f5e5-4c69-b260-b7ebd51be79b
+:CREATED:  [2023-04-25 Tue 12:27]
+:UPDATED:  [2023-04-25 Tue 12:27]
+:ROAM_EXCLUDE: t
+:END:
+
+***** etc
+:PROPERTIES:
+:ID:       cf6bc373-1f5e-4a19-ac68-e78e1dc23580
+:CREATED:  [2023-04-25 Tue 12:27]
+:UPDATED:  [2023-04-25 Tue 12:27]
+:ROAM_EXCLUDE: t
+:END:
+
+
+***** helpers
+:PROPERTIES:
+:ID:       a571d35b-a8e0-4733-9bb7-86bab3a8f574
+:CREATED:  [2023-04-25 Tue 12:27]
+:UPDATED:  [2023-05-03 Wed 16:16]
+:ROAM_EXCLUDE: t
+:END:
+
+- nicked & consolidated from ::
+https://github.com/NapoleonWils0n/cerberus/blob/master/emacs/mpv-timer.org
+
+#+begin_src emacs-lisp
+(defun mpv-osd ()
+  "Show the osd"
+  (interactive)
+  (mpv--enqueue '("set_property" "osd-level" "3") 'ignore))
+
+(defun mpv-screenshot ()
+  "Take a screenshot"
+  (interactive)
+  (mpv--enqueue '("screenshot") 'ignore))
+
+
+
+(defun mpv-frame-step ()
+  "Step one frame forward."
+  (interactive)
+  (mpv--enqueue '("frame-step") 'ignore))
+
+
+(defun mpv-frame-back-step ()
+  "Step one frame backward."
+  (interactive)
+  (mpv--enqueue '("frame-back-step") 'ignore))
+
+
+#+end_src
+
+***** TODO quick-cutting
+:PROPERTIES:
+:ID:       d3c85696-80f3-4299-8218-544814daa267
+:CREATED:  [2023-04-25 Tue 12:27]
+:UPDATED:  [2023-04-25 Tue 12:27]
+:ROAM_EXCLUDE: t
+:END:
+
+-kwq
+:: https://github.com/NapoleonWils0n/cerberus/blob/master/emacs/edit-videos-with-ffmpeg-mpv-emacs.org
+
+**** pdf-view
+:PROPERTIES:
+:ID:       90477387-9ef3-4e7b-8d80-d2344623d521
+:CREATED:  <2022-02-22 Tue 15:27>
+:ROAM_EXCLUDE: t
+:UPDATED:  [2022-09-28 Wed 16:36]
+:END:
+***** midnight-minor-mode ; dark-mode filter on pdfs                         :visual:
+:PROPERTIES:
+:ID:       539f2eb0-e47d-4976-8c96-6c5a7705835a
+:CREATED:  <2022-02-22 Tue 15:27>
+:ROAM_EXCLUDE: t
+:UPDATED:  [2022-04-25 Mon 10:10]
+:END:
+#+begin_src emacs-lisp
+(with-eval-after-load 'pdf-view
+  (add-hook 'pdf-view-mode-hook 'pdf-view-midnight-minor-mode))
+#+end_src
+**** project
+:PROPERTIES:
+:ID:       9ba6a6bd-ef23-4909-bb86-15c5cecf6714
+:ROAM_EXCLUDE: t
+:END:
+
+***** TODO project-vterm
+:PROPERTIES:
+:ID:       01fb88ae-fd1b-478e-af85-552a50e5f5e2
+:ROAM_EXCLUDE: t
+:UPDATED:  [2023-06-13 Tue 14:52]
+:END:
+
+#+begin_src emacs-lisp
+(with-eval-after-load
+    'project
+  (defun project-vterm ()
+    "Start vterm in the current project's root directory.
+If a buffer already exists for running vterm in the project's root,
+switch to it.  Otherwise, create a new vterm buffer.
+With \\[universal-argument] prefix arg, create a new vterm buffer even
+if one already exists."
+    (interactive)
+    (let* ((default-directory (project-root (project-current t)))
+           (vterm-buffer-name (project-prefixed-buffer-name "vterm"))
+           (vterm-buffer (get-buffer vterm-buffer-name)))
+      (if (and vterm-buffer (not current-prefix-arg))
+          (pop-to-buffer-same-window vterm-buffer)
+        (vterm t))))
+  (define-key project-prefix-map (kbd "t") 'project-vterm)
+  (add-to-list 'project-switch-commands
+               '(project-vterm
+                 "Start vterm in the current project's root directory.")))
+#+end_src
+
+#+RESULTS:
+| project-vterm        | Start vterm in the current project's root directory. |
+| consult-ripgrep      | Search for regexp with rg                            |
+| consult-find         | Find file consult                                    |
+| project-find-file    | Find file                                            |
+| project-find-regexp  | Find regexp                                          |
+| project-find-dir     | Find directory                                       |
+| project-vc-dir       | VC-Dir                                               |
+| project-eshell       | Eshell                                               |
+| project-compile      | Compile                                              |
+| magit-project-status | Magit                                                |
+| consult-ripgrep      | ripgrep                                              |
+**** atomic-chrome
+:PROPERTIES:
+:CREATED:  [2023-09-21 Thu 11:47]
+:UPDATED:  [2023-09-21 Thu 11:47]
+:ID:       dddef534-214c-4241-8f81-a420aabddd99
+:ROAM_EXCLUDE: t
+:END:
+***** init
+:PROPERTIES:
+:CREATED:  [2023-09-21 Thu 11:47]
+:UPDATED:  [2023-09-23 Sat 18:50]
+:ID:       19e35350-310a-4103-b8f8-951b59d0ca4c
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp
+(require 'atomic-chrome)
+(atomic-chrome-start-server)
+#+end_src
+***** between firefox, chrome
+:PROPERTIES:
+:CREATED:  [2023-09-21 Thu 11:56]
+:UPDATED:  [2023-09-21 Thu 12:03]
+:ID:       073636e3-bccc-4df3-b019-c56f57dcb95c
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp
+(setq atomic-chrome-port--firefox 4001
+      atomic-chrome-port--chrome 4002
+      atomic-chrome-port--gcp 4003)
+
+(defun qz/atomic-chrome-choose (browser)
+  (interactive
+   (list
+    (completing-read "browser, port: " '(firefox chrome gcp))))
+  (setq atomic-chrome-server-ghost-text-port
+        (symbol-value (intern (concat "atomic-chrome-port--" browser))))
+  (atomic-chrome-stop-server)
+  (atomic-chrome-start-server)
+  (message "qz: atomic-chrome: Using %s:%s"
+           browser atomic-chrome-server-ghost-text-port))
+#+end_src
+
+#+RESULTS:
+: qz/atomic-chrome-choose
+***** websites . modes
+:PROPERTIES:
+:CREATED:  [2023-09-21 Thu 12:03]
+:UPDATED:  [2023-11-16 Thu 20:46]
+:ID:       89a5080a-5345-40e5-bc98-85f53d74bd4a
+:END:
+
+#+begin_src emacs-lisp
+(setq atomic-chrome-url-major-mode-alist
+      '(;;; jupyter
+        ("localhost:8890" . python-mode)
+        ("localhost:8888" . python-mode)
+        ("datacamp.com" . python-mode)
+        ("notebooks.googleusercontent.com" . python-mode)
+        ;;; etc
+        ))
+#+end_src
+
+#+RESULTS:
+: (("localhost:8890" . python-mode) ("localhost:8888" . python-mode) ("datacamp.com" . python-mode) ("notebooks.googleusercontent.com" . python-mode))
+
+***** default mode = org (obviously)
+:PROPERTIES:
+:ID:       cdd70720-badb-41e1-b4e1-d902b9a0f4ab
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp
+(setq atomic-chrome-default-major-mode 'org-mode)
+#+end_src
+
+#+RESULTS:
+: org-mode
 
 *** [[id:6baf4bff-d5fe-4ce0-a130-0464e49de67d][org]]
 :PROPERTIES:
@@ -8400,13 +9162,18 @@ Optionally you can pass a BUFFER to use instead of the `current-buffer'."
 :ID:       30c87ac3-057a-46c0-a969-456eee6d2de9
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
+:UPDATED:  [2023-09-04 Mon 17:07]
 :END:
+
 #+begin_src emacs-lisp :noweb-ref agenda
-(defun qz/agenda-files-update (&rest _)
+(defun qz/agenda-files-update (&optional &rest force?)
   "Update the value of `org-agenda-files' with relevant candidates"
   (interactive)
-  (setq org-agenda-files (qz/files-agenda)
-        qz/agenda-daily-files (qz/agenda-daily-files-f)))
+  (unless (and (boundp 'qz/agenda-files-updated)
+               (or force? (not qz/agenda-files-updated)))
+    (setq org-agenda-files (qz/files-agenda)
+          qz/agenda-daily-files (qz/agenda-daily-files-f)
+          qz/agenda-files-updated t)))
 #+end_src
 
 #+RESULTS:
@@ -8455,7 +9222,11 @@ processing a lot"
 :ID:       f6bedbac-927c-46aa-bd67-e241af09bd76
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
+:UPDATED:  [2023-09-04 Mon 19:03]
 :END:
+
+- needs =qz/agenda-files-update= to run first
+
 #+begin_src emacs-lisp :noweb-ref agenda :results drawer
 (setq qz/daily-title-regexp ".?[0-9]\\{4\\}-[0-9]\\{2\\}-[0-9]\\{2\\}.?")
 
@@ -8465,8 +9236,6 @@ processing a lot"
                                 org-agenda-files)
                     'string-greaterp)
               k)))
-
-;;(sort (qz/agenda-daily-files-f) 'string-greaterp)
 #+end_src
 
 #+RESULTS:
@@ -8474,18 +9243,46 @@ processing a lot"
 qz/agenda-daily-files-f
 :end:
 
+******** testing
+:PROPERTIES:
+:ID:       4795f677-1f55-4b63-ac41-062261a9540c
+:UPDATED:  [2023-09-04 Mon 19:06]
+:END:
+
+#+begin_src emacs-lisp :results table :tangle no :noweb-ref null
+(mapcar 'list
+        (seq-take
+         (sort (seq-filter (lambda (s) (string-match qz/daily-title-regexp s))
+                           org-agenda-files)
+               'string-greaterp)
+         5))
+#+end_src
+
+#+RESULTS:
+| /home/samuel/life/roam/daily/private-2023-09-04.org |
+| /home/samuel/life/roam/daily/private-2023-09-01.org |
+| /home/samuel/life/roam/daily/private-2023-08-31.org |
+| /home/samuel/life/roam/daily/private-2023-08-30.org |
+| /home/samuel/life/roam/daily/private-2023-08-29.org |
+
 ******* clock-files
 :PROPERTIES:
 :ID:       91873c41-446a-4eb1-9c28-c62e922ab5b3
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
+:UPDATED:  [2023-08-30 Wed 17:48]
 :END:
 
 #+begin_src emacs-lisp :noweb-ref agenda
 (defun qz/clock-files ()
   (split-string
    (shell-command-to-string
-    "rg CLOCK ~/life/roam/ -c | grep -v 'org#' | awk -F '[,:]' '{print $1}'")))
+    (format "
+rg CLOCK ~/life/roam/ -c -t org \
+  | grep -v 'org#' \
+  | grep -v '%s' \
+  | awk -F '[,:]' '{print $1}'
+" (format-time-string "%Y")))))
 #+end_src
 
 #+RESULTS:
@@ -8700,7 +9497,7 @@ rg '^\*+' $(rg '2023-04-1' ~/life/roam/ -c -t org | grep -v 'org#' | awk -F '[,:
 :ID:       7e41b5a2-8678-4921-aebd-dcffecb0bbe5
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:  [2022-10-06 Thu 12:24]
+:UPDATED:  [2023-09-04 Mon 17:19]
 :END:
 #+begin_src emacs-lisp :noweb-ref agenda
 ;; current (default) sorting strat
@@ -8719,6 +9516,7 @@ get a list of `TODO' entries, from daily files, ordered by date (from filename/c
 - see `qz/agenda-daily-files-f' for the subset view of `org-agenda-files'
 - see `org-agenda-sorting-strategy' for sort permutations."
   (interactive)
+  (qz/agenda-files-update)
   (let* ((org-agenda-files (qz/agenda-daily-files-f))
          (org-agenda-sorting-strategy '(timestamp-down category-down)))
     (org-todo-list)))
@@ -9327,6 +10125,44 @@ The diary entry can contain `%s' which will be replaced with
 
 #+RESULTS:
 : qz/diary-sunset
+***** column
+:PROPERTIES:
+:CREATED:  [2023-09-29 Fri 17:14]
+:UPDATED:  [2023-09-29 Fri 17:14]
+:ID:       eabd7052-7cb7-48de-af8c-28452e703a01
+:ROAM_EXCLUDE: t
+:END:
+****** org-column-default-format
+:PROPERTIES:
+:CREATED:  [2023-09-29 Fri 17:14]
+:UPDATED:  [2023-09-29 Fri 17:28]
+:ID:       d02e3f08-8480-40d2-84b0-665e540ce027
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref org
+(setq org-columns-default-format "%22UPDATED %100ITEM %TODO %3PRIORITY %TAGS")
+#+end_src
+
+#+RESULTS:
+: "%22UPDATED %100ITEM %TODO %3PRIORITY %TAGS"
+
+****** qz/unorg-columns
+:PROPERTIES:
+:CREATED:  [2023-09-29 Fri 17:14]
+:UPDATED:  [2023-09-29 Fri 17:14]
+:ID:       080cbe4c-a212-4a4d-a472-45b231475913
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref org
+(defun qz/unorg-columns ()
+  (interactive)
+  (org-columns-remove-overlays))
+#+end_src
+
+#+RESULTS:
+: qz/unorg-columns
 
 ***** ql
 :PROPERTIES:
@@ -9441,7 +10277,7 @@ The diary entry can contain `%s' which will be replaced with
 :PROPERTIES:
 :ID:       6f7cb6d8-c938-4b28-81ce-0a35cd891132
 :CREATED:  [2023-06-05 Mon 21:29]
-:UPDATED:  [2023-06-30 Fri 18:10]
+:UPDATED:  [2023-09-24 Sun 16:36]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -9449,6 +10285,19 @@ The diary entry can contain `%s' which will be replaced with
 
 #+begin_src emacs-lisp :noweb-ref org
 (defun qz/org-now ()
+  "
+default ::
+- feed
+  - stored
+    - [headline]
+  - clocking
+    - [headline]
+
+prefix C-u ::
+[default]
+-
+
+"
   (interactive)
   (let* ((b (get-buffer-create "*org-now*"))
          (n 5))
@@ -9463,10 +10312,7 @@ The diary entry can contain `%s' which will be replaced with
         (delete-region (region-beginning)
                        (region-end))
 
-        (cl-labels ((fmt (r)
-                      (insert (format "| %s |\n"
-                                      (s-join " | " r))))
-                    (line (&rest s)
+        (cl-labels ((line (&rest s)
                       (insert (format "%s\n" (or (and s (s-join " " s)) "")))))
           ;;(line "* org-now")
           (eval-after-load 'svg-clock
@@ -9476,34 +10322,34 @@ The diary entry can contain `%s' which will be replaced with
           (insert "* feed\n")
 
 
-          (insert "** looking at\n")
-          (line)
-          (mapcar (lambda (s)
-                    (ignore-errors
-                      (line "-" (plist-get (car s) :timestamp) "::"
-                            (org-link-make-string
-                             (car (cdr s))
-                             ;; FIXME ugly ass conditions
-                             (or (cadr (cdr s))
-                                 (car (cdr s)))))))
-                  qz/looking-at)
-          (line)
+          ;; (insert "** looking at\n")
+          ;; (line)
+          ;; (mapcar (lambda (s)
+          ;;           (ignore-errors
+          ;;             (line "-" (plist-get (car s) :timestamp) "::"
+          ;;                   (org-link-make-string
+          ;;                    (car (cdr s))
+          ;;                    ;; FIXME ugly ass conditions
+          ;;                    (or (cadr (cdr s))
+          ;;                        (car (cdr s)))))))
+          ;;         qz/looking-at)
+          ;; (line)
 
 
-          (insert "** stored\n")
+          (insert "** stored")
           (line)
           (mapcar (lambda (s) (line "- " (apply 'org-link-make-string s)))
                   org-stored-links)
           (line)
 
-          (insert "** clocking\n")
+          (insert "** clocking")
           (line)
 
           ;; XXX copied from above
           ;; (headline "" (mapcar (line (links (link-fn)))))
           (mapcar (lambda (s)
                     (and s
-                         (line "- " (apply 'org-link-make-string s))))
+                       (line "- " (apply 'org-link-make-string s))))
                   ;; FYI to get max value from this
                   ;; (setq org-clock-history-length 1000000) ;; 1 million
                   ;; (setq org-clock-persist t)
@@ -9520,29 +10366,34 @@ The diary entry can contain `%s' which will be replaced with
           (line)
 
           ;; TODO new section? actions/refile actions/captured
+          (message "org-now: prefix %s" current-prefix-arg)
+          (setq fmt (lambda (r)
+                      (insert (format "| %s |\n"
+                                      (s-join " | " r))))
+           pref (lambda ()
+                       (insert "** heading\n")
+                       (insert "*** updated\n")
+                       ;; TODO lexical closure issue (because of when?)
 
-          (when prefix-arg
-            (insert "** heading\n")
-            (insert "*** updated\n")
-            (funcall fmt '("date" "title" "heading" "node"))
-            (insert "|----------\n")
-            (mapcar fmt (seq-take (qz/org-ql--updated) n))
-            (org-table-align)
-            (insert "\n")
+                       (funcall fmt '("date" "title" "heading" "node"))
+                       (insert "|----------\n")
+                       (mapcar fmt (seq-take (qz/org-ql--updated) n))
+                       (org-table-align)
+                       (insert "\n")
 
-            (insert "*** created\n")
-            (funcall fmt '("date" "title" "heading" "node"))
-            (insert "|----------\n")
-            (mapcar fmt (seq-take (qz/org-ql--created) n))
-            (org-table-align)
-            (insert "\n")
+                       (insert "*** created\n")
+                       (funcall fmt '("date" "title" "heading" "node"))
+                       (insert "|----------\n")
+                       (mapcar fmt (seq-take (qz/org-ql--created) n))
+                       (org-table-align)
+                       (insert "\n")
 
-            (insert "** node\n")
-            (insert "*** updated\n")
-            (funcall fmt '("date" "node-title"))
-            (insert "|----------\n")
-            (mapcar fmt (org-babel-execute:sqlite
-                         (format "
+                       (insert "** node\n")
+                       (insert "*** updated\n")
+                       (funcall fmt '("date" "node-title"))
+                       (insert "|----------\n")
+                       (mapcar fmt (org-babel-execute:sqlite
+                                    (format "
 select
   (
     case when instr(properties, '(\"UPDATED\" .') > 0
@@ -9556,16 +10407,16 @@ select
  )
  order by created desc
  limit %s" n)
-                         '((:db . "~/.config/emacs/org-roam.db"))))
-            (org-table-align)
-            (insert "\n")
+                                    '((:db . "~/.config/emacs/org-roam.db"))))
+                       (org-table-align)
+                       (insert "\n")
 
 
-            (insert "*** created\n")
-            (funcall fmt '("date" "node-title"))
-            (insert "|----------\n")
-            (mapcar fmt (org-babel-execute:sqlite
-                         (format "
+                       (insert "*** created\n")
+                       (funcall fmt '("date" "node-title"))
+                       (insert "|----------\n")
+                       (mapcar fmt (org-babel-execute:sqlite
+                                    (format "
 select
   (
     case when instr(properties, '(\"CREATED\" .') > 0
@@ -9579,19 +10430,83 @@ select
  )
  order by created desc
  limit %s" n)
-                         '((:db . "~/.config/emacs/org-roam.db"))))
-            (org-table-align)
-            (insert "\n"))
+                                    '((:db . "~/.config/emacs/org-roam.db"))))
+                       (org-table-align)
+                       (insert "\n")
+                       )))
+          (when current-prefix-arg
+            (funcall pref)
+            ;;             (insert "** heading\n")
+            ;;             (insert "*** updated\n")
+            ;;             ;; TODO lexical closure issue (because of when?)
 
-          ;; end tables
-          )
-        (read-only-mode 1)
-        ;; end display
-        ))
-    (display-buffer b)))
+            ;;             (funcall 'fmt '("date" "title" "heading" "node"))
+            ;;             (insert "|----------\n")
+            ;;             (mapcar 'fmt (seq-take (qz/org-ql--updated) n))
+            ;;             (org-table-align)
+            ;;             (insert "\n")
 
-(define-key global-map (kbd "C-s-n") 'qz/org-now)
+            ;;             (insert "*** created\n")
+            ;;             (funcall 'fmt '("date" "title" "heading" "node"))
+            ;;             (insert "|----------\n")
+            ;;             (mapcar 'fmt (seq-take (qz/org-ql--created) n))
+            ;;             (org-table-align)
+            ;;             (insert "\n")
 
+            ;;             (insert "** node\n")
+            ;;             (insert "*** updated\n")
+            ;;             (funcall 'fmt '("date" "node-title"))
+            ;;             (insert "|----------\n")
+            ;;             (mapcar 'fmt (org-babel-execute:sqlite
+            ;;                          (format "
+            ;; select
+            ;;   (
+            ;;     case when instr(properties, '(\"UPDATED\" .') > 0
+            ;;       then substr(properties, instr(properties, '(\"UPDATED\" .') + 15, 20)
+            ;;     else null end
+            ;;   ) as created,
+            ;;   title
+            ;;   from nodes
+            ;;  where (
+            ;;    instr(properties, '(\"UPDATED\" .') > 0
+            ;;  )
+            ;;  order by created desc
+            ;;  limit %s" n)
+            ;;                          '((:db . "~/.config/emacs/org-roam.db"))))
+            ;;             (org-table-align)
+            ;;             (insert "\n")
+
+
+            ;;             (insert "*** created\n")
+            ;;             (funcall fmt '("date" "node-title"))
+            ;;             (insert "|----------\n")
+            ;;             (mapcar fmt (org-babel-execute:sqlite
+            ;;                          (format "
+            ;; select
+            ;;   (
+            ;;     case when instr(properties, '(\"CREATED\" .') > 0
+            ;;       then substr(properties, instr(properties, '(\"CREATED\" .') + 15, 20)
+            ;;     else null end
+            ;;   ) as created,
+            ;;   title
+            ;;   from nodes
+            ;;  where (
+            ;;    instr(properties, '(\"CREATED\" .') > 0
+            ;;  )
+            ;;  order by created desc
+            ;;  limit %s" n)
+            ;;                          '((:db . "~/.config/emacs/org-roam.db"))))
+            ;;             (org-table-align)
+            ;;             (insert "\n"))
+
+            ;; end tables
+            )
+          (read-only-mode 1)
+          ;; end display
+          ))
+      (display-buffer b)))
+
+  (define-key global-map (kbd "C-s-n") 'qz/org-now)
 #+end_src
 
 #+RESULTS:
@@ -10003,11 +10918,12 @@ fuck the speed my man; {M-x load-library RET ob-} is so annoying
 :ID:       05415208-95bf-4153-b65c-32e10112c582
 :CREATED:  [2021-11-29 Mon]
 :ROAM_EXCLUDE: t
-:UPDATED:  [2023-04-12 Wed 18:13]
+:UPDATED:  [2023-09-01 Fri 20:35]
 :END:
 
 
-#+begin_src emacs-lisp :noweb-ref roam :colnames '(count file)
+#+begin_src emacs-lisp :noweb-ref roam :colnames '(count file) :results table
+;; (makunbound 'qz/org-babel-lob-ingest-files)
 (defvar qz/org-babel-lob-ingest-files
   (append (mapcar (lambda (s)
                     (when-let ((n (org-roam-node-from-title-or-alias s)))
@@ -10020,6 +10936,9 @@ fuck the speed my man; {M-x load-library RET ob-} is so annoying
                     "plantuml"
                     "GNU Guix"
                     "git"
+                    "Apache Kafka"
+                    "kafka-connect"
+                    "bigquery"
                     ))
           ;; .. other files
           nil
@@ -10039,16 +10958,19 @@ fuck the speed my man; {M-x load-library RET ob-} is so annoying
 #+end_src
 
 #+RESULTS:
-| count | file                                                   |
-|-------+--------------------------------------------------------|
-|    75 | /home/samuel/life/roam/20210420T114708Z-newstore.org   |
-|    11 | /home/samuel/life/roam/20210813T161035Z-kubernetes.org |
-|    26 | /home/samuel/life/roam/20200515T151822Z-postgresql.org |
-|     4 | /home/samuel/life/roam/20210813T161035Z-es_mode.org    |
-|     2 | /home/samuel/life/roam/20200415T145703Z-emacs_lisp.org |
-|     1 | /home/samuel/life/roam/20210505T135556Z-plantuml.org   |
-|     1 | /home/samuel/life/roam/20200919T152005Z-gnu_guix.org   |
-|     1 | /home/samuel/life/roam/20200511T150956Z-git.org        |
+| count | file                                                      |
+|-------+-----------------------------------------------------------|
+|    78 | /home/samuel/life/roam/20210420T114708Z-newstore.org      |
+|    12 | /home/samuel/life/roam/20210813T161035Z-kubernetes.org    |
+|    34 | /home/samuel/life/roam/20200515T151822Z-postgresql.org    |
+|     5 | /home/samuel/life/roam/20210813T161035Z-es_mode.org       |
+|     2 | /home/samuel/life/roam/20200415T145703Z-emacs_lisp.org    |
+|     2 | /home/samuel/life/roam/20210505T135556Z-plantuml.org      |
+|     1 | /home/samuel/life/roam/20200919T152005Z-gnu_guix.org      |
+|     1 | /home/samuel/life/roam/20200511T150956Z-git.org           |
+|    12 | /home/samuel/life/roam/20230829T100710Z-apache_kafka.org  |
+|     7 | /home/samuel/life/roam/20230628T155405Z-kafka-connect.org |
+|     1 | /home/samuel/life/roam/20220824T094643Z-bigquery.org      |
 
 ******* choose babel block                                                     :func:
 :PROPERTIES:
@@ -11621,7 +12543,7 @@ so we can use it as a COMMAND. better traceability than a lambda
 :PROPERTIES:
 :ID:       5aa025eb-cc43-4866-9401-bd043ecf971b
 :CREATED:  [2021-12-12 Sun 22:34]
-:UPDATED:  [2022-03-10 Thu 18:48]
+:UPDATED:  [2023-09-24 Sun 16:54]
 :END:
 
 - :: [[id:6ae36e2f-ab6d-45bc-9448-8dce233c8528][data-driven automatic actions in org roam]]
@@ -11634,9 +12556,12 @@ as this is my current mechanism for making a [[id:5d31286f-eef2-490a-8d44-0cded2
 
 #+begin_src emacs-lisp :noweb-ref roam
 
+(defun qz/timestamp ()
+  (format-time-string "[%Y-%m-%d %a %H:%M]"))
+
 (defun qz/org-roam--insert-timestamp (&rest args)
   (when (not (org-entry-get nil "CREATED"))
-    (org-entry-put nil "CREATED" (format-time-string "[%Y-%m-%d %a %H:%M]")))
+    (org-entry-put nil "CREATED" (qz/timestamp)))
   (qz/org-roam--updated-timestamp))
 
 (defun qz/org-roam--updated-timestamp (&rest args)
@@ -11646,22 +12571,42 @@ as this is my current mechanism for making a [[id:5d31286f-eef2-490a-8d44-0cded2
             (when pt
               (org-entry-put
                pt "UPDATED"
-               (format-time-string "[%Y-%m-%d %a %H:%M]"))))
+               (qz/timestamp))))
           (list (and (org-roam-node-at-point)
                      (org-roam-node-point (org-roam-node-at-point)))
                 (save-excursion
                   (org-back-to-heading-or-point-min)
                   (point)))))
 
+;; FIXME
 (add-hook 'org-roam-capture-new-node-hook 'qz/org-roam--insert-timestamp)
+
 (add-hook 'org-mode-hook (lambda ()
                            (add-hook 'before-save-hook
                                      'qz/org-roam--updated-timestamp nil t)))
-(qz/advice- org-id-get-create :after qz/org-roam--insert-timestamp)
+(qz/advice- org-id-get-create :before qz/org-roam--insert-timestamp)
 #+end_src
 
 #+RESULTS:
-| qz/advice-enable--org-id-get-create--qz/org-roam--insert-timestamp | qz/advice-disable--org-id-get-create--qz/org-roam--insert-timestamp |
+: (qz/advice-enable--org-id-get-create--qz/org-roam--insert-timestamp qz/advice-disable--org-id-get-create--qz/org-roam--insert-timestamp)
+
+******** TODO interaction bug :: needlessly updating timestamps on daily files
+:PROPERTIES:
+:CREATED:  [2023-09-24 Sun 16:53]
+:UPDATED:  [2023-09-24 Sun 16:54]
+:ID:       1bf59c36-4f6b-41a6-9096-702c1d97efc3
+:ROAM_EXCLUDE: t
+:END:
+
+i.e. when jumping about with {C-s-j}
+
+********* org-roam-capture-new-node-hook X org-roam-dailies-goto-today(org-roam-dailies-capture-today)
+:PROPERTIES:
+:CREATED:  [2023-09-24 Sun 16:52]
+:UPDATED:  [2023-09-24 Sun 16:52]
+:ID:       e2314986-aac7-48da-8196-211534983b19
+:ROAM_EXCLUDE: t
+:END:
 ******* auto-tagging
 :PROPERTIES:
 :ID:       bac18b83-9a07-4c4b-ac68-82a4ba1b480c
@@ -11704,19 +12649,19 @@ as this is my current mechanism for making a [[id:5d31286f-eef2-490a-8d44-0cded2
 #+RESULTS:
 : qz/is-file-private
 
-******** helpers
+******* helpers
 :PROPERTIES:
 :ID:       7658fa6d-a033-4e97-8fb1-19c6ccb09fbd
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
 :END:
-********* plumbing
+******** plumbing
 :PROPERTIES:
 :ID:       80941280-8587-4a9b-84c4-d9af3892e7a8
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
 :END:
-********** refresh filetags cache
+********* refresh filetags cache
 :PROPERTIES:
 :ID:       755ba202-4a54-4d18-a196-56fd80e9ce83
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -11731,13 +12676,13 @@ addressing caching & consistency problems with :PROPERTIES: drawer and #+propert
   (org-set-regexps-and-options) ; regen property detection regexp
   (org-get-tags))               ; write to cache
 #+end_src
-********* transformations
+******** transformations
 :PROPERTIES:
 :ID:       6b3ffc25-dc8f-4bcb-9571-1169bbb57f20
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
 :END:
-********** title-to-tag
+********* title-to-tag
 :PROPERTIES:
 :ID:       b1a87e36-cb29-410c-a8af-9ef422a702de
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -11756,13 +12701,13 @@ addressing caching & consistency problems with :PROPERTIES: drawer and #+propert
 
 #+RESULTS:
 : qz/title-to-tag
-********* data
+******** data
 :PROPERTIES:
 :ID:       66045845-0060-470d-9d0e-77c6afac1461
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
 :END:
-********** get-file-by-tag; add multi AND/OR
+********* get-file-by-tag; add multi AND/OR
 :PROPERTIES:
 :ID:       ddbd6abb-43d8-4178-87ad-e1a43cfebaa7
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -11784,7 +12729,7 @@ addressing caching & consistency problems with :PROPERTIES: drawer and #+propert
 #+RESULTS:
 : qz/org-roam-node-from-tag
 
-*********** test
+********** test
 :PROPERTIES:
 :ID:       6a2330ff-8636-4eb8-8af9-7fe43c2ae1c9
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -11800,13 +12745,13 @@ addressing caching & consistency problems with :PROPERTIES: drawer and #+propert
 
 #+RESULTS:
 | 563 | /home/samuel/life/roam/20200706T122138Z-meeting_epic_cleanup.org |
-********* predicates
+******** predicates
 :PROPERTIES:
 :ID:       c168d9bc-6095-46e3-94c9-a4b9e1bc6ebb
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
 :END:
-********** content-based
+********* content-based
 :PROPERTIES:
 :ID:       015dff9b-6d3b-4086-b187-c2da15c23c57
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -11814,7 +12759,7 @@ addressing caching & consistency problems with :PROPERTIES: drawer and #+propert
 :END:
 from filepath, or structural properties of the file
 
-*********** note-buffer-p
+********** note-buffer-p
 :PROPERTIES:
 :ID:       9f3f1779-400b-48df-9af0-4af4777ebfdb
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -11831,7 +12776,7 @@ from filepath, or structural properties of the file
 #+RESULTS:
 : qz/note-buffer-p
 
-*********** is-private-p
+********** is-private-p
 :PROPERTIES:
 :ID:       59ebb422-7c9a-4a33-aa8d-d52b8d718f9e
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -11853,7 +12798,7 @@ from filepath, or structural properties of the file
 #+RESULTS:
 : qz/is-private-p
 
-*********** is-daily-p
+********** is-daily-p
 :PROPERTIES:
 :ID:       d3e4a57e-bf2b-4ef5-b99f-bbb407809a48
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -11868,7 +12813,7 @@ from filepath, or structural properties of the file
 #+RESULTS:
 : qz/is-daily-p
 
-*********** is-project-p
+********** is-project-p
 :PROPERTIES:
 :ID:       a08ff855-c475-4718-a2e4-f11ce12f1b4c
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -11883,7 +12828,7 @@ from filepath, or structural properties of the file
 
 #+RESULTS:
 : qz/is-project-p
-*********** is-person-p
+********** is-person-p
 :PROPERTIES:
 :ID:       883f7cfa-f698-4b1f-92ba-32b41b8db3da
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -11899,7 +12844,7 @@ from filepath, or structural properties of the file
 #+RESULTS:
 : qz/is-person-p
 
-*********** file-has-todo-p
+********** file-has-todo-p
 :PROPERTIES:
 :ID:       53530907-3b29-401c-a25d-f647d10fa98f
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -11947,13 +12892,13 @@ tasks.
 #+RESULTS:
 : qz/file-has-todo-p
 
-********** link-based
+********* link-based
 :PROPERTIES:
 :ID:       41b87a22-731f-49c1-bd2d-6c41db00d779
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
 :END:
-*********** has-links
+********** has-links
 :PROPERTIES:
 :ID:       25c75e9d-08a4-4dba-8c0d-a187f9802c3e
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -11977,7 +12922,7 @@ tasks.
 #+RESULTS:
 : qz/node-has-links
 
-*********** has-link-p
+********** has-link-p
 :PROPERTIES:
 :ID:       3e6964b3-2f21-435f-8d75-bd2b728cdd6a
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -12001,7 +12946,7 @@ tasks.
 #+RESULTS:
 : qz/node-has-link-p
 
-*********** has-link-to-p
+********** has-link-to-p
 :PROPERTIES:
 :ID:       0b994d06-666a-4085-baa6-b532599cf063
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -12027,7 +12972,7 @@ tasks.
 #+RESULTS:
 : qz/node-has-link-to-p
 
-*********** has-transitive-link-p
+********** has-transitive-link-p
 :PROPERTIES:
 :ID:       5fcfabfe-ee6a-4151-98f4-7bd9efddf325
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -12080,7 +13025,7 @@ order by degree desc
 ;;x(qz/has-transitive-link-p (qz/title->roam-id "emacs"))
 #+end_src
 
-************ exploring links
+*********** exploring links
 :PROPERTIES:
 :ID:       d5f4e927-59e1-4c43-8dad-87333028a5ff
 :CREATED:  [2023-05-03 Wed 19:47]
@@ -12096,7 +13041,7 @@ transitive members.
 
 #+RESULTS:
 
-*********** TODO has-mutual-connection
+********** TODO has-mutual-connection
 :PROPERTIES:
 :ID:       b08963dd-6cba-44c3-9ee8-29fa5f4904d2
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -12672,7 +13617,131 @@ https://github.com/org-roam/org-roam/issues/991#issuecomment-882010053
 find $HOME/life -name '*.png' | grep screenshot.png
 #+end_src
 
+***** modern
+:PROPERTIES:
+:CREATED:  [2023-09-23 Sat 23:21]
+:UPDATED:  [2023-09-23 Sat 23:21]
+:ID:       0bde11cb-fe19-4be4-858b-9af55cd2fbcd
+:ROAM_EXCLUDE: t
+:END:
 
+****** org-modern-star
+:PROPERTIES:
+:CREATED:  [2023-09-23 Sat 23:21]
+:UPDATED:  [2023-09-24 Sun 15:41]
+:ID:       d2c3248a-4854-43b8-9c04-0dabb628177f
+:ROAM_EXCLUDE: t
+:END:
+
+******* qz/bullets-- :var:
+:PROPERTIES:
+:CREATED:  [2023-09-24 Sun 20:26]
+:UPDATED:  [2023-11-07 Tue 12:50]
+:ID:       950aacbc-a1e6-4c53-9ca6-38951ba30bce
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp :noweb-ref org
+(setq qz/bullets--newline? nil
+      qz/bullets--spacing 2
+      qz/bullets--list
+      '((◉ ○ ◈ ◇ ✳)
+        (🐕 🦮 🌭 🐶) ;; #{🐕\x200d;🦺}# 🐕‍🦺
+        (🍀 🍮 🫰 🫶)
+        (🙈 🙉 🙊)
+
+        (🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘)
+        (🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘 🌙 🌚 🌛 🌜)
+
+        ("ฅ՞•ﻌ•՞ฅ" "ʕっ￫ᴥ￩ʔっ" "ʕ ꈍᴥꈍʔ" "ᵒ̴̶̷̥ ᆽᵒ̴̶̷̥") ;; best with no spacing per-level
+        (ہ ﻩ)
+        ("") ; minimalist
+
+
+        ;;(¹ ) char 185
+        ))
+
+
+#+end_src
+
+#+RESULTS:
+: ((◉ ○ ◈ ◇ ✳) (🐕 🦮 🌭 🐶) (🍀 🍮 🫰 🫶) (🙈 🙉 🙊) (🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘) (🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘 🌙 🌚 🌛 🌜) ("ฅ՞•ﻌ•՞ฅ" "ʕっ￫ᴥ￩ʔっ" "ʕ ꈍᴥꈍʔ" "ᵒ̴̶̷̥ ᆽᵒ̴̶̷̥") (ہ ﻩ) (""))
+
+******* org-modern--choose-bullets :func:
+:PROPERTIES:
+:CREATED:  [2023-09-24 Sun 20:26]
+:UPDATED:  [2023-09-24 Sun 21:47]
+:ID:       39edd1c6-85e6-4ca5-ba24-c5091edf8001
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp :noweb-ref org
+(defun qz/org-modern--choose-bullets (&optional n)
+  (interactive)
+  (setq qz/bullets
+        (or (and n (nth n qz/bullets--list))
+            (let ((v (mapcar (lambda (b) (cons (format "%s" b) b))
+                             qz/bullets--list)))
+              (cdr (assoc (completing-read "bullets? " (mapcar 'car v))
+                          v))))
+        org-modern-star
+        (cl-loop for star in
+                 (seq-take
+                  (-cycle qz/bullets
+                          ;; ╱|、
+                          ;;(˚ˎ。7
+                          ;; |、˜〵
+                          ;; じしˍ,)ノ
+                          ) 60)
+                 and i from 0
+                 collect (format "%s%s%s"
+                                 (if qz/bullets--newline? "\n" "")
+                                 (make-string (* i qz/bullets--spacing) 32) ;; spc
+                                 star))))
+
+(qz/org-modern--choose-bullets 8)
+#+end_src
+
+#+RESULTS:
+: ("" "  " "    " "      " "        " "          " "            " "              " "                " "                  " "                    " "                      " "                        " "                          " "                            " "                              " "                                " "                                  " "                                    " "                                      " "                                        " "                                          " "                                            " "                                              " "                                                " "                                                  " "                                                    " "                                                      " "                                                        " "                                                          " "                                                            " "                                                              " "                                                                " "                                                                  " "                                                                    " "                                                                      " "                                                                        " "                                                                          " "                                                                            " "                                                                              " "                                                                                " "                                                                                  " "                                                                                    " "                                                                                      " "                                                                                        " "                                                                                          " "                                                                                            " "                                                                                              " "                                                                                                " "                                                                                                  " "                                                                                                    " "                                                                                                      " "                                                                                                        " "                                                                                                          " "                                                                                                            " "                                                                                                              " "                                                                                                                " "                                                                                                                  " "                                                                                                                    " "                                                                                                                      ")
+
+******* TODO name / space offset per list & default
+:PROPERTIES:
+:CREATED:  [2023-09-24 Sun 00:30]
+:UPDATED:  [2023-09-24 Sun 00:30]
+:ID:       adf25efe-ccd9-47b6-b431-ab061f153d1f
+:ROAM_EXCLUDE: t
+:END:
+
+****** org-modern-list
+:PROPERTIES:
+:CREATED:  [2023-09-23 Sat 23:26]
+:UPDATED:  [2023-09-23 Sat 23:39]
+:ID:       d7fb3b55-d49a-4fae-aac0-3c0f5a7ecae8
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref org
+(setq org-modern-list
+      '((43 . "◦")
+        (45 . "–")
+        (42 . "•")))
+
+(mapcar (lambda (e) (char-to-string (car e))) org-modern-list)
+#+end_src
+
+#+RESULTS:
+: ("+" "-" "*")
+
+****** org-modern-tag
+:PROPERTIES:
+:CREATED:  [2023-09-23 Sat 23:39]
+:UPDATED:  [2023-09-23 Sat 23:39]
+:ID:       f83541d6-4740-4f92-84b3-44c8d4972b2c
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref org
+(setq org-modern-tag t)
+#+end_src
 
 ***** web-tools
 :PROPERTIES:
@@ -13099,7 +14168,7 @@ C-M-S
 :PROPERTIES:
 :ID:       ed581dc6-ce42-430a-921c-c07ac5c12698
 :CREATED:  [2022-09-28 Wed 16:36]
-:UPDATED:  [2022-10-26 Wed 11:57]
+:UPDATED:  [2023-10-31 Tue 13:08]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -13112,7 +14181,10 @@ C-M-S
 (defun org-insert-subheading-respect-content (&rest arg)
   (interactive "P")
   (let ((org-insert-heading-respect-content t))
-    (org-insert-subheading arg)))
+    (org-insert-subheading arg)
+    ;; [[id:28622111-aa1e-4d9a-ac23-0140a67e3d7f]]
+    (end-of-line)))
+
 
 (define-key org-mode-map (kbd "C-M-<return>")
             'org-insert-subheading-respect-content)
@@ -13130,9 +14202,10 @@ C-M-S
 #+end_src
 
 #+RESULTS:
-| lambda | nil | (interactive) | (make-marker) | (org-up-heading-or-point-min) |
+: (closure (t) nil (interactive) (make-marker) (org-up-heading-or-point-min))
 
 (org-insert-subheading nil)
+
 **** effort estimates
 :PROPERTIES:
 :ID:       4139f89e-a615-43b6-a951-79880772cd4e
@@ -13250,7 +14323,7 @@ also accessible from the agenda with the ‘e’ key.
 :ID:       ded3219a-de09-4bee-a919-bf79debb9022
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:  [2023-05-07 Sun 15:52]
+:UPDATED:  [2023-09-29 Fri 14:31]
 :END:
 
 #+begin_src emacs-lisp
@@ -13258,6 +14331,12 @@ also accessible from the agenda with the ‘e’ key.
 (message "pre org: %s" (shell-command-to-string "date"))
 (with-eval-after-load 'org
   (require 's)
+  ;;; FIXME :: org-roam init kills id stuff ?
+  ;;; BEGIN ORGID HACKS
+  ;;(org-id-update-id-locations)
+  (setq org-id-locations "/home/samuel/.config/org-id-locations")
+  ;;   after setting in-session, (org-roam-update-org-id-locations)
+  ;;; END ORGID HACKS
   (message "loading org: %s" (shell-command-to-string "date"))
   <<org>>
   )
@@ -13271,11 +14350,12 @@ also accessible from the agenda with the ‘e’ key.
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
 :END:
-***** org-confirm-babel-evaluate; don't ask                                     :var:
+***** org-confirm-babel-evaluate  ; don't ask                                   :var:
 :PROPERTIES:
 :ID:       57ced9da-b883-47ea-9a88-00579d24dbf9
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
+:UPDATED:  [2023-10-09 Mon 11:58]
 :END:
 #+begin_src emacs-lisp  :noweb-ref org
 (setq org-confirm-babel-evaluate nil)
@@ -13513,6 +14593,33 @@ any value <0 is a most controversial decision
 #+RESULTS:
 : t
 
+***** org-tags-exclude-from-inheritance
+:PROPERTIES:
+:CREATED:  [2023-10-09 Mon 11:58]
+:UPDATED:  [2023-10-09 Mon 11:58]
+:ID:       e5488368-a733-4c1e-82fb-9c236eeb7d1f
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref org
+(setq org-tags-exclude-from-inheritance '("daily" "project"))
+#+end_src
+
+#+RESULTS:
+: ("daily" "project")
+
+***** org-hierarchical-todo-statistics  ; count tasks recursively
+:PROPERTIES:
+:CREATED:  [2023-10-09 Mon 11:58]
+:UPDATED:  [2023-10-09 Mon 11:58]
+:ID:       7478b485-ccdb-4d72-be5d-604782d81a95
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref org
+(setq org-hierarchical-todo-statistics nil)
+#+end_src
+
 **** slack
 :PROPERTIES:
 :ID:       4454a5e4-98c8-482c-95da-c70f0a77bb29
@@ -13727,7 +14834,7 @@ prepend or to append."
 :PROPERTIES:
 :ID:       b07ff6f9-2e00-467c-98e8-c4c8697ce08f
 :CREATED:  <2022-02-23 Wed 09:17>
-:UPDATED:  [2023-04-12 Wed 17:09]
+:UPDATED:  [2023-09-04 Mon 18:49]
 :END:
 
 adapted for [[id:b33372ae-f731-4482-8e3a-0c5e986ac70a][org-roam]], the =ROAM_EXCLUDE= property is set, to reduce
@@ -13742,8 +14849,8 @@ do not already have one."
   (interactive)
   (when (file-exists-p (buffer-file-name (current-buffer)))
     (org-map-entries (lambda (&rest r)
-                       (unless (org-id-get)
-                         (org-id-get-create)
+                       (unless (ignore-errors (org-id-get))
+                         (ignore-errors (org-id-get-create))
                          (org-set-property "ROAM_EXCLUDE" "t"))))))
 
 
@@ -13757,6 +14864,26 @@ do not already have one."
 
 #+RESULTS:
 : t
+****** finding & fixing duplicate IDs
+:PROPERTIES:
+:CREATED:  [2023-09-04 Mon 18:46]
+:UPDATED:  [2023-09-04 Mon 18:49]
+:ID:       1082df7c-e1f2-42f8-9b34-e8c1285afe3e
+:ROAM_EXCLUDE: t
+:END:
+
+
+#+begin_src shell  :var _=(setq-local org-link-elisp-confirm-function nil)
+rg 'ID:' $HOME/life/roam -t org \
+    | grep  -vE '2023-09-04|archive' \
+    | awk -F'ID:' '{print $2}' \
+    | sort | uniq -c | sort -k1 | awk '{ if ($1 > 1) print $2 }' \
+    | xargs -I {} echo '[[elisp:(consult-ripgrep org-roam-directory ":ID: {}")][rg :: {}]]'
+#+end_src
+
+#+RESULTS:
+:results:
+:end:
 
 ***** org-mode-hook -> adaptive-wrap-prefix-mode
 :PROPERTIES:
@@ -13841,7 +14968,7 @@ I'm using tags and auto-tags rather sporadically
 :ID:       bebc4bc6-3ed0-49a1-b76a-ffe7ee11dd33
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:  [2022-09-30 Fri 13:31]
+:UPDATED:
 :END:
 640px is a good size, at approximately 64 columns
 
@@ -13853,11 +14980,52 @@ check with (org-redisplay-inline-images)
 -----------------------------------------------------------------
 
 #+begin_src emacs-lisp :noweb-ref org
-(setq org-image-actual-width 640)
+(setq qz/org-image-actual-width 640)
+(defun qz/org-image-width (&optional n)
+  (setq org-image-actual-width (or n qz/org-image-actual-width)))
+(qz/org-image-width)
 #+end_src
 
 #+RESULTS:
 : 640
+
+****** TODO re-adjust on text-scale-adjust (mouse, local, global)
+:PROPERTIES:
+:CREATED:  [2023-09-28 Thu 16:48]
+:UPDATED:  [2023-09-28 Thu 16:55]
+:ID:       4dbb3303-307d-4aee-92dd-5c4a2126581e
+:ROAM_EXCLUDE: t
+:END:
+
+- needs to be derived from text-scale, or DEFAULT
+
+  #+begin_src emacs-lisp :noweb-ref null
+  (defun qz/org-image-width--derive--text-scale ()
+    (and-let* ((b (boundp 'text-scale-mode-amount))
+               (v (symbol-value 'text-scale-mode-amount)))))
+
+  (defun qz/org-image-width--derive (&rest _)
+    (let ((w (qz/org-image-width--derive--text-scale)))
+      (message "qz image-width :: %s" w)
+      (qz/org-image-width (qz/org-image-width--derive--text-scale)))
+    (qz/org-refresh-inline-images))
+
+  (qz/advice- qz/org-image-width--derive :after text-scale-increase)
+  #+end_src
+
+  #+RESULTS:
+  : (qz/advice-enable--qz/org-image-width--derive--text-scale-increase qz/advice-disable--qz/org-image-width--derive--text-scale-increase)
+
+******* test it
+:PROPERTIES:
+:CREATED:  [2023-09-28 Thu 16:55]
+:UPDATED:  [2023-09-28 Thu 16:55]
+:ID:       64f6124e-719c-44c8-a305-636d345878d4
+:ROAM_EXCLUDE: t
+:END:
+
+  #+DOWNLOADED: screenshot @ 2023-09-28 16:49:24
+  [[file:screenshots/2023-09-28_16-49-24_screenshot.png]]
 
 ***** hide property drawers
 :PROPERTIES:
@@ -13998,7 +15166,7 @@ check with (org-redisplay-inline-images)
 :PROPERTIES:
 :ID:       a066c6c9-a733-4d56-baef-662353c21a82
 :CREATED:  [2022-11-29 Tue 11:08]
-:UPDATED:  [2022-12-12 Mon 14:51]
+:UPDATED:  [2023-09-24 Sun 16:39]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -14034,8 +15202,8 @@ still inferior to file-local settings."
          (file-prefix (file-name-sans-extension (buffer-file-name)))
          (filename (format "%s-%s.%s" file-prefix headline-alnum
                            (cl-case backend
-                             ('pdf "tex")
-                             ('slack "md")
+                             (pdf   "tex")
+                             (slack "md")
                              (t backend)))))
     (save-restriction
       (org-narrow-to-subtree)
@@ -14184,7 +15352,7 @@ a communication channel."
 :ID:       21946f30-986f-49fe-a51d-38c78f315543
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:  [2023-07-16 Sun 18:18]
+:UPDATED:  [2023-09-29 Fri 18:49]
 :END:
 
 #+begin_src emacs-lisp
@@ -14201,6 +15369,25 @@ a communication channel."
 (defun qz/suspend ()
   (interactive)
   (async-shell-command "loginctl suspend"))
+
+(defun qz/redshift-full ()
+  (interactive)
+  (async-shell-command "guix shell redshift-wayland -- redshift -O 1000K -r -b .7 "
+                       "*process:redshift*"))
+
+(defun qz/redshift-mellow ()
+  (interactive)
+  (async-shell-command "guix shell redshift-wayland -- redshift -O 2000K -r -b .7 "
+                       "*process:redshift*"))
+(defun qz/redshift-mellowbright ()
+  (interactive)
+  (async-shell-command "guix shell redshift-wayland -- redshift -O 2000K -r -b 1 "
+                       "*process:redshift*"))
+
+(defun qz/dmesg ()
+  (interactive)
+  (async-shell-command "sudo dmesg -w"
+                       "*process:dmesg*"))
 
 (defun qz/reload-config-home ()
   (interactive)
@@ -14351,14 +15538,14 @@ pactl list sources | grep -E 'Name|Desc' -n
 | 428: | Name: bluez_sink.44_F0_9E_51_52_7B.a2dp_sink.monitor                                               |
 | 429: | Description: Monitor of Samuel’s AirPods Pro                                                       |
 
-****** tascam: input: alsa_input.usb-TEAC_Corporation_TASCAM_DR_Series-00.analog-stereo
+****** tascam:  input:  alsa_input.usb-TEAC_Corporation_TASCAM_DR_Series-00.analog-stereo
 :PROPERTIES:
 :ID:       2bfd38e2-cf1c-4074-8349-b4d9a3736b9f
 :CREATED:  [2022-04-22 Fri 15:31]
 :UPDATED:  [2022-04-22 Fri 15:31]
 :ROAM_EXCLUDE: t
 :END:
-****** tascam: output: alsa_output.usb-TEAC_Corporation_TASCAM_DR_Series-00.analog-stereo.monitor
+****** tascam:  output: alsa_output.usb-TEAC_Corporation_TASCAM_DR_Series-00.analog-stereo.monitor
 :PROPERTIES:
 :ID:       4a4a7516-1e18-4d0e-9646-5cc87a361341
 :CREATED:  [2022-04-22 Fri 15:31]
@@ -15697,7 +16884,7 @@ if `truncate-lines' is non-nil."
 #+RESULTS:
 : vline
 
-***** rde: scheme reader incompatibility: =(defvar vline-line-char ?|)=
+****** rde: scheme reader incompatibility: =(defvar vline-line-char ?|)=
 :PROPERTIES:
 :ID:       3193f8ae-2c44-4b87-ab8c-9df0aabf2c7a
 :CREATED:  [2022-09-30 Fri 13:11]
@@ -16046,19 +17233,19 @@ JS: json object"
 :PROPERTIES:
 :ID:       f7f6f20c-7184-407b-b921-c5e70ebbbff5
 :CREATED:  [2023-04-16 Sun 15:25]
-:UPDATED:  [2023-04-16 Sun 15:26]
+:UPDATED:  [2023-09-24 Sun 16:07]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src shell
-echo autosaves: "$(find . | grep -E '(\\b\\.\\#|\\b\\#)' | tee /tmp/autosaves-life | wc -l)"
-echo unignored: "$(git ls-files -ic --exclude-from=.gitignore | tee /tmp/unignored-life | wc -l)"
+echo autosaves: "$(find $HOME/life | grep -E '#' | tee /tmp/autosaves-life | wc -l)"
+echo unignored: "$(cd $HOME/life && git ls-files -ic --ignored  --exclude-standard | tee /tmp/unignored-life | wc -l)"
 #+end_src
 
 #+RESULTS:
 :results:
-autosaves: 0
-unignored: 0
+autosaves: 48
+unignored: 1
 :end:
 
 *** TODO bye
@@ -16122,21 +17309,21 @@ eval "docker run --rm --volumes-from gcloud-config gcr.io/google.com/cloudsdktoo
 :PROPERTIES:
 :ID:       ba39068b-5e0d-49a3-83e3-2ac05eab3ef7
 :CREATED:  [2023-07-18 Tue 12:11]
-:UPDATED:  [2023-07-18 Tue 12:11]
+:UPDATED:  [2024-01-15 Mon 19:35]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src shell :tangle ~/.local/bin/gsutil
 #!/usr/bin/env sh
 
-eval "docker run --rm --volumes-from gcloud-config gcr.io/google.com/cloudsdktool/google-cloud-cli gsutil" "$@"
+eval "docker run --rm --volumes-from gcloud-config -v $PWD:/home/cloudsdk -w  /home/cloudsdk gcr.io/google.com/cloudsdktool/google-cloud-cli gsutil" "$@"
 #+end_src
 
 **** bq
 :PROPERTIES:
 :ID:       13367261-6c04-4004-8a8b-45a5323035cc
 :CREATED:  [2023-04-03 Mon 13:05]
-:UPDATED:  [2023-06-06 Tue 13:09]
+:UPDATED:  [2023-11-15 Wed 14:44]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -16151,7 +17338,7 @@ qargs=$( printf ' %q' "$@" | sed -e 's/\\n/ /g' -e "s/\$'/'/g")
 
 #echo $qargs > $HOME/.cache/bq.out
 
-cmd='docker run --rm --volumes-from gcloud-config gcr.io/google.com/cloudsdktool/google-cloud-cli bq'
+cmd='docker run --rm --volumes-from gcloud-config -v $HOME/tmp/ns:/tmp gcr.io/google.com/cloudsdktool/google-cloud-cli bq'
 
 echo "$cmd" "$qargs" > $HOME/.cache/bq.in
 
@@ -16413,6 +17600,13 @@ Debugger entered--Lisp error: (file-missing "Cannot open load file" "No such fil
 :UPDATED:  [2023-05-03 Wed 18:06]
 :ROAM_EXCLUDE: t
 :END:
+******** clobbers symbols -- some compound utf chars :: 🐕‍🦺 ->#{🐕\x200d;🦺}#
+:PROPERTIES:
+:CREATED:  [2023-09-24 Sun 15:42]
+:UPDATED:  [2023-09-24 Sun 15:42]
+:ID:       979a9abb-aba2-4d82-ab5d-b9c4bb913bf4
+:ROAM_EXCLUDE: t
+:END:
 ******** unquote literals =,=  become literal =unquote=
 :PROPERTIES:
 :ID:       6cdd496b-c4ef-4998-9d48-5bf40f0b1246
@@ -16650,7 +17844,7 @@ CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
 :PROPERTIES:
 :ID:       ed8adb71-72ab-4156-bab8-4fe2f4712812
 :CREATED:  [2022-09-28 Wed 16:47]
-:UPDATED:  [2022-09-28 Wed 16:47]
+:UPDATED:  [2023-10-23 Mon 08:52]
 :ROAM_EXCLUDE: t
 :END:
 ***** gpg pinentry
