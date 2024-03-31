@@ -1,7 +1,7 @@
 :PROPERTIES:
-:CREATED:  [2022-08-30 Tue 11:12]
 :ID:       12f7748c-7095-4969-8261-94ad0169a24c
-:UPDATED:  [2024-01-15 Mon 19:35]
+:CREATED:  [2022-08-30 Tue 11:12]
+:UPDATED:  [2024-03-31 Sun 20:28]
 :END:
 #+property: header-args            :tangle-mode (identity #o444) :noweb yes
 #+property: header-args:sh         :tangle-mode (identity #o755)
@@ -11,13 +11,11 @@
 #+property: header-args:emacs-lisp :noweb-ref conf-emacs
 #+title: system config; gnu guix (rde) & emacs
 
-
-
 * header
 :PROPERTIES:
 :ID:       d5a65665-c696-493b-a426-89a0ce6c1fbd
 :CREATED:  [2023-07-12 Wed 19:42]
-:UPDATED:  [2023-09-26 Tue 16:15]
+:UPDATED:  [2024-03-31 Sun 19:04]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -30,7 +28,7 @@ all the host/user specific things.
 (rde features gnupg)
 #+end_src
 
-#+begin_src scheme :tangle header.scm
+#+begin_src scheme :tangle header.scm :noweb-ref null
 (define-module (header)
   #:use-module <<header-imports>>
   )
@@ -59,6 +57,10 @@ all the host/user specific things.
     (mail-account
      (id   'work)
      (fqda "sculpepper@newstore.com")
+     (type 'gmail-tls))
+    (mail-account
+     (id   'work-gcp)
+     (fqda "sculpepper@newstore.net")
      (type 'gmail-tls))
     (mail-account
      (id   'yt)
@@ -114,8 +116,8 @@ all the host/user specific things.
    #:email "samuel@samuelculpepper.com"
    #:user-groups '(;; basic groups
                    "lp" "wheel" "video"
-                   ;;; zsa
-                   ;;"plugdev"
+                   ;;; qmk, zsa
+                   ;; "plugdev" ;; FIXME ??? supplementary group [...] undefined
                    )
    ))
 
@@ -145,7 +147,7 @@ all the host/user specific things.
 :PROPERTIES:
 :ID:       53756386-28a4-4f37-b819-4ce10572406c
 :CREATED:  [2023-07-23 Sun 11:33]
-:UPDATED:  [2023-10-31 Tue 13:07]
+:UPDATED:  [2024-01-24 Wed 13:52]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -173,12 +175,13 @@ all the host/user specific things.
 :PROPERTIES:
 :ID:       6bb15998-32c1-4674-890a-85180a89d66a
 :CREATED:  [2022-07-29 Fri 18:22]
-:UPDATED:  [2023-09-26 Tue 16:12]
+:UPDATED:  [2024-03-31 Sun 19:01]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme
 (define-module (configs)
+
   #:use-module (header)
   #:use-module (emacs)
 
@@ -204,6 +207,7 @@ all the host/user specific things.
   #:use-module (gnu system file-systems)
   #:use-module (gnu system keyboard)
   #:use-module (gnu system mapped-devices)
+  #:use-module (gnu system shadow) ; account-service-type
 
   #:use-module (guix channels)
   #:use-module (guix gexp)
@@ -231,6 +235,7 @@ all the host/user specific things.
   #:use-module (rde features messaging)
   #:use-module (rde features networking)
   #:use-module (rde features password-utils)
+  #:use-module (rde features presets)
   #:use-module (rde features python)
   #:use-module (rde features shells)
   #:use-module (rde features shellutils)
@@ -250,32 +255,22 @@ all the host/user specific things.
   #:use-module (rde gexp)
 
   #:use-module (rde home services i2p)
+  #:use-module (rde home services emacs)
+
   #:use-module (rde packages emacs)
   #:use-module (rde packages emacs-xyz)
   #:use-module (rde packages)
+
   #:use-module (rde system services accounts)
+
   ;;#:use-module (gnu home-services shellutils)
+
   #:use-module (nongnu packages nvidia)
   #:use-module (nongnu services nvidia)
+
   ;;#:use-module (rde features bluetooth) ;; TODO qzdl
 
   #:use-module (srfi srfi-1))
-#+end_src
-
-***** user features
-:PROPERTIES:
-:ID:       738d1f19-afd3-4497-b2ba-2434fc090789
-:CREATED:  [2022-07-29 Fri 17:48]
-:UPDATED:  [2022-07-29 Fri 17:48]
-:ROAM_EXCLUDE: t
-:END:
-#+begin_src scheme
-
-;;; User-specific features
-
-;; Initial user's password hash will be available in store, so it's
-;; use this feature with care
-;; (display (crypt "hi" "$6$abc"))
 #+end_src
 
 ***** helpers
@@ -305,11 +300,11 @@ all the host/user specific things.
             (urls urls)))))
 #+end_src
 
-****** mail serializer (bravehost | gmail-tls)
+****** mail serializers (bravehost | gmail-tls)
 :PROPERTIES:
 :ID:       fb637534-e1ae-493b-bf5e-0cdc5ec1cc2f
 :CREATED:  [2022-08-29 Mon 17:06]
-:UPDATED:  [2022-09-28 Wed 16:03]
+:UPDATED:  [2024-03-04 Mon 11:52]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -341,14 +336,6 @@ all the host/user specific things.
 (define gmail-tls-isync-settings
   (generate-isync-serializer "imap.gmail.com" gmail-tls-folder-mapping))
 #+end_src
-
-****
-:PROPERTIES:
-:ID:       1fcfe6cc-78f9-43e5-89a7-3a27d68597f6
-:CREATED:  [2022-11-21 Mon 14:13]
-:UPDATED:  [2022-11-21 Mon 14:13]
-:ROAM_EXCLUDE: t
-:END:
 
 
 ******* keyboard
@@ -452,10 +439,10 @@ all the host/user specific things.
 :PROPERTIES:
 :ID:       5508a976-f9ad-457c-b4bb-46dbf3b73fb0
 :CREATED:  [2022-07-29 Fri 17:36]
-:UPDATED:  [2023-09-24 Sun 16:03]
+:UPDATED:  [2024-03-31 Sun 19:03]
 :END:
 
-**** pkgs, pkgs-vanilla                                                        :func:
+**** pkgs, pkgs-vanilla (helper)                                               :func:
 :PROPERTIES:
 :ID:       5fb5abba-de52-453a-8cfb-875f6d6897ba
 :CREATED:  [2022-08-08 Mon 11:41]
@@ -521,7 +508,7 @@ all the host/user specific things.
 ***** emacs
 :PROPERTIES:
 :CREATED:  [2023-09-24 Sun 15:48]
-:UPDATED:  [2023-09-24 Sun 15:48]
+:UPDATED:  [2024-03-31 Sun 19:03]
 :ID:       8e9b8179-cf15-4672-a15b-c6f020e0e7e8
 :ROAM_EXCLUDE: t
 :END:
@@ -899,7 +886,7 @@ independently.  Clock instances ared updated automatically.  Their resources
 :PROPERTIES:
 :ID:       47bf4150-8113-438f-9b56-87bc6e24744c
 :CREATED:  [2023-04-03 Mon 12:17]
-:UPDATED:  [2023-04-03 Mon 12:47]
+:UPDATED:  [2024-01-25 Thu 16:06]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -1344,7 +1331,7 @@ guix import elpa -a melpa atomic-chrome
 ******* src
 :PROPERTIES:
 :CREATED:  [2023-09-21 Thu 11:40]
-:UPDATED:  [2023-09-21 Thu 11:43]
+:UPDATED:  [2024-02-17 Sat 17:20]
 :ID:       3e06e209-1d75-4925-a130-ea418db3ab00
 :ROAM_EXCLUDE: t
 :END:
@@ -1375,6 +1362,61 @@ the browser and Emacs, they are synced to the same.  Firefox is supported via
 the @code{GhostText} browser addon.")
    (license license:gpl3+)))
 #+end_src
+
+****** emacs-spacious-padding
+:PROPERTIES:
+:CREATED:  [2024-02-17 Sat 17:18]
+:UPDATED:  [2024-02-17 Sat 17:27]
+:ID:       53635ebe-7282-43b9-9b9e-deb4e2691164
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src shell :wrap "src scheme"
+echo -e "(define-public emacs-spacious-padding\n$(guix import elpa spacious-padding)\n)"
+#+end_src
+
+#+RESULTS:
+#+begin_src scheme
+(define-public emacs-spacious-padding
+  (package
+   (name "emacs-spacious-padding")
+   (version "0.3.0")
+   (source (origin
+            (method url-fetch)
+            (uri (string-append
+                  "https://elpa.gnu.org/packages/spacious-padding-" version
+                  ".tar"))
+            (sha256 (base32
+                     "1iiaxgl18k8hkwwyz3qnargv6q8kwzyh39ai46k5xbpmyrsj4b16"))))
+   (build-system emacs-build-system)
+   (home-page "https://git.sr.ht/~protesilaos/spacious-padding")
+   (synopsis "Increase the padding/spacing of frames and windows")
+   (description
+    "# spacious-padding for GNU Emacs DEMO IMAGES: -
+<https://protesilaos.com/codelog/2023-06-03-emacs-spacious-padding/> -
+<https://protesilaos.com/codelog/2023-11-15-spacious-padding-extra-ui-dev/> This
+package provides a global minor mode to increase the spacing/padding of Emacs
+windows and frames.  The idea is to make editing and reading feel more
+comfortable.  Enable the mode with `M-x spacious-padding-mode`.  Adjust the
+exact spacing values by modifying the user option `spacious-padding-widths`.
+Inspiration for this package comes from [Nicolas Rougier's impressive
+designs](https://github.com/rougier) and [Daniel Mendler's `org-modern`
+package](https://github.com/minad/org-modern). + Package name (GNU ELPA):
+`spacious-padding` + Official manual:
+<https://protesilaos.com/emacs/spacious-padding> + Change log:
+<https://protesilaos.com/emacs/spacious-padding> + Git repo on @code{SourceHut}:
+<https://git.sr.ht/~protesilaos/spacious-padding> - Mirrors: + @code{GitHub}:
+<https://github.com/protesilaos/spacious-padding> + @code{GitLab}:
+<https://gitlab.com/protesilaos/spacious-padding> + Mailing list:
+<https://lists.sr.ht/~protesilaos/general-issues> + Sample images: -
+<https://protesilaos.com/codelog/2023-06-03-emacs-spacious-padding/> -
+<https://protesilaos.com/codelog/2023-11-15-spacious-padding-extra-ui-dev/> +
+Backronyms: Space Perception Adjusted Consistently Impacts Overall Usability
+State ...  padding; Spacious ...  Precise Adjustments to Desktop Divider
+Internals Neatly Generated.")
+   (license license:gpl3+)))
+#+end_src
+
 ***** python
 :PROPERTIES:
 :CREATED:  [2023-09-24 Sun 15:48]
@@ -1659,7 +1701,37 @@ done
 
 
 :end:
+***** collectors
+:PROPERTIES:
+:CREATED:  [2024-03-31 Sun 16:11]
+:UPDATED:  [2024-03-31 Sun 16:11]
+:ID:       77791020-9bfe-40e4-90d9-a540967c7465
+:ROAM_EXCLUDE: t
+:END:
+****** home
+:PROPERTIES:
+:CREATED:  [2024-03-31 Sun 16:11]
+:UPDATED:  [2024-03-31 Sun 16:11]
+:ID:       02017447-da21-465d-a80e-5b1230936486
+:ROAM_EXCLUDE: t
+:END:
 
+#+begin_src scheme :noweb-ref pkg-home
+;; python-keyring-pass ;; TODO broken [2024-03-31 Sun 16:24]soehitng
+;; perl-graph-easy
+#+end_src
+
+****** emacs
+:PROPERTIES:
+:CREATED:  [2024-03-31 Sun 16:11]
+:UPDATED:  [2024-03-31 Sun 16:12]
+:ID:       def4d5e8-d988-455b-b044-9ef8db869238
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme :noweb-ref pkg-emacs-my
+;;; ...
+#+end_src
 
 *** features
 :PROPERTIES:
@@ -1669,7 +1741,7 @@ done
 :ROAM_EXCLUDE: t
 :END:
 
-**** my features
+**** my
 :PROPERTIES:
 :ID:       b290c986-542c-46ef-9729-defbd20da2ea
 :CREATED:  [2022-08-29 Mon 17:10]
@@ -1866,95 +1938,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 (pretty-print "pre-%user-features")
 #+end_src
 
-**** abcdw features
-:PROPERTIES:
-:ID:       1532c6ba-0d0c-499e-bddd-ae1caa1dc778
-:CREATED:  [2022-07-29 Fri 17:48]
-:UPDATED:  [2023-07-05 Wed 12:32]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src scheme
-(define %user-features
-  (remove
-   unspecified?
-   (list
-    my-feature-user-info
-    my-feature-gnupg
-    (feature-password-store)
-    my-feature-mail-settings
-
-    (feature-keyboard
-     ;; To get all available options, layouts and variants run:
-     ;; cat `guix build xkeyboard-config`/share/X11/xkb/rules/evdev.lst
-     #:keyboard-layout %thinkpad-layout))))
-#+end_src
-
-***** COMMENT debug: print features
-:PROPERTIES:
-:ID:       4d60cafe-ff70-4540-a5ed-2e9b1a7b4b3e
-:CREATED:  [2022-07-29 Fri 17:48]
-:UPDATED:  [2022-07-29 Fri 17:48]
-:ROAM_EXCLUDE: t
-:END:
-#+begin_src scheme
-;;(map pretty-print %user-features)
-#+end_src
-
-***** TODO future features
-:PROPERTIES:
-:ID:       ad67e350-c601-49f4-ba21-ca6486ed96fb
-:CREATED:  [2022-07-29 Fri 17:48]
-:UPDATED:  [2022-08-22 Mon 17:34]
-:ROAM_EXCLUDE: t
-:END:
-#+begin_src scheme
-;;; TODO: feature-wallpapers https://wallhaven.cc/
-;;; TODO: feature-icecat
-;; PipeWire/iwd:
-;; https://github.com/J-Lentz/iwgtk
-;; https://github.com/krevedkokun/guix-config/blob/master/system/yggdrasil.scm
-;; https://github.com/werman/noise-suppression-for-voice#pipewire
-#+end_src
-
-#+RESULTS:
-
-***** COMMENT debug: pre main-features
-:PROPERTIES:
-:ID:       152578fa-8848-40dc-a0e3-a1a51825a5f7
-:CREATED:  [2022-07-29 Fri 18:24]
-:UPDATED:  [2022-07-29 Fri 18:24]
-:ROAM_EXCLUDE: t
-:END:
-#+begin_src scheme
-(pretty-print "pre-%main-features")
-#+end_src
-
-**** %main-features
-:PROPERTIES:
-:ID:       3455e06a-0a2b-4ca9-aca6-2ee2fa05f16f
-:CREATED:  [2022-07-29 Fri 17:53]
-:UPDATED:  [2022-09-28 Wed 16:09]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src scheme
-
-;;; WARNING: The order can be important for features extending
-;;; services of other features.  Be careful changing it.
-
-(define %main-features
-  (remove
-   (lambda (s) (or (not s) (unspecified? s)))
-   (list
-    ;;; BEGIN; main
-    <<main>>
-    ;;; END; main
-    )))
-
-#+end_src
-
-**** features
+**** rde
 :PROPERTIES:
 :ID:       ba479dce-2f41-467e-b177-b38d2379f1a7
 :CREATED:  [2022-08-01 Mon 11:05]
@@ -1967,14 +1951,14 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 :PROPERTIES:
 :ID:       476030a6-84df-46c8-931d-03b86769879d
 :CREATED:  [2023-07-23 Sun 11:33]
-:UPDATED:  [2023-07-23 Sun 11:33]
+:UPDATED:  [2024-03-31 Sun 20:11]
 :ROAM_EXCLUDE: t
 :END:
-****** custom-services
+n****** custom-services
 :PROPERTIES:
 :ID:       52dbdae7-459f-4950-9961-c2a9cd035844
 :CREATED:  [2022-08-09 Tue 12:44]
-:UPDATED:  [2022-09-28 Wed 16:09]
+:UPDATED:  [2024-03-31 Sun 20:03]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -1988,6 +1972,21 @@ Install and configure redshift, an adaptive light-temperature controller.")))
  #:home-services
  (list
   <<services>>
+    ;;; not exposed!!!!   such folly!!!
+  (simple-service 'emacs-my-init-el
+                  home-emacs-service-type
+                  (home-emacs-extension
+                   (init-el
+                    (append
+                     (list #~"(define-key key-translation-map [?\\C-x] [?\\C-u])\n"
+                           #~"(define-key key-translation-map [?\\C-u] [?\\C-x])\n")
+                     (list init-el)))))
+
+  ;; (simple-service 'emacs-my-package-rebuild
+  ;;                 home-emacs-service-type
+  ;;                 (home-emacs-extension
+  ;;                  (rebuild-elisp-packages? #t)))
+
   )
  #:system-services
  (remove
@@ -2010,14 +2009,14 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 :PROPERTIES:
 :ID:       5b5d963a-b70c-4867-87b8-8beb1633fa02
 :CREATED:  [2022-09-28 Wed 15:47]
-:UPDATED:  [2023-04-18 Tue 14:06]
+:UPDATED:  [2024-03-31 Sun 20:02]
 :ROAM_EXCLUDE: t
 :END:
 
 #+name: guile-service-envars
 #+begin_src scheme :noweb-ref services
 ((@ (gnu services) simple-service)
- 'make-guix-aware-of-guix-home-subcomand
+ 'my-environment-variables
  (@ (gnu home services) home-environment-variables-service-type)
  `(
          ;;; GRAPHICS
@@ -2038,7 +2037,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
    ;; ("MESA_GL_VERSION_OVERRIDE" . "3.4")
    ;;("MESA_GLSL_VERSION_OVERRIDE" . "340")
 
-   ;;("GBM_BACKEND" . "nvidia-drm")
+   ;;("GBM_BACKEND" . "nvidia-drm") ;; [2024-01-28 Sun]
         ;;;; guix build --no-grafts -f /home/samuel/git/sys/nonguix/nongnu/packages/nvidia.scm | wl-copy
         ;;;; or
         ;;;; guix build nvidia-driver | wl-copy
@@ -2058,8 +2057,8 @@ Install and configure redshift, an adaptive light-temperature controller.")))
    ;;      ("__EGL_EXTERNAL_PLATFORM_CONFIG_DIRS" . ,(string-append driver-path "/share/egl/egl_external_platform.d"))
    ;;      ))
    ;;
-   ("__GLX_VENDOR_LIBRARY_NAME" . "nvidia")
-   ("WLR_NO_HARDWARE_CURSORS" . "1")
+   ;;("__GLX_VENDOR_LIBRARY_NAME" . "nvidia")
+   ;;("WLR_NO_HARDWARE_CURSORS" . "1")
    ;;("WLR_DRM_NO_ATOMIC" . "1")
    ;; echo "/dev/dri/card$(udevadm info -a -n /dev/dri/card1 | grep boot_vga | rev | cut -c 2)"
    ;;("WLR_DRM_DEVICES" . "/dev/dri/card1")   ;; gpu only
@@ -2074,7 +2073,7 @@ Install and configure redshift, an adaptive light-temperature controller.")))
     "$XDG_CONFIG_HOME/guix/current/lib/guile/3.0/site-ccache\
 :$GUILE_LOAD_COMPILED_PATH")
 
-        ;;; JS/BABEL
+        ;;; jsBABEL
    ;; javascript sucks, npm sucks
    ;; https://github.com/npm/npm/issues/6675#issuecomment-250318382
    ;; https://github.com/npm/cli/issues/1451
@@ -2430,7 +2429,7 @@ wc /tmp/id-locations-files
 :PROPERTIES:
 :ID:       7d5b1d90-1d2b-4a25-b7d1-f28376cb1f3d
 :CREATED:  [2023-07-05 Wed 12:41]
-:UPDATED:  [2023-07-05 Wed 12:41]
+:UPDATED:  [2024-02-03 Sat 15:12]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -2460,6 +2459,7 @@ chooser_type=simple"
                 "303030AA"
                 "303030AA"))
 #+end_src
+
 
 ****** services-sys
 :PROPERTIES:
@@ -2541,10 +2541,10 @@ chooser_type=simple"
 
 #+begin_src scheme :noweb-ref services-sys
         ;;; udev: nvidia
-(when gaming?
-  (simple-service
-   'nvidia-udev-rule udev-service-type
-   (list nvidia-driver)))
+;; (when gaming?
+;;   (simple-service
+;;    'nvidia-udev-rule udev-service-type
+;;    (list nvidia-driver)))
 #+end_src
 
 ******** OLD X11 gdm with nvidia                                           :inactive:
@@ -2588,6 +2588,43 @@ chooser_type=simple"
 :ID:       0127c2bd-17af-496e-9053-1aea475b86aa
 :ROAM_EXCLUDE: t
 :END:
+
+******** for qmk
+:PROPERTIES:
+:CREATED:  [2024-01-24 Wed 13:42]
+:UPDATED:  [2024-01-24 Wed 13:42]
+:ID:       ce55093e-e8c6-422d-aa46-9252d12e2703
+:ROAM_EXCLUDE: t
+:END:
+- needs user group :: plugdev
+- source: qmk-udev-rules :: https://git.savannah.gnu.org/cgit/guix.git/tree/gnu/packages/firmware.scm?h=43a82ad5450a686d2adec99d23f9544a5a1e48cb#n1686
+
+********* as package?
+:PROPERTIES:
+:CREATED:  [2024-01-24 Wed 13:43]
+:UPDATED:  [2024-01-24 Wed 13:43]
+:ID:       839f2adb-1fd4-4b4a-8fca-b0f371eec5ae
+:ROAM_EXCLUDE: t
+:END:
+
+********* group, plugdev
+:PROPERTIES:
+:CREATED:  [2024-01-28 Sun 14:34]
+:UPDATED:  [2024-01-28 Sun 14:41]
+:ID:       77bb6a5d-faaf-40af-9c0d-bb224947c52a
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme :noweb-ref services-sys
+;; User account and groups for QMK / ZSA.
+
+(simple-service 'udev-qmk-plugdev account-service-type
+                (list (user-group (name "plugdev"))))
+
+;; (service-extension account-service-type
+;;                  (const (list (user-group (name "plugdev")))))
+#+end_src
+
 ******** for zsa keyboards
 :PROPERTIES:
 :CREATED:  [2023-09-24 Sun 15:55]
@@ -2632,7 +2669,7 @@ chooser_type=simple"
 :PROPERTIES:
 :ID:       c3963cdf-a521-4647-b76c-4128b42457ce
 :CREATED:  [2023-03-14 Tue 17:49]
-:UPDATED:  [2023-09-24 Sun 16:17]
+:UPDATED:  [2024-02-08 Thu 15:13]
 :END:
 
 ********* exposition
@@ -2658,7 +2695,7 @@ questions:
 :PROPERTIES:
 :ID:       fb07c83c-8e9d-417a-9f85-4d8cd4a8184c
 :CREATED:  [2023-03-14 Tue 18:18]
-:UPDATED:  [2023-03-14 Tue 18:18]
+:UPDATED:  [2024-02-08 Thu 15:13]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -2751,14 +2788,8 @@ sudo rsync \
 ******** postgresql (v10)
 :PROPERTIES:
 :ID:       f3e1e339-0500-410e-87b2-ed61fc47f9a0
-:CREATED:  [2023-07-17 Mon 10:10]
-:UPDATED:  [2023-07-17 Mon 10:12]
-:ROAM_EXCLUDE: t
-:END:
-:PROPERTIES:
-:ID:       8d0bccba-0e24-4e9b-8beb-e22d61343dcc
+:UPDATED:  [2024-01-25 Thu 15:56]
 :CREATED:  [2022-09-28 Wed 15:53]
-
 :ROAM_EXCLUDE: t
 :END:
 
@@ -3194,18 +3225,23 @@ host	all	all	0.0.0.0/0       md5
 (unless gaming?
   (feature-sway
    ;;#:sway (replace-mesa sway)
-   #:xwayland? #f
+   #:xwayland? #t
    ;; #:opacity 0.9 ;; TODO qzdl
    ;; #:wallpaper "$HOME/.cache/wallpaper.png" ;; TODO qzdl
    #:extra-config
-   `(;;(include ,(local-file "./config/sway/config"))
+   `(
+     ;;(include ,(local-file "./config/sway/config"))
+
      ;; TODO sway: toggle opacity for WINDOW
+
      (,#~"output * bg ~/.cache/wallpaper.png fill")
      ;;(,#~"output eDP-1 bg ~/.cache/wallpaper.png fill")
      (,#~"output DP-2 res 3840x1080")
      (,#~"output DP-1 res 3840x1080")
+
      ;; TODO sway: wacom input rotation matrix
      (,#~"input \"*\" tool_mode \"*\" relative calibration_matrix 0.0 -1.0 1.0 1.0 0.0 0.0")
+
      ;; danke demis ht - Sharing Indicatortps://github.com/minikN/guix/blob/ca15b5a5954d50fe75e2b03f21afc019e002022b/config.scm#L173
      (for_window "[app_id=\"pavucontrol\"]" floating enable, border pixel)
      (for_window "[app_id=\"pinentry-qt\"]" floating enable, border pixel)
@@ -3219,23 +3255,26 @@ host	all	all	0.0.0.0/0       md5
      (bindsym $mod+Ctrl+p opacity minus 0.1)
 
      ;;(bindsym $mod+x exec $menu)
-     (gaps inner 30)
-     (bindsym $mod+Period exec "tessen -a copy")
 
+     (gaps inner 20)
+
+     ;;; Mousepad sensitivity & behaviorr
      (input type:touchpad
             ;; TODO: Move it to feature-sway or feature-mouse?
             ((accel_profile flat)
              (pointer_accel "0.2")
              (natural_scroll enabled) ;; tablet / phone mindset
              (tap enabled)))
-     ;; nub life
+
+     ;;; Nub Life.
      (input "2:10:TPPS/2_Elan_TrackPoint"
             ((pointer_accel "0.2")
              (accel_profile flat)))
 
-     ;; middle mouse
+     ;;; Middle Mouse.
      (bindsym $mod+button2 "[con_mark=_prev]" focus)
 
+     ;;; Volume Control.
      (bindsym $mod+bracketright exec "pactl set-sink-volume @DEFAULT_SINK@ +5%")
      (bindsym $mod+bracketleft exec "pactl set-sink-volume @DEFAULT_SINK@ -5%")
      (bindsym $mod+Ctrl+bracketright exec "pactl set-sink-mute @DEFAULT_SINK@ toggle")
@@ -3336,7 +3375,8 @@ swaymsg -m -t subscribe '["window"]' | \
 :ROAM_EXCLUDE: t
 :END:
 
-#+begin_src scheme :noweb-ref main
+#+begin_src scheme :noweb-ref null
+;;:noweb-ref main
 ;; FIXME swayidle: external monitor resuming bug (probably gpu issue)e
 ;; https://github.com/swaywm/sway/issues/5759
 (unless gaming?
@@ -3408,7 +3448,8 @@ swaymsg -m -t subscribe '["window"]' | \
 :ROAM_EXCLUDE: t
 :END:
 
-#+begin_src scheme :noweb-ref main
+#+begin_src scheme :noweb-ref null
+;;:noweb-ref main
 ;; TODO understand why kanshi freezes my kernel
 ;;
 ;;(1200 seconds of cup sleep!!  dangerous, hard poweroff via button is only
@@ -3504,7 +3545,8 @@ annoying! cannot fathom why this doesn't work
 #+begin_src scheme :noweb-ref main
 (feature-plantuml)
 #+end_src
-***** emacs stuff
+
+***** emacs-related
 :PROPERTIES:
 :ID:       c0924a65-73cc-4693-ba65-6abd6c6634dd
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3516,45 +3558,23 @@ annoying! cannot fathom why this doesn't work
 :PROPERTIES:
 :ID:       d2fc9152-8683-46c1-9ef2-4ca84510bb49
 :CREATED:  [2022-09-28 Wed 16:14]
-:UPDATED:  [2023-09-21 Thu 11:41]
+:UPDATED:  [2024-03-31 Sun 20:06]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme :noweb-ref main
 (feature-emacs
+ ;;-portable
  ;;#:emacs (@ (declantsien packages emacs) emacs-next-wr)
  #:emacs (@ (rde packages emacs) emacs-next-pgtk-latest)
-
- #:extra-init-el
- (append
-  (list #~"(define-key key-translation-map [?\\C-x] [?\\C-u])\n"
-        #~"(define-key key-translation-map [?\\C-u] [?\\C-x])\n")
-  (list init-el)
-  )
+ ;; #:emacs emacs-next-pgtk
+ ;; #:emacs emacs-pgtk
+ #:native-comp? #t
  #:additional-elisp-packages
  ;; TODO if feature-emacs-PACKAGE exists, advise its use
  (append
-  (list ;;emacs-consult-dir
-
-        ;;; QZDL
-   emacs-sql-indent
-   emacs-ob-go
-   emacs-org-ml
-   emacs-ox-jira
-   emacs-moldable-emacs
-   emacs-kubernetes
-   python-pylsp-mypy
-   emacs-ox-slack
-   emacs-svg-clock
-   emacs-consult-recoll
-   emacs-bigquery-mode
-   emacs-dogears
-   emacs-chatgpt-shell
-   emacs-selectric-mode
-   emacs-atomic-chrome
-
-   ;;
-   ;; emacs-code-review    ; TODO qzdl pkg
+  (list
+   <<emacs-pkg-my>>
    )
   (pkgs
    <<emacs-pkg>>
@@ -3562,45 +3582,63 @@ annoying! cannot fathom why this doesn't work
  )
 #+end_src
 
-******* packages/misc                                                           :pkg:
+****** my/emacs-packages                                                        :pkg:
 :PROPERTIES:
 :ID:       5f892275-23ad-429c-9651-f48f5e8576ec
 :CREATED:  [2022-09-28 Wed 16:14]
-:UPDATED:  [2023-09-23 Sat 21:35]
+:UPDATED:  [2024-03-31 Sun 20:18]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme :noweb-ref emacs-pkg
-"emacs-elfeed"
+"emacs-adaptive-wrap" ;; TODO feature-olivetti
 "emacs-calfw"
+"emacs-calibredb"
+"emacs-chatgpt-shell"
+"emacs-chess"
 "emacs-company"
+"emacs-consult-org-roam"
+"emacs-crdt"
+"emacs-csv-mode"
 "emacs-debbugs"
 "emacs-dimmer"
 "emacs-edit-server"
 "emacs-eglot"
+"emacs-elfeed"
 "emacs-eros"
 "emacs-ess"
-"emacs-explain-pause-mode"
 "emacs-forge"
+"emacs-fountain-mode" ;; TODO feature-emacs-fountain-mode
 "emacs-ggtags"
 "emacs-gnuplot"
 "emacs-go-mode"
+"emacs-gptel"
 "emacs-highlight-indent-guides"
 "emacs-hl-todo"
 "emacs-htmlize" ;; ement: - ox-export html: org src blocks
 "emacs-hyperbole"
 "emacs-jq-mode"
 "emacs-json-snatcher"
+"emacs-jupyter"
+"emacs-ligature"
 "emacs-logview" ;; https://github.com/doublep/logview
 "emacs-lsp-mode"
 "emacs-lsp-ui"
+"emacs-lua-mode"
+"emacs-magit-todos"  ;; TODO feature-version-control
 "emacs-ob-async"
 "emacs-org-download"
 "emacs-org-edit-latex"
 "emacs-org-fragtog"
+"emacs-org-jira"
+"emacs-org-ql"
 "emacs-org-reveal"
+"emacs-org-roam-ui"
 "emacs-org-super-agenda"
 "emacs-org-transclusion"
+"emacs-org-tree-slide"
+"emacs-org-web-tools"
+"emacs-orgit"        ;; TODO feature-version-control
 "emacs-ox-hugo"
 "emacs-ox-pandoc"
 "emacs-paredit"
@@ -3608,7 +3646,6 @@ annoying! cannot fathom why this doesn't work
 "emacs-protobuf-mode"
 "emacs-py-isort"
 "emacs-python-black"
-;;"emacs-repology"
 "emacs-restart-emacs"
 "emacs-slime"
 "emacs-slime-repl-ansi-color"
@@ -3616,39 +3653,58 @@ annoying! cannot fathom why this doesn't work
 "emacs-string-inflection"
 "emacs-terraform-mode"
 "emacs-yaml-mode"
-"emacs-org-jira"
-"emacs-org-ql"
-"emacs-orgit"        ;; TODO feature-version-control
-"emacs-magit-todos"  ;; TODO feature-version-control
-"emacs-adaptive-wrap" ;; TODO feature-olivetti
-"emacs-org-tree-slide"
-"emacs-chess"
-"emacs-org-web-tools"
-"emacs-lua-mode"
-"emacs-consult-org-roam"
-"emacs-fountain-mode" ;; TODO feature-emacs-fountain-mode
-"emacs-csv-mode"
-"emacs-org-roam-ui"
-"emacs-ligature"
+;; "emacs-explain-pause-mode" ;; FIXME upon reload, check fails :: https://ci.guix.gnu.org/search?query=emacs-explain-pause-mode%20spec:master
+;; "emacs-impostman"
+;; "emacs-org-autotangle"
 ;; TODO feature-emacs-lsp
 ;;"emacs-artbollocks"
+;;"emacs-repology"
 ;;"emacs-vlf" ;; TODO guix: package emacs-vlf
-
-;; emacs-impostman
-;; "emacs-org-autotangle"
 #+end_src
 
+****** misc/emacs-packages
+:PROPERTIES:
+:CREATED:  [2024-03-31 Sun 16:08]
+:UPDATED:  [2024-03-31 Sun 16:08]
+:ID:       6e4db0e4-2fc8-4751-a108-a1345cc839cd
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme :noweb-ref emacs-pkg-my
+;;emacs-consult-dir
+
+;;; QZDL
+emacs-sql-indent
+emacs-ob-go
+emacs-org-ml
+emacs-ox-jira
+emacs-moldable-emacs
+emacs-kubernetes
+python-pylsp-mypy
+emacs-ox-slack
+emacs-svg-clock
+emacs-consult-recoll
+emacs-bigquery-mode
+
+;; emacs-dogears ;; TODO broken [2024-03-31 Sun 16:08].  consider taking a "no logic in capture approach" anywy.  prescribing / filtering the list vs logging is not a robust thing.
+;; emacs-chatgpt-shell (superseded by upstream)
+emacs-selectric-mode
+emacs-atomic-chrome
+emacs-spacious-padding
+
+;;
+;; emacs-code-review    ; TODO qzdl pkg
+#+end_src
 ****** TODO emacs-appearance
 :PROPERTIES:
 :ID:       e7344b77-dfd0-4bc5-aade-cd6b92dc58da
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2023-06-19 Mon 11:05]
+:UPDATED:  [2024-03-31 Sun 19:10]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme :noweb-ref main
-(feature-emacs-modus-themes
- #:dark? #t)
+(feature-emacs-modus-themes)
 ;; TODO extra-modus-theme-overrides
 ;; [[file:~/git/sys/rde/src/rde/features/emacs-xyz.scm::(define* (feature-emacs-modus-themes][emacs-xyz.scm::feature-emacs-modus-themes]]
 ;; #:extra-elisp
@@ -3880,7 +3936,7 @@ annoying! cannot fathom why this doesn't work
 :PROPERTIES:
 :ID:       7fca8716-000f-4794-b174-2ed192d51c26
 :CREATED:  [2022-08-01 Mon 12:46]
-:UPDATED:  [2022-09-28 Wed 15:37]
+:UPDATED:  [2024-01-28 Sun 13:58]
 :ROAM_EXCLUDE: t
 :END:
 #+begin_src scheme :noweb-ref main
@@ -4045,7 +4101,7 @@ annoying! cannot fathom why this doesn't work
 :PROPERTIES:
 :ID:       3b57f1e4-e156-4505-8d82-085ef082408c
 :CREATED:  [2022-08-01 Mon 10:55]
-:UPDATED:  [2023-04-14 Fri 11:24]
+:UPDATED:  [2024-03-04 Mon 12:10]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -4059,15 +4115,15 @@ annoying! cannot fathom why this doesn't work
  (cons*
   '(:name "Inbox :: Personal"  :key "P"
     :query "tag:unread and tag:inbox and tag:personal")
-  '(:name "Inbox :: Work"      :key "W"
-    :query "tag:unread and tag:inbox and tag:work")
+  '(:name "Inbox :: Work"      :key "Ww"
+    :query "tag:unread and tag:inbox and tag:/work/")
   '(:name "Inbox :: Guix Home" :key "H"
     :query "tag:unread and tag:guix-home")
   '(:name "Inbox :: RDE"       :key "R"
     :query "tag:unread and (to:/rde/ or cc:/rde/)")
   '(:name "Watching"           :key "tw"
     :query "thread:{tag:watch}")
-  '(:name "Work :: data"      :key "W"
+  '(:name "Work :: data"      :key "Wd"
     :query "tag:work and (from:/jlunan/ or to:/dre/)")
   %rde-notmuch-saved-searches))
 #+end_src
@@ -4076,7 +4132,7 @@ annoying! cannot fathom why this doesn't work
 :PROPERTIES:
 :ID:       2a190f7d-8013-42f2-ab78-49d4f61dd180
 :CREATED:  [2022-08-01 Mon 10:55]
-:UPDATED:  [2022-08-01 Mon 10:58]
+:UPDATED:  [2024-03-31 Sun 20:21]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -4094,11 +4150,11 @@ annoying! cannot fathom why this doesn't work
   (templates "$HOME")))
 #+end_src
 
-***** base packages                                                             :pkg:
+***** base packages/rest                                                        :pkg:
 :PROPERTIES:
 :ID:       9490f8c2-7074-4a89-a62e-f82b6bfc2f2b
 :CREATED:  [2022-08-01 Mon 10:55]
-:UPDATED:  [2023-07-16 Sun 18:16]
+:UPDATED:  [2024-03-31 Sun 20:26]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -4107,24 +4163,25 @@ annoying! cannot fathom why this doesn't work
  #:home-packages
  (append
   (list
-   python-keyring-pass
-   ;; perl-graph-easy
    <<pkg-home>>
    )
 
   (pkgs
-   "wl-clipboard"
-   "grim"
+
    "figlet" ;; TODO: Move to emacs-artist-mode
    ;;"calibre"
-   ;;"icecat" "nyxt"
-   ;;"ungoogled-chromium-wayland" "ublock-origin-chromium"
-
    "utox" "qtox" "jami"
 
-   "alsa-utils" "vim"
-   "cozy" "pavucontrol"
+   "vim"
+
+   "alsa-utils"
+   "pavucontrol"
+
+   ;; wayland-dev
    "wev"
+   "wl-clipboard" "grim"
+
+
    "obs" "obs-wlrobs"
    "recutils" "binutils"
    "fheroes2"
@@ -4143,6 +4200,7 @@ annoying! cannot fathom why this doesn't work
    "ripgrep" "curl" "make"
    "sqlite"
 
+   ;; python-base
    ;;; PYTHON
    "python"
    "python-black"
@@ -4167,10 +4225,10 @@ annoying! cannot fathom why this doesn't work
 
    "libnotify"
 
-   ;; HACK to fix firefox dialog crashes
-   "gdk-pixbuf"
+   "gdk-pixbuf" ;; HACK to fix firefox dialog crashes
 
    "v4l-utils"
+   "qmk-udev-rules"
    ))
  #:system-packages
  (pkgs "fwupd-nonfree")
@@ -4179,17 +4237,16 @@ annoying! cannot fathom why this doesn't work
 
 #+RESULTS:
 
-
 ***** TODO unsorted
 :PROPERTIES:
 :ID:       72ecbbb1-860b-471e-a2e8-d96cf8c3dac3
 :CREATED:  [2023-03-30 Thu 12:47]
-:UPDATED:  [2023-07-14 Fri 18:32]
+:UPDATED:  [2024-01-28 Sun 14:00]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme :noweb-ref main
-(feature-youtube-dl
+(feature-yt-dlp
  #:emacs-ytdl emacs-ytdl-next)
 ;;(feature-nyxt)
 (feature-emacs-dashboard
@@ -4218,7 +4275,7 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs-spelling)
 #+end_src
 
-***** pending
+***** TODO pending
 :PROPERTIES:
 :ID:       5bbe74bc-777b-4dfe-ad73-8650e9ee9ec2
 :CREATED:  [2023-07-04 Tue 10:59]
@@ -4256,6 +4313,101 @@ annoying! cannot fathom why this doesn't work
 #+begin_src scheme
 ;;(map pretty-print %main-features)
 (pretty-print "post-%main-features")
+
+#+end_src
+
+**** collectors
+:PROPERTIES:
+:CREATED:  [2024-03-31 Sun 16:03]
+:UPDATED:  [2024-03-31 Sun 16:03]
+:ID:       00f22464-570c-4033-9801-0b71f80202c6
+:ROAM_EXCLUDE: t
+:END:
+***** abcdw features
+:PROPERTIES:
+:ID:       1532c6ba-0d0c-499e-bddd-ae1caa1dc778
+:CREATED:  [2022-07-29 Fri 17:48]
+:UPDATED:  [2023-07-05 Wed 12:32]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme
+(define %user-features
+  (remove
+   unspecified?
+   (list
+    my-feature-user-info
+    my-feature-gnupg
+    (feature-password-store)
+    my-feature-mail-settings
+
+    (feature-keyboard
+     ;; To get all available options, layouts and variants run:
+     ;; cat `guix build xkeyboard-config`/share/X11/xkb/rules/evdev.lst
+     #:keyboard-layout %thinkpad-layout))))
+#+end_src
+
+****** COMMENT debug: print features
+:PROPERTIES:
+:ID:       4d60cafe-ff70-4540-a5ed-2e9b1a7b4b3e
+:CREATED:  [2022-07-29 Fri 17:48]
+:UPDATED:  [2022-07-29 Fri 17:48]
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme
+;;(map pretty-print %user-features)
+#+end_src
+
+****** TODO future features
+:PROPERTIES:
+:ID:       ad67e350-c601-49f4-ba21-ca6486ed96fb
+:CREATED:  [2022-07-29 Fri 17:48]
+:UPDATED:  [2022-08-22 Mon 17:34]
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme
+;;; TODO: feature-wallpapers https://wallhaven.cc/
+;;; TODO: feature-icecat
+;; PipeWire/iwd:
+;; https://github.com/J-Lentz/iwgtk
+;; https://github.com/krevedkokun/guix-config/blob/master/system/yggdrasil.scm
+;; https://github.com/werman/noise-suppression-for-voice#pipewire
+#+end_src
+
+#+RESULTS:
+
+****** COMMENT debug: pre main-features
+:PROPERTIES:
+:ID:       152578fa-8848-40dc-a0e3-a1a51825a5f7
+:CREATED:  [2022-07-29 Fri 18:24]
+:UPDATED:  [2022-07-29 Fri 18:24]
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme
+(pretty-print "pre-%main-features")
+#+end_src
+
+***** %main-features
+:PROPERTIES:
+:ID:       3455e06a-0a2b-4ca9-aca6-2ee2fa05f16f
+:CREATED:  [2022-07-29 Fri 17:53]
+:UPDATED:  [2022-09-28 Wed 16:09]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme
+
+;;; WARNING: The order can be important for features extending
+;;; services of other features.  Be careful changing it.
+
+(define %main-features
+  (remove
+   (lambda (s) (or (not s) (unspecified? s)))
+   (list
+    ;;; BEGIN; main
+    <<main>>
+    ;;; END; main
+    )))
 
 #+end_src
 
@@ -4402,18 +4554,25 @@ annoying! cannot fathom why this doesn't work
      (targets '("/boot/efi"))))
    ;; os
    (feature-kernel
-    ;;#:kernel nongnu:linux-lts ;; nvidia
-    #:kernel nongnu:linux
+    ;;#:kernel nongnu:linux-lts ;;; NVIDIA
+    #:kernel nongnu:linux ;;; DEFAULT
     #:kernel-arguments
     '("quiet" "ipv6.disable=1" "net.ifnames=0"
-      "nouveau.modeset=1"
-      ;; https://forums.developer.nvidia.com/t/nvidia-495-on-sway-tutorial-questions-arch-based-distros/192212
+
+      ;;; DEFAULT
+       "nouveau.modeset=1"
+
+      ;;; FORUM NVIDIA ATTEMPT https://forums.developer.nvidia.com/t/nvidia-495-on-sway-tutorial-questions-arch-based-distros/192212
       ;;"nvidia-drm.modeset=1" "nouveau.blacklist=1" "modprobe.blacklist=nouveau"
-      ;; NEW NVIDIA ATTEMPT
+
+      ;;; NEW NVIDIA ATTEMPT 0
+      ;;"nvidia_drm.modeset=1"
       ;;"modprobe.blacklist=nvidiafb,nouveau"
       ;;"nvidia.NVreg_OpenRmEnableUnsupportedGpus=1"
-      ;;"nvidia_drm.modeset=1"
 
+      ;;; NEW NVIDIA ATTEMPT 1 (fail, but progress; nvidia-smi runs)
+      ;;"nvidia_drm.modeset=1"
+      ;;"modprobe.blacklist=nouveau"
       )
     ;; removed "modprobe.blacklist=snd_hda_intel,snd_soc_skl"
     #:firmware (list nongnu:linux-firmware
@@ -4421,7 +4580,7 @@ annoying! cannot fathom why this doesn't work
                      intel-vaapi-driver)
     #:initrd nongnu-sys:microcode-initrd
     #:kernel-loadable-modules (list v4l2loopback-linux-module
-                                    ;;nvidia-module
+                                    ;;nvidia-module ;; NVIDIA FORUM
                                     ))
    (feature-file-systems
     #:mapped-devices ixy-mapped-devices
@@ -4733,6 +4892,7 @@ annoying! cannot fathom why this doesn't work
 
 (list
  %default-guix-channel
+
  (channel
   (name 'rde)
   (url "https://git.sr.ht/~abcdw/rde")
@@ -4741,6 +4901,7 @@ annoying! cannot fathom why this doesn't work
     "257cebd587b66e4d865b3537a9a88cccd7107c95"
     (openpgp-fingerprint
      "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0"))))
+
  (channel
   (name 'nonguix)
   (url "https://gitlab.com/nonguix/nonguix")
@@ -4749,6 +4910,18 @@ annoying! cannot fathom why this doesn't work
     "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
     (openpgp-fingerprint
      "2A39 3FFF 68F4 EF7A 3D29  12AF 6F51 20A0 22FB B2D5"))))
+
+ ;;; for hyprland
+ ;; (channel
+ ;; (name 'rosenthal)
+ ;; (url "https://codeberg.org/hako/rosenthal.git")
+ ;; (branch "trunk")
+ ;; (introduction
+ ;;  (make-channel-introduction
+ ;;   "7677db76330121a901604dfbad19077893865f35"
+ ;;   (openpgp-fingerprint
+ ;;    "13E7 6CD6 E649 C28C 3385  4DF5 5E5A A665 6149 17F7"))))
+
  ;;; build of /gnu/store/59vmvlzgmksqryyvr45kp43v3wmz36qd-guix-package-cache.drv failed
  ;; (channel
  ;;  (name 'guix-binary)
@@ -4883,7 +5056,7 @@ annoying! cannot fathom why this doesn't work
 :ID:       1b524325-ce8c-4d9a-8496-69a393a036e1
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:  [2023-07-14 Fri 18:48]
+:UPDATED:  [2024-02-20 Tue 16:08]
 :END:
 
 - see :: ~/.config/emacs/init.el
@@ -4907,6 +5080,8 @@ annoying! cannot fathom why this doesn't work
      )))
 
 #+end_src
+
+#+RESULTS:
 
 *** bindings                                                                    :kbd:
 :PROPERTIES:
@@ -5598,13 +5773,18 @@ when prefix arg nil,       fold to all levels."
     (qz/debug- ;; HACK I don't understand prefix / current-prefix
      ;; ... is it next/ now respectively?
      (message "prefix: %s" (list current-prefix-arg prefix-arg)))
+
     ;;; DO THE FOLD
     (funcall-interactively 'org-content prefix-arg)
+
     ;;; HACK ENSURE NICE DISPLAY IF NICE DISPLAY
     ;; org-modern-mode doesn't handle "demoting" and manual link
     ;; editing, etc... all too well
     (when (and (boundp 'org-modern-mode) org-modern-mode)
-      (org-modern-mode 1))
+      (ignore-errors
+        (org-modern-mode 1)))
+
+    ;;; HACK Indent, if active
     (when (and (boundp 'org-indent-mode) org-indent-mode)
       (org-indent-indent-buffer))
     ;; FOR SOME JAZZ, PRINT THE OUTLINE
@@ -5726,23 +5906,27 @@ so,  maybe if I narrow the buffer to the subtree at point; 'qz/org-show-all;
 **** {s-S-TAB}         :: org-roam-insert
 :PROPERTIES:
 :CREATED:  [2023-10-08 Sun 17:24]
-:UPDATED:  [2023-10-08 Sun 17:26]
+:UPDATED:  [2024-02-07 Wed 11:18]
 :ID:       d23dfc37-8e39-41b8-b4ee-60cfcaa34fe7
 :ROAM_EXCLUDE: t
 :END:
+
 #+begin_src emacs-lisp
 (define-key global-map (kbd "C-s-=") 'org-roam-node-insert)
 (define-key global-map (kbd "C-s-+") 'org-roam-node-find)
+
+(define-key global-map (kbd "C-s-f") 'org-roam-node-find)
+(define-key global-map (kbd "C-s-b") 'org-roam-node-insert)
 #+end_src
 
 #+RESULTS:
-: org-roam-node-find
+: org-roam-node-insert
 
 **** {C-M-|}           :: dwim-indent
 :PROPERTIES:
 :ID:       6b16863f-f6a1-4ba2-82a7-e10a12890eb0
 :CREATED:  [2023-06-19 Mon 18:01]
-:UPDATED:  [2023-11-16 Thu 20:45]
+:UPDATED:  [2024-02-17 Sat 17:10]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -5771,9 +5955,13 @@ org-errors about caching from my dodgy code"
                               (not (seq-contains-p
                                     qz/org-babel-indent-exclude-lang
                                     (car (org-babel-get-src-block-info))))))
+                    (when (equal "python" (car (org-babel-get-src-block-info)))
+                      (mapc 'call-interactively '(python-black-region
+                                                  py-isort-region)))
                     'indent-region)
                    ((derived-mode-p 'python-mode)
-                    (python-black-buffer))
+                    (python-black-buffer)
+                    (py-isort-buffer))
                    ((and (derived-mode-p 'prog-mode)
                          (mark-whole-buffer))
                     'indent-region)
@@ -7029,6 +7217,19 @@ CLOCK: [2022-03-17 Thu 10:06]--[2022-03-17 Thu 11:32] =>  1:26
 
 #+RESULTS:
 : ((:engine . "bq") (:results . "raw"))
+****** org-babel-default-header-args:sqlite
+:PROPERTIES:
+:CREATED:  [2024-02-14 Wed 18:03]
+:UPDATED:  [2024-02-14 Wed 18:06]
+:ID:       6b081fc0-1d13-4d5f-8321-5ed2693f25d3
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp
+(setq org-babel-default-header-args:sqlite '((:colnames . "yes")))
+#+end_src
+
+#+RESULTS:
+: ((:colnames . "yes"))
 
 ***** bigquery
 :PROPERTIES:
@@ -7456,17 +7657,17 @@ done
 ***** black formatting args
 :PROPERTIES:
 :CREATED:  [2023-11-16 Thu 20:45]
-:UPDATED:  [2023-11-16 Thu 20:45]
+:UPDATED:  [2024-02-17 Sat 17:12]
 :ID:       6662a59b-42a0-4240-af44-d4e384e098a7
 :ROAM_EXCLUDE: t
 :END:
 #+begin_src emacs-lisp
 (with-eval-after-load 'python-black
-  (setq python-black--base-args '("--quiet" "-l 79" "--preview")))
+  (setq python-black--base-args '("--quiet" "-l 78" "--preview")))
 #+end_src
 
 #+RESULTS:
-: ("--quiet" "-l 79" "--preview")
+: ("--quiet" "-l 78" "--preview")
 
 **** [[id:0c02b1ad-3964-4b51-ba59-d2de0e05428f][golang]]
 :PROPERTIES:
@@ -7917,7 +8118,7 @@ this is nice at =2=, matching the defaults of 'json-pretty-print.
 :PROPERTIES:
 :ID:       7c74478a-1c1a-4bb3-8b13-04a30da500dc
 :CREATED:  [2023-04-21 Fri 16:10]
-:UPDATED:  [2023-04-21 Fri 16:10]
+:UPDATED:  [2024-02-17 Sat 09:29]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -7928,8 +8129,251 @@ this is nice at =2=, matching the defaults of 'json-pretty-print.
   (setq chatgpt-shell-openai-key
         (auth-source-pass-get 'secret "chatgpt/api/emacs")
         dall-e-shell-openai-key chatgpt-shell-openai-key))
+
+#+end_src
+**** gptel
+:PROPERTIES:
+:CREATED:  [2024-02-17 Sat 09:29]
+:UPDATED:  [2024-02-17 Sat 09:29]
+:ID:       d93ae918-8cf5-466d-a933-b64f222397d2
+:ROAM_EXCLUDE: t
+:END:
+***** tangler
+:PROPERTIES:
+:CREATED:  [2024-02-17 Sat 09:53]
+:UPDATED:  [2024-02-20 Tue 16:08]
+:ID:       dc3669a8-debf-4b99-a931-6a56abffe46c
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp :results silent
+(with-eval-after-load 'gptel
+  <<gptel>>
+  )
 #+end_src
 
+***** secrets
+:PROPERTIES:
+:CREATED:  [2024-02-17 Sat 09:44]
+:UPDATED:  [2024-02-17 Sat 09:44]
+:ID:       75b67fd7-43d5-4d58-a9df-69699a7947bf
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :results silent :noweb-ref gptel
+(setq gptel-api-key
+      (lambda () (auth-source-pass-get 'secret "chatgpt/api/emacs")))
+#+end_src
+***** programmatic
+:PROPERTIES:
+:CREATED:  [2024-02-17 Sat 09:44]
+:UPDATED:  [2024-02-17 Sat 09:44]
+:ID:       c9ca21eb-b4a8-4f05-ba6a-9118fdf79084
+:ROAM_EXCLUDE: t
+:END:
+- https://github.com/karthink/gptel/wiki
+****** example from wiki
+:PROPERTIES:
+:CREATED:  [2024-02-17 Sat 09:44]
+:UPDATED:  [2024-02-17 Sat 09:44]
+:ID:       f76d0fc7-2870-40b1-b286-712cd4b232e4
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref null :eval no
+(gptel-request
+ "my prompt"                                 ;the prompt to send to ChatGPT
+ ;; The below keys are all optional
+ :buffer   some-buffer-or-name              ;defaults to (current-buffer)
+ :system   "Chat directive here"            ;defaults to gptel--system-message
+ :position some-pt                          ;defaults to (point)
+ :context  (list "any other info")          ;will be available to the callback
+ :callback (lambda (response info) ...))    ;called with the response and an info plist
+                                        ;defaults to inserting the response at :position
+#+end_src
+***** org by default (obviously)
+:PROPERTIES:
+:CREATED:  [2024-02-18 Sun 17:39]
+:UPDATED:  [2024-02-18 Sun 17:39]
+:ID:       e45cab65-6191-4bf7-8e99-8fada3a6747f
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref gptel
+(setq gptel-default-mode 'org-mode)
+#+end_src
+
+#+RESULTS:
+: org-mode
+
+***** other backends
+:PROPERTIES:
+:CREATED:  [2024-02-17 Sat 09:53]
+:UPDATED:  [2024-02-17 Sat 09:53]
+:ID:       71fa9410-6470-442c-9ecf-52a9a317af1d
+:ROAM_EXCLUDE: t
+:END:
+****** llamafile
+:PROPERTIES:
+:CREATED:  [2024-02-17 Sat 09:53]
+:UPDATED:  [2024-02-17 Sat 10:40]
+:ID:       bfde002b-4383-4e86-ac16-5a70455a08bc
+:ROAM_EXCLUDE: t
+:END:
+
+this backend simply looks at 8080, the default port for llamafile.
+
+it will therefore interface with any model.
+
+#+begin_src emacs-lisp :noweb-ref gptel
+;; Llama.cpp offers an OpenAI compatible API
+(gptel-make-openai "llama-cpp"          ;Any name
+                   :stream t                             ;Stream responses
+                   :protocol "http"
+                   :host "localhost:8080"                ;Llama.cpp server location
+                   :models '("test"))                    ;Any names, doesn't matter for Llama
+#+end_src
+
+#+RESULTS:
+: #s(gptel-openai "llama-cpp" "localhost:8080" nil "http" t "/v1/chat/completions" nil ("test") "http://localhost:8080/v1/chat/completions")
+******* choosing a llamafile to run
+:PROPERTIES:
+:CREATED:  [2024-02-17 Sat 10:40]
+:UPDATED:  [2024-02-17 Sat 11:03]
+:ID:       1e2e03a6-0adc-4c5a-889b-aad7a9b0b3e8
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp
+(setq qz/llamafile-args
+      '(;; gpu offload
+        "-ngl 9999"
+        ;;"--nobrowser"
+        ))
+
+(defun qz/llamafile ()
+  (interactive)
+  (async-shell-command
+   (format "%s %s"
+           ;; choose model,
+           (cadr (s-split
+                  "	" (completing-read
+                           "model: " (s-split "\n" (s-trim (shell-command-to-string
+                                                            "du -sh ~/dl/*.llamafile"))))))
+           ;; args
+           (s-join " " qz/llamafile-args))
+   "*process:llamafile*"))
+#+end_src
+
+#+RESULTS:
+: qz/llamafile
+****** gemini
+:PROPERTIES:
+:CREATED:  [2024-02-18 Sun 17:26]
+:UPDATED:  [2024-02-18 Sun 17:26]
+:ID:       9f685134-4cc0-441b-999d-95aaf7195d71
+:ROAM_EXCLUDE: t
+:END:
+
+******* custom gemini constructor for aiplatform
+:PROPERTIES:
+:CREATED:  [2024-02-19 Mon 09:31]
+:UPDATED:  [2024-02-20 Tue 16:09]
+:ID:       378f883a-9cf0-4867-810b-3c66192ffa5f
+:ROAM_EXCLUDE: t
+:END:
+ #+begin_src emacs-lisp :noweb-ref null :results silent
+ (require 'gptel-gemini)
+ (cl-defun qz/gptel-make-gemini
+     (name &key header key stream
+           (host "generativelanguage.googleapis.com")
+           (protocol "https")
+           (models '("gemini-pro"))
+           (endpoint "/v1beta/models/gemini-pro:"))
+
+   "Register a Gemini backend for gptel with NAME.
+
+  Keyword arguments:
+
+  HOST (optional) is the API host, defaults to
+  \"generativelanguage.googleapis.com\".
+
+  MODELS is a list of available model names.  Currently only
+  \"gemini-pro\" is available.
+
+  STREAM is a boolean to enable streaming responses, defaults to
+  false.
+
+  PROTOCOL (optional) specifies the protocol, \"https\" by default.
+
+  ENDPOINT (optional) is the API endpoint for completions, defaults to
+  \"/v1beta/models/gemini-pro:streamGenerateContent\" if STREAM is true and
+  \"/v1beta/models/gemini-pro:generateContent\" otherwise.
+
+  HEADER (optional) is for additional headers to send with each
+  request. It should be an alist or a function that retuns an
+  alist, like:
+  ((\"Content-Type\" . \"application/json\"))
+
+  KEY (optional) is a variable whose value is the API key, or
+  function that returns the key."
+   (let ((backend (gptel--make-gemini
+                   :name name
+                   :host host
+                   :header header
+                   :models models
+                   :protocol protocol
+                   :endpoint endpoint
+                   :stream stream
+                   :key key
+                   :url
+                   (lambda ()
+                     (concat protocol "://" host endpoint
+                             (if gptel-stream
+                                 "streamGenerateContent"
+                               "generateContent"))))))
+     (prog1 backend
+       (setf (alist-get name gptel--known-backends
+                        nil nil #'equal)
+             backend))))
+#+end_src
+******* TODO check debug utils from gptel
+:PROPERTIES:
+:CREATED:  [2024-02-18 Sun 18:40]
+:UPDATED:  [2024-02-18 Sun 18:40]
+:ID:       cddf8e4b-003e-4a48-b54c-41586d11a79b
+:ROAM_EXCLUDE: t
+:END:
+******* TODO check header generation code
+:PROPERTIES:
+:CREATED:  [2024-02-18 Sun 18:40]
+:UPDATED:  [2024-02-20 Tue 16:08]
+:ID:       65a0e9db-d7e1-4982-8876-436f057cf5bd
+:ROAM_EXCLUDE: t
+:END:
+
+- endpoint :: v1/projects/${PROJECT_ID}/locations/${LOCATION_ID}/publishers/google/models/${MODEL_ID}:streamGenerateContent
+- code: gemini :: [[file:/gnu/store/4332r56wnlqbd490n9hnnid5zpbk5axy-emacs-gptel-0.6.0/share/emacs/site-lisp/gptel-0.6.0/gptel-gemini.el::(cl-defun gptel-make-gemini][gptel-gemini.el::cl-defun gptel-make-gemini]]
+- code: chatgpt :: [[file:/gnu/store/4332r56wnlqbd490n9hnnid5zpbk5axy-emacs-gptel-0.6.0/share/emacs/site-lisp/gptel-0.6.0/gptel.el::(gptel-make-openai][gptel.el::(gptel-make-openai]]
+*******
+
+
+#+begin_src emacs-lisp :noweb-ref null :results silent
+(qz/gptel-make-gemini
+ "Gemini"
+ ;; TOKEN
+ ;; vs
+ ;; "Authorization: Bearer $(gcloud auth print-access-token)"
+ ;;  https://ai.google.dev/tutorials/setup
+ :header (lambda () `(("Authorization" . ,(concat "Bearer " (gptel--get-api-key)))))
+ :key (lambda () (s-trim (shell-command-to-string
+                          "$(gcloud auth print-access-token)")))
+ :stream t
+ ;;
+ :host "us-central1-aiplatform.googleapis.com"
+ :endpoint
+ (format "v1/projects/%s/locations/%s/publishers/google/models/%s:"
+         "s-t-dre-svc-62ef" "us-central1" "gemini-pro"))
+ #+end_src
 
 **** consult
 :PROPERTIES:
@@ -7981,7 +8425,7 @@ not elegant AT ALL, but the API to ripgrep from consult uses
 #+RESULTS:
 : qz/consult-ripgrep-files
 
-***** {C-c b s}     :: consult-ripgrep-bookmark                        :func:kbd:
+***** {C-c b s}     :: consult-ripgrep-bookmark                            :func:kbd:
 :PROPERTIES:
 :ID:       1ec5c6fe-e672-457a-ab67-82e358244df3
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -8224,7 +8668,7 @@ consult-recoll--search-flags
 :UPDATED:  [2023-05-03 Wed 11:39]
 :ROAM_EXCLUDE: t
 :END:
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :noweb-ref null
 (require 'dogears)
 (dogears-mode 1)
 #+end_src
@@ -8293,11 +8737,12 @@ consult-recoll--search-flags
 ;; NOWEB EMBARK END
 #+end_src
 
-***** {C-.} -> embark-act                                                       :kbd:
+***** {C-.}            :: embark-act                                            :kbd:
 :PROPERTIES:
 :ID:       8234c6dc-773a-4da2-8e8a-e96970f8c47f
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
+:UPDATED:  [2024-02-01 Thu 15:16]
 :END:
 #+begin_src emacs-lisp :noweb-ref embark-hoist
 (define-key global-map (kbd "C-.") 'embark-act)
@@ -8306,13 +8751,36 @@ consult-recoll--search-flags
 #+RESULTS:
 : embark-act
 
-***** embark
+***** {C-M-n}, {C-M-p} :: embark-select-and-[next|previous]                     :kbd:
 :PROPERTIES:
 :ID:       8a00fc8c-1be0-4f6f-8c5e-9b9018f65298
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
+:UPDATED: [2024-02-01 Thu 15:16]
 :END:
+
+
 #+begin_src emacs-lisp :noweb-ref embark
+;;; https://www.reddit.com/r/emacs/comments/pac8kp/how_to_send_an_embark_command_without_pulling_up/
+;;; (defun shell-command-on-current-completion-candidate ()
+;;;   (interactive)
+;;;   (embark--act #'shell-command (car (embark--targets))))
+
+(defun qz/example-embark-act-arbitrary ()
+  (interactive)
+  (embark--act 'shell-command (car (embark--targets))))
+
+(defun qz/embark-select-and-next ()
+  (interactive)
+  (call-interactively 'embark-select)
+  (call-interactively 'vertico-next))
+(defun qz/embark-select-and-previous ()
+  (interactive)
+  (call-interactively 'embark-select)
+  (call-interactively 'vertico-previous))
+
+(define-key minibuffer-mode-map (kbd "C-M-n") 'qz/embark-select-and-next)
+(define-key minibuffer-mode-map (kbd "C-M-p") 'qz/embark-select-and-previous)
 #+end_src
 
 **** eww
@@ -8705,6 +9173,7 @@ it's [2022-10-04 Tue]; I have just retrieved the dirtiest hack in a while from t
 :ROAM_EXCLUDE: t
 :END:
 #+begin_src emacs-lisp
+;; (string-to-char "⋈")
 (setq qz/pretty-logicals
       (mapcan (lambda (e) (list e (cons (upcase (car e)) (cdr e))))
               '(("lambda"       . 955)  ; λ  _LAMBDA
@@ -8720,16 +9189,16 @@ it's [2022-10-04 Tue]; I have just retrieved the dirtiest hack in a while from t
                 ("where"        . 963)  ; σ  SELECT
                 ("not"          . 172)  ; ¬  NOT SIGN
                 ("in"           . 8712) ; ∈  MEMBER OF
+                ("inner join"   . 8904) ; ⋈  NATURAL (INNER) JOIN
                 ("contains"     . 8712) ; ""
                 ("not in"       . 8713) ; ∉ NOT MEMBER OF
                 ("not contains" . 8712) ; ""
                 ;; ∴ therefore
                 ;; ∵ because
-                ;; ∃
+                ;; ∃ 8707
                 ;; ∃ EXISTS ONE (UNIQUE)
                 ;; ∄ not exists
                 ;; σ_φ(R)
-                ;;not
                 ))
       qz/pretty-text
       '(("[...]" . 8943) ; ⋯  MIDLINE HORIZONTAL ELLIPSIS
@@ -8737,7 +9206,7 @@ it's [2022-10-04 Tue]; I have just retrieved the dirtiest hack in a while from t
         ))
 
 (defun my-pretty--add (s)
-  "extend prettify-symbols-alist qwith s"
+  "extend prettify-symbols-alist with s"
   (setq prettify-symbols-alist (seq-uniq (append prettify-symbols-alist s))))
 
 (defun my-pretty-logicals ()
@@ -8748,6 +9217,7 @@ it's [2022-10-04 Tue]; I have just retrieved the dirtiest hack in a while from t
 
 (add-hook 'prog-mode-hook 'my-pretty-logicals)
 (add-hook 'text-mode 'my-pretty-text)
+(add-hook 'org-mode 'my-pretty-text)
 (global-prettify-symbols-mode 1)
 #+end_src
 
@@ -8914,6 +9384,94 @@ Optionally you can pass a BUFFER to use instead of the `current-buffer'."
 
 #+RESULTS:
 : nil
+**** modus-themes
+:PROPERTIES:
+:CREATED:  [2024-01-15 Mon 19:48]
+:UPDATED:  [2024-01-15 Mon 19:48]
+:ID:       ac80f0a8-cbdd-45fa-b394-8db550421234
+:ROAM_EXCLUDE: t
+:END:
+***** modus-themes-reload
+:PROPERTIES:
+:CREATED:  [2024-01-15 Mon 19:48]
+:UPDATED:  [2024-01-15 Mon 19:54]
+:ID:       24f6c2ba-e447-4840-ba81-5ec128cfd5a4
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp
+(with-eval-after-load 'modus-themes
+  <<modus>>
+  (qz/modus-themes-reload)
+  )
+#+end_src
+
+#+RESULTS:
+: modus-operandi-deuteranopia
+
+#+begin_src emacs-lisp :noweb-ref modus
+(defun qz/modus-themes-reload ()
+  (interactive)
+  (when current-prefix-arg
+    (setq modus-themes-common-palette-overrides qz/modus-overrides))
+  (when-let* ((modus-themes-custom-auto-reload t)
+              (theme (modus-themes--current-theme)))
+    (modus-themes-load-theme theme)))
+#+end_src
+
+#+RESULTS:
+: qz/modus-themes-reload
+***** my-modus-overrides
+:PROPERTIES:
+:CREATED:  [2024-01-15 Mon 19:49]
+:UPDATED:  [2024-01-15 Mon 19:55]
+:ID:       07da6a8b-d165-408e-ad28-6577ff25da67
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref modus :results table
+;; Apply gray scale foreground, background, and overline (headings 0-8)
+;; headings are oblique (face:bold)
+(setq
+ qz/modus-overrides
+ (append
+  '(
+    (default light) ;; TODO default text is light
+    )
+  (cl-loop
+   for pre in '("" "fg-") append
+   (cl-loop
+    for n from 1 to 8
+    append (cl-labels ((s (pre) (intern (format "%s-heading-%s" pre n))))
+             `((,(s 'fg)
+                ;;; what color should the headings be?
+                ;;fg-main   ;; 1.  whatever the main text color is.
+                ;;"#333"    ;; 2.  a lightening.
+                "#666"      ;; 2.  a lightening, 2.
+                )
+               ;;(,(s 'bg) nil)
+               ))))))
+;;; (qz/modus-themes-reload)
+#+end_src
+
+#+RESULTS:
+| default      | light |
+| fg-heading-1 | #666  |
+| fg-heading-2 | #666  |
+| fg-heading-3 | #666  |
+| fg-heading-4 | #666  |
+| fg-heading-5 | #666  |
+| fg-heading-6 | #666  |
+| fg-heading-7 | #666  |
+| fg-heading-8 | #666  |
+| fg-heading-1 | #666  |
+| fg-heading-2 | #666  |
+| fg-heading-3 | #666  |
+| fg-heading-4 | #666  |
+| fg-heading-5 | #666  |
+| fg-heading-6 | #666  |
+| fg-heading-7 | #666  |
+| fg-heading-8 | #666  |
+
 **** mpv
 :PROPERTIES:
 :ID:       7c3d77d7-f5e5-4c69-b260-b7ebd51be79b
@@ -8987,17 +9545,255 @@ https://github.com/NapoleonWils0n/cerberus/blob/master/emacs/mpv-timer.org
 :ROAM_EXCLUDE: t
 :UPDATED:  [2022-09-28 Wed 16:36]
 :END:
+
+***** COMMENT noweb tangler
+:PROPERTIES:
+:CREATED:  [2024-02-08 Thu 14:58]
+:UPDATED:  [2024-02-08 Thu 14:58]
+:ID:       0582ec93-19e9-4f33-95bf-a5c67fcde7c0
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp :noweb yes
+(with-eval-after-load 'pdf-view
+  <<pdf-view>>
+  )
+#+end_src
 ***** midnight-minor-mode ; dark-mode filter on pdfs                         :visual:
 :PROPERTIES:
 :ID:       539f2eb0-e47d-4976-8c96-6c5a7705835a
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:  [2022-04-25 Mon 10:10]
+:UPDATED:  [2024-02-08 Thu 14:57]
 :END:
-#+begin_src emacs-lisp
-(with-eval-after-load 'pdf-view
-  (add-hook 'pdf-view-mode-hook 'pdf-view-midnight-minor-mode))
 #+end_src
+
+#+begin_src emacs-lisp :noweb-ref pdf-view
+(add-hook 'pdf-view-mode-hook 'pdf-view-midnight-minor-mode)
+#+end_src
+***** list-annot, custom date format
+:PROPERTIES:
+:CREATED:  [2024-02-08 Thu 15:59]
+:UPDATED:  [2024-02-08 Thu 16:04]
+:ID:       19c27145-8a22-4ed0-b95e-81c90c70b3e5
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref pdf-view
+(defun pdf-annot-print-property (a property)
+  "Pretty print annotation A's property PROPERTY."
+  (let ((value (pdf-annot-get a property)))
+    (cl-case property
+      (color
+       (propertize (or value "")
+                   'face (and value
+                              `(:background ,value))))
+      ((created modified)
+       (let ((date value))
+         (if (null date)
+             "No date"
+           ;;; ✂ ----
+           (format-time-string (org-time-stamp-format t t) date)
+           ;; (current-time-string  date)
+           ;;; ---- ✂
+           )))
+      ;; print verbatim
+      (subject
+       (or value "No subject"))
+      (opacity
+       (let ((opacity (or value 1.0)))
+         (format "%d%%" (round (* 100 opacity)))))
+      (t (format "%s" (or value ""))))))
+
+;; (format-time-string (org-time-stamp-format t t) (current-time))
+#+end_src
+
+#+RESULTS:
+: pdf-annot-print-property
+
+***** swap {n C-n} {p C-p} :kbd:
+:PROPERTIES:
+:CREATED:  [2024-02-08 Thu 14:57]
+:UPDATED:  [2024-02-08 Thu 14:58]
+:ID:       0ff5518d-8481-4590-8844-778798924153
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp :noweb-ref pdf-view
+(define-key pdf-view-mode-map (kbd "n") 'pdf-view-next-line-or-next-page)
+(define-key pdf-view-mode-map (kbd "p") 'pdf-view-previous-line-or-previous-page)
+(define-key pdf-view-mode-map (kbd "C-n") 'pdf-view-next-page-command)
+(define-key pdf-view-mode-map (kbd "C-p") 'pdf-view-previous-page-command)
+#+end_src
+***** easy actions: highlighting, underlining
+:PROPERTIES:
+:CREATED:  [2024-02-08 Thu 14:59]
+:UPDATED:  [2024-02-12 Mon 10:41]
+:ID:       f8b18fa1-22e4-4bfe-a305-4ad3ea0d1ba2
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp :noweb-ref pdf-view
+(define-key pdf-view-mode-map (kbd "u") 'pdf-annot-add-underline-markup-annotation)
+(define-key pdf-view-mode-map (kbd "h") 'pdf-annot-add-highlight-markup-annotation)
+(define-key pdf-view-mode-map (kbd "t") 'pdf-annot-add-text-annotation)
+
+(define-key pdf-view-mode-map (kbd "L") 'pdf-annot-list-annotations)
+(define-key pdf-view-mode-map (kbd "D") 'pdf-annot-delete)
+
+(define-key pdf-view-mode-map (kbd "M-g M-g") 'pdf-view-goto-page)
+
+;; markup vs text
+;; Pdf-annot-add-text-annotation
+;; pdf-annot-add-markup-annotation
+;; pdf-annot-mouse-add-text-annotation
+;; pdf-annot-add-squiggly-markup-annotation
+;; pdf-annot-add-highlight-markup-annotation
+;; pdf-annot-add-strikeout-markup-annotation
+;; pdf-annot-add-underline-markup-annotation
+#+end_src
+
+#+RESULTS:
+: pdf-view-goto-page
+
+****** {M-<mouse-1-drag>} pdf-view-mouse-set-region-rectangle (is slow)
+:PROPERTIES:
+:CREATED:  [2024-02-08 Thu 15:49]
+:UPDATED:  [2024-02-08 Thu 15:49]
+:ID:       a328fcc0-6707-4b92-9e04-057ac362f18a
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp :noweb-ref pdf-view
+;;; pdf-view-mouse-set-region-rectangle
+;;; - pdf-view-mouse-set-region
+;;; - pdf-view-active-region.
+#+end_src
+
+******* toggle text-highlight, word | char
+:PROPERTIES:
+:CREATED:  [2024-02-08 Thu 16:06]
+:UPDATED:  [2024-02-08 Thu 18:56]
+:ID:       869af486-19c5-495d-824a-e2df77bc6104
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref pdf-view
+(setq pdf-view-selection-style 'glyph)
+(setq pdf-view-selection-style 'word
+      )HOMNE
+#+end_src
+
+#+RESULTS:
+: word
+
+******** pdf-annot-list-format
+:PROPERTIES:
+:CREATED:  [2024-02-08 Thu 16:08]
+:UPDATED:  [2024-02-08 Thu 16:23]
+:ID:       38f357f2-e816-4ebf-8a30-60f967b56dba
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src emacs-lisp :noweb-ref pdf-view
+(setq pdf-annot-list-format
+      '((page . 4)
+        (date . 22)
+        (type . 10)
+        (contents . 73)
+        (label . 24)))
+#+end_src
+
+
+********* annot-list-listed-types
+:PROPERTIES:
+:CREATED:  [2024-02-08 Thu 16:23]
+:UPDATED:  [2024-02-08 Thu 16:23]
+:ID:       2705658e-6e09-4828-a769-7550a380d005
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref pdf-view
+(setq pdf-annot-list-listed-types '(nil text file squiggly highlight underline strike-out))
+#+end_src
+
+#+RESULTS:
+: ((page . 4) (date . 22) (type . 10) (contents . 73) (label . 24))
+
+
+#+RESULTS:
+: qz/pdf-history-clear
+
+********* pdf-view-use-scaling
+:PROPERTIES:
+:CREATED:  [2024-02-08 Thu 16:23]
+:UPDATED:  [2024-02-12 Mon 09:45]
+:ID:       fee3384a-19e8-45c4-b857-5bb08ffb43a8
+:ROAM_EXCLUDE: t
+:END:
+
+
+#+begin_src emacs-lisp :noweb-ref pdf-view
+;; use best quality always
+(setq pdf-view-use-scaling nil)
+#+end_src
+
+#+RESULTS:
+: nil
+
+***** visual excerpt
+:PROPERTIES:
+:CREATED:  [2024-02-08 Thu 14:59]
+:ID:       ca7ce083-9fb2-46bb-a65f-682e40cb0f20
+:ROAM_EXCLUDE: t
+:UPDATED:  [2024-02-08 Thu 14:59]
+:END:
+***** reading/writing outlines
+:PROPERTIES:
+:CREATED:  [2024-02-08 Thu 14:59]
+:UPDATED:  [2024-02-08 Thu 14:59]
+:ID:       2482f4f6-836c-43be-ae67-b1d74dde31bc
+:ROAM_EXCLUDE: t
+:END:
+***** exploring pdf-mode
+:PROPERTIES:
+:CREATED:  [2024-02-08 Thu 15:03]
+:UPDATED:  [2024-02-08 Thu 15:42]
+:ID:       4ac5b279-c219-4fd0-ad27-e2da5b741c58
+:ROAM_EXCLUDE: t
+:END:
+****** pdf-history
+:PROPERTIES:
+:CREATED:  [2024-02-08 Thu 15:03]
+:UPDATED:  [2024-02-08 Thu 16:26]
+:ID:       91178495-b307-480f-b729-0e984d9b7d23
+:ROAM_EXCLUDE: t
+:END:
+
+
+
+#+begin_src emacs-lisp :noweb-ref pdf-view
+;;; pdf-history-minor-mode
+
+(define-key pdf-view-mode-map (kbd "x x") 'pdf-history-debug)
+(define-key pdf-view-mode-map (kbd "x n") 'pdf-history-forward)
+(define-key pdf-view-mode-map (kbd "x p") 'pdf-history-backward)
+(define-key pdf-view-mode-map (kbd "x l") 'qz/pdf-history-clear)
+
+(defun qz/pdf-history-clear ()
+  (interactive)
+  (pdf-history-clear)
+  (pdf-history-debug))
+
+;;pdf-history-goto
+;;;pdf-history-push
+
+#+end_src
+
+
+
+
+****** pdf-register {m}, {'}
+:PROPERTIES:
+:CREATED:  [2024-02-08 Thu 15:42]
+:ID:       bd037db5-5400-4d72-a7ad-9c108462528b
+:ROAM_EXCLUDE: t
+:END:
 **** project
 :PROPERTIES:
 :ID:       9ba6a6bd-ef23-4909-bb86-15c5cecf6714
@@ -9045,6 +9841,50 @@ if one already exists."
 | project-compile      | Compile                                              |
 | magit-project-status | Magit                                                |
 | consult-ripgrep      | ripgrep                                              |
+**** password-store
+:PROPERTIES:
+:CREATED:  [2024-01-15 Mon 20:11]
+:UPDATED:  [2024-01-15 Mon 20:11]
+:ID:       a31ecdab-1881-46a4-a097-a13534b16a30
+:ROAM_EXCLUDE: t
+:END:
+***** otp
+:PROPERTIES:
+:CREATED:  [2024-01-15 Mon 20:11]
+:UPDATED:  [2024-01-15 Mon 20:15]
+:ID:       73875503-1a5c-4d1d-bb09-22a8bbe9e516
+:ROAM_EXCLUDE: t
+:END:
+******
+
+#+begin_src emacs-lisp
+(setq qz/screenshot-tool "grim"
+      qz/screenshot-rect "screenshot") ;; grim -g \"$(slurp)\"
+;; ~/.local/bin/screenshot
+
+(defun password-store-otp-append-from-image (entry)
+  "Check clipboard for an image and scan it to get an OTP URI, append it to ENTRY."
+  (interactive (list (read-string "Password entry: ")))
+  (let ((qr-image-filename (password-store-otp--get-qr-image-filename entry)))
+    (when (not (zerop
+                (shell-command (format "%s %s" qz/screenshot-rect qr-image-filename))))
+      (error "Couldn't get image from clipboard"))
+    (with-temp-buffer
+      (condition-case nil
+          (call-process "zbarimg" nil t nil "-q" "--raw"
+                        qr-image-filename)
+        (error
+         (error "It seems you don't have `zbar-tools' installed")))
+      (password-store-otp-append
+       entry
+       (buffer-substring (point-min) (point-max))))
+    (when (not password-store-otp-screenshots-path)
+      (delete-file qr-image-filename))))
+#+end_src
+
+#+RESULTS:
+: password-store-otp-append-from-image
+
 **** atomic-chrome
 :PROPERTIES:
 :CREATED:  [2023-09-21 Thu 11:47]
@@ -9157,7 +9997,7 @@ if one already exists."
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
 :END:
-******** [[id:ec8b00b4-3bd3-458c-9777-d2581c0f6fd5][agenda-files-update]]                                               :func:var:
+******** [[id:ec8b00b4-3bd3-458c-9777-d2581c0f6fd5][agenda-files-update]]  :func:var:
 :PROPERTIES:
 :ID:       30c87ac3-057a-46c0-a969-456eee6d2de9
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -9217,7 +10057,7 @@ processing a lot"
 | qz/advice-enable--org-clock-resolve--qz/agenda-files-update-clock | qz/advice-disable--org-clock-resolve--qz/agenda-files-update-clock |
 | qz/advice-enable--org-clock-resolve--qz/agenda-files-update       | qz/advice-disable--org-clock-resolve--qz/agenda-files-update       |
 
-******* [[id:9b0676a9-93d3-4449-ac82-721d4e20d4d6][daily-files]]                                                        :func:var:
+******* [[id:9b0676a9-93d3-4449-ac82-721d4e20d4d6][daily-files]]           :func:var:
 :PROPERTIES:
 :ID:       f6bedbac-927c-46aa-bd67-e241af09bd76
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -9357,7 +10197,7 @@ rg '^\*+' $(rg '2023-04-1' ~/life/roam/ -c -t org | grep -v 'org#' | awk -F '[,:
   (seq-uniq (append qz/org-agenda-files (qz/project-files))))
 #+end_src
 
-******* [[id:cb81cfd7-fb16-4965-af20-69129cf4fd97][project-files]]                                                          :func:
+******* [[id:cb81cfd7-fb16-4965-af20-69129cf4fd97][project-files]]             :func:
 :PROPERTIES:
 :ID:       8279b4e0-f23a-44f9-a1af-07a44b5de957
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -10171,7 +11011,7 @@ The diary entry can contain `%s' which will be replaced with
 :UPDATED:  [2023-04-21 Fri 15:28]
 :ROAM_EXCLUDE: t
 :END:
-****** qz/org-ql :hello:baby:
+****** qz/org-ql                                                         :hello:baby:
 :PROPERTIES:
 :ID:       f4ac07db-3576-4843-8164-ffb169de5db1
 :CREATED:  [2023-04-21 Fri 15:28]
@@ -10854,6 +11694,7 @@ we use the '(4) prefix arg, to respect a running timer, as follows (from doc of 
 :ID:       1ea03a77-5511-41cd-bd74-6ff19e750f4b
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
+:UPDATED:  [2024-02-17 Sat 17:29]
 :END:
 #+begin_src emacs-lisp :noweb-ref org
 (setq org-confirm-babel-evaluate nil)
@@ -10867,7 +11708,8 @@ we use the '(4) prefix arg, to respect a running timer, as follows (from doc of 
         ("sb" . "src shell")
         ("se" . "src emacs-lisp")
         ("sl" . "src scheme")
-        ("sp" . "src sql :engine postgres")
+        ;; ("sp" . "src sql :engine postgres")
+        ("sp" . "src python")
         ("sr" . "src R")
         ("ss" . "src")
         ("jp" . "src jupyter-python")
@@ -10876,7 +11718,7 @@ we use the '(4) prefix arg, to respect a running timer, as follows (from doc of 
 #+end_src
 
 #+RESULTS:
-: ((d . definition) (ee . example) (es . src es) (el . src emacs-lisp) (q . quote) (sb . src shell) (se . src emacs-lisp) (sl . src scheme) (sp . src sql :engine postgres) (sr . src R) (ss . src) (jp . src jupyter-python) (jr . src jupyter-R) (r . src restclient))
+: (("d" . "definition") ("ee" . "example") ("es" . "src es") ("el" . "src emacs-lisp") ("q" . "quote") ("sb" . "src shell") ("se" . "src emacs-lisp") ("sl" . "src scheme") ("sp" . "src python") ("sr" . "src R") ("ss" . "src") ("jp" . "src jupyter-python") ("jr" . "src jupyter-R") ("r" . "src restclient"))
 
 ****** do-load-languages
 :PROPERTIES:
@@ -10918,7 +11760,7 @@ fuck the speed my man; {M-x load-library RET ob-} is so annoying
 :ID:       05415208-95bf-4153-b65c-32e10112c582
 :CREATED:  [2021-11-29 Mon]
 :ROAM_EXCLUDE: t
-:UPDATED:  [2023-09-01 Fri 20:35]
+:UPDATED:  [2024-02-01 Thu 14:53]
 :END:
 
 
@@ -10939,6 +11781,7 @@ fuck the speed my man; {M-x load-library RET ob-} is so annoying
                     "Apache Kafka"
                     "kafka-connect"
                     "bigquery"
+                    "gcloud cli"
                     ))
           ;; .. other files
           nil
@@ -10968,9 +11811,10 @@ fuck the speed my man; {M-x load-library RET ob-} is so annoying
 |     2 | /home/samuel/life/roam/20210505T135556Z-plantuml.org      |
 |     1 | /home/samuel/life/roam/20200919T152005Z-gnu_guix.org      |
 |     1 | /home/samuel/life/roam/20200511T150956Z-git.org           |
-|    12 | /home/samuel/life/roam/20230829T100710Z-apache_kafka.org  |
-|     7 | /home/samuel/life/roam/20230628T155405Z-kafka-connect.org |
-|     1 | /home/samuel/life/roam/20220824T094643Z-bigquery.org      |
+|    17 | /home/samuel/life/roam/20230829T100710Z-apache_kafka.org  |
+|     9 | /home/samuel/life/roam/20230628T155405Z-kafka-connect.org |
+|     6 | /home/samuel/life/roam/20220824T094643Z-bigquery.org      |
+|     2 | /home/samuel/life/roam/20240109T092025Z-gcloud_cli.org    |
 
 ******* choose babel block                                                     :func:
 :PROPERTIES:
@@ -11532,7 +12376,7 @@ hence \"everywhere\"."
 :PROPERTIES:
 :ID:       738bcea1-9721-4d18-b7a8-b30e67ebdcc6
 :CREATED:  [2023-05-03 Wed 11:12]
-:UPDATED:  [2023-05-03 Wed 11:14]
+:UPDATED:  [2024-02-03 Sat 00:31]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -11565,6 +12409,21 @@ description: Emacs Org Roam is a solution for taking non-hierarchical notes
 relevance: 20
 :end:
 
+****** display-template
+:PROPERTIES:
+:CREATED:  [2024-02-03 Sat 00:31]
+:UPDATED:  [2024-02-03 Sat 00:31]
+:ID:       c5e5dd44-b2c9-417c-8651-28a94ddc9fc0
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src emacs-lisp :noweb-ref roam
+(setq org-roam-node-display-template "${title}")
+#+end_src
+
+#+RESULTS:
+: "${title}"
+
 ****** create node :: ensure id, and non-exclusion
 :PROPERTIES:
 :ID:       38d5adfe-f060-4d06-af94-eba7fbe74621
@@ -11589,11 +12448,11 @@ relevance: 20
 #+RESULTS:
 : qz/create-node
 
-****** extract-as-subtree-with-link
+****** TODO extract-as-subtree-with-link :broken:
 :PROPERTIES:
 :ID:       19efeebd-be59-4f1f-84f9-946d728a38ca
 :CREATED:  [2023-06-18 Sun 17:51]
-:UPDATED:  [2023-06-18 Sun 17:51]
+:UPDATED:  [2024-02-02 Fri 13:02]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -11887,7 +12746,7 @@ The `slug' generated from that STR follows these rules:
 :ROAM_EXCLUDE: t
 :END:
 
-******* org-roam-mode-sections :var:
+******* org-roam-mode-sections                                                  :var:
 :PROPERTIES:
 :ID:       ba3dd508-d97a-440c-ad26-e1213938887c
 :CREATED:  [2023-07-05 Wed 19:32]
@@ -13494,7 +14353,7 @@ how to iterate over nodes, given some predicate
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
 :END:
-******* =*org-roam*= (backlinks) buffer                                    :var:func:
+******* =*org-roam*= (backlinks) buffer                                      :var:func:
 :PROPERTIES:
 :ID:       fca1f0cb-46ad-4064-ad9d-925dc56b4ebb
 :CREATED:  <2022-02-22 Tue 15:27>
@@ -13633,7 +14492,7 @@ find $HOME/life -name '*.png' | grep screenshot.png
 :ROAM_EXCLUDE: t
 :END:
 
-******* qz/bullets-- :var:
+******* qz/bullets--                                                            :var:
 :PROPERTIES:
 :CREATED:  [2023-09-24 Sun 20:26]
 :UPDATED:  [2023-11-07 Tue 12:50]
@@ -13666,7 +14525,7 @@ find $HOME/life -name '*.png' | grep screenshot.png
 #+RESULTS:
 : ((◉ ○ ◈ ◇ ✳) (🐕 🦮 🌭 🐶) (🍀 🍮 🫰 🫶) (🙈 🙉 🙊) (🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘) (🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘 🌙 🌚 🌛 🌜) ("ฅ՞•ﻌ•՞ฅ" "ʕっ￫ᴥ￩ʔっ" "ʕ ꈍᴥꈍʔ" "ᵒ̴̶̷̥ ᆽᵒ̴̶̷̥") (ہ ﻩ) (""))
 
-******* org-modern--choose-bullets :func:
+******* org-modern--choose-bullets                                             :func:
 :PROPERTIES:
 :CREATED:  [2023-09-24 Sun 20:26]
 :UPDATED:  [2023-09-24 Sun 21:47]
@@ -14334,7 +15193,7 @@ also accessible from the agenda with the ‘e’ key.
   ;;; FIXME :: org-roam init kills id stuff ?
   ;;; BEGIN ORGID HACKS
   ;;(org-id-update-id-locations)
-  (setq org-id-locations "/home/samuel/.config/org-id-locations")
+  ;; (setq org-id-locations "/home/samuel/.config/org-id-locations")
   ;;   after setting in-session, (org-roam-update-org-id-locations)
   ;;; END ORGID HACKS
   (message "loading org: %s" (shell-command-to-string "date"))
@@ -15352,7 +16211,7 @@ a communication channel."
 :ID:       21946f30-986f-49fe-a51d-38c78f315543
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:  [2023-09-29 Fri 18:49]
+:UPDATED:  [2024-03-31 Sun 20:28]
 :END:
 
 #+begin_src emacs-lisp
@@ -15370,9 +16229,20 @@ a communication channel."
   (interactive)
   (async-shell-command "loginctl suspend"))
 
+
+(defun qz/redshift-fulldark ()
+  (interactive)
+  (async-shell-command "guix shell redshift-wayland -- redshift -O 1000K -r -b .4 "
+                       "*process:redshift*"))
+
 (defun qz/redshift-full ()
   (interactive)
   (async-shell-command "guix shell redshift-wayland -- redshift -O 1000K -r -b .7 "
+                       "*process:redshift*"))
+
+(defun qz/redshift-fullbright ()
+  (interactive)
+  (async-shell-command "guix shell redshift-wayland -- redshift -O 1000K -r -b 1 "
                        "*process:redshift*"))
 
 (defun qz/redshift-mellow ()
@@ -15386,39 +16256,46 @@ a communication channel."
 
 (defun qz/dmesg ()
   (interactive)
-  (async-shell-command "sudo dmesg -w"
-                       "*process:dmesg*"))
+  (async-shell-command
+   "sudo dmesg -w"
+   "*process:dmesg*"))
 
 (defun qz/reload-config-home ()
   (interactive)
+  (save-some-buffers)
   (async-shell-command
    (concat
     "make -C $HOME/git/qz/dotfiles home"
-    "&& echo 'home--bal-ehg--di' | espeak --stdin ")))
+    "&& echo 'home--bal-ehg--di' | espeak --stdin ")
+   "*process:dotfiles-reload*"))
 
 (defun qz/build-config-home ()
   (interactive)
+  (save-some-buffers)
   (async-shell-command
    (concat
     "make -C $HOME/git/qz/dotfiles hbuild"
-    "&& echo 'home--bal-ehg--di' | espeak --stdin ")))
+    "&& echo 'home--bal-ehg--di' | espeak --stdin ")
+   "*process:dotfiles-reload*"))
 
 (defun qz/reload-config-system ()
   (interactive)
   (async-shell-command
    (concat
-    "sudo -E make -C $HOME/git/sys/rde/examples system"
-    "&& echo 'system--bal-ehg--di' | espeak --stdin")))
+    "make -C $HOME/git/qz/dotfiles tangle && sudo -E make -C $HOME/git/qz/dotfiles system"
+    "&& echo 'system--bal-ehg--di' | espeak --stdin")
+   "*process:dotfiles-reload*"))
 
 (defun qz/reload-config-all ()
   (interactive)
   (async-shell-command
    (concat
-    "   make -C $HOME/git/sys/rde/examples -B guix"
-    "&& make -C $HOME/git/sys/rde/examples home"
-    "&& sudo -E make -C $HOME/git/sys/rde/examples system"
+    "   make -C $HOME/git/qz/dotfiles -B guix"
+    "&& make -C $HOME/git/qz/dotfiles home"
+    "&& sudo -E make -C $HOME/git/qz/dotfiles system"
     "&& echo 'do the do, like ooo; pull & home & system bal-ehg--di'"
-    "   | espeak --stdin")))
+    "   | espeak --stdin")
+   "*process:dotfiles-reload*"))
 
 (defun qz/reload-config-emacs ()
   (interactive)
@@ -15427,7 +16304,8 @@ a communication channel."
 (defun qz/guix-pull ()
   (interactive)
   (async-shell-command
-   "make -C $HOME/git/sys/rde/examples -B guix"))
+   "make -C $HOME/git/qz/dotfiles -B guix"
+   "*process:dotfiles-reload*"))
 #+end_src
 
 #+RESULTS:
@@ -16978,12 +17856,183 @@ PATH should be a topic that can be thrown at the man command."
 :UPDATED:  [2023-04-14 Fri 17:23]
 :ROAM_EXCLUDE: t
 :END:
-:PROPERTIES:
-:ID:       bd758b3f-e8fb-4e08-9256-812e185a8e71
-:CREATED:  [2023-04-14 Fri 17:22]
-:UPDATED
-:END:
 
+***** emacs-copilot.el
+:PROPERTIES:
+:CREATED:  [2024-02-17 Sat 09:40]
+:UPDATED:  [2024-02-17 Sat 09:40]
+:ID:       2331c87e-3057-4320-804e-741b6f96bda4
+:ROAM_EXCLUDE: t
+:END:
+- :: https://raw.githubusercontent.com/jart/emacs-copilot/main/copilot.el
+
+#+begin_src emacs-lisp :tangle no :eval no :noweb-ref nil
+;;; copilot.el --- Emacs Copilot
+
+;; Copyright 2023 Justine Alexandra Roberts Tunney
+
+;; Author: Justine Tunney
+;; Email: jtunney@mozilla.com
+;; License: Apache 2.0
+;; Version: 0.1
+
+;; Copyright 2023 Mozilla Foundation
+;;
+;; Licensed under the Apache License, Version 2.0 (the "License");
+;; you may not use this file except in compliance with the License.
+;; You may obtain a copy of the License at
+;;
+;;     http://www.apache.org/licenses/LICENSE-2.0
+;;
+;; Unless required by applicable law or agreed to in writing, software
+;; distributed under the License is distributed on an "AS IS" BASIS,
+;; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+;; See the License for the specific language governing permissions and
+;; limitations under the License.
+
+;;; Commentary:
+;;
+;; The `copilot-complete' function demonstrates that ~100 lines of LISP
+;; is all it takes for Emacs to do that thing Github Copilot and VSCode
+;; are famous for doing except superior w.r.t. both quality and freedom
+;;
+;; Emacs Copilot helps you do pair programming with a local-running LLM
+;; that generates code completions within Emacs buffers. The LLM is run
+;; as a sub-command that remembers your local editing history on a file
+;; by file basis. Tokens stream into your buffer without delay as gen'd
+;; and you can hit `C-g' to interrupt your LLM at any time. History and
+;; memory can also be deleted from the LLM's context when deleting code
+;; from your Emacs buffer that matches up verbatim. Copilot is language
+;; agnostic and your programming language is determed by file extension
+;;
+;; The recommended LLM right now is WizardCoder 34b since it scores the
+;; same as GPT-4 on HumanEval. You need a computer like a Mac Studio M2
+;; Ultra in order to use it. If you have a modest system then you could
+;; consider downloading the WizardCoder-Python-13b llamafile since it's
+;; almost as good, and will even go acceptably fast on CPU-only systems
+;; having at least AVX2 and 2200 MT/s RAM. If you're even more strapped
+;; for compute and use things like Raspberry Pi, then give Phi-2 a spin
+;;
+;; To get started, try writing the first line of a function, e.g.
+;;
+;;     bool is_prime(int x) {
+;;
+;; Then place your caret at the end of the line, and press `C-c C-k` to
+;; hand over control to your LLM, which should generate the rest of the
+;; function implementation for you. Things are also tuned so the LLM is
+;; likely to stop as soon as a function is made. Explanations and other
+;; kind of ELI5 commentary is avoided too.
+;;
+;; Later on, if you were to write something like this:
+;;
+;;     int main() {
+;;       for (int i = 0; i < 100;
+;;
+;; And ask your LLM to complete that, then your LLM will likely recall
+;; that you two wrote an is_prime() function earlier, even though it's
+;; only considering those two lines in the current instruction. You'll
+;; most likely then see it decide to generate code to print the primes
+
+;;; Code:
+
+(defgroup copilot nil
+  "Large language model code completion."
+  :prefix "copilot-"
+  :group 'editing)
+
+(defcustom copilot-bin
+  "wizardcoder-python-34b-v1.0.Q5_K_M.llamafile"
+  "Path of llamafile executable with LLM weights."
+  :type 'string
+  :group 'copilot)
+
+;;;###autoload
+(defun copilot-complete ()
+  (interactive)
+  (let* ((spot (point))
+         (inhibit-quit t)
+         (curfile (buffer-file-name))
+         (cash (concat curfile ".cache"))
+         (hist (concat curfile ".prompt"))
+         (lang (file-name-extension curfile))
+
+         ;; extract current line, to left of caret
+         ;; and the previous line, to give the llm
+         (code (save-excursion
+                 (dotimes (i 2)
+                   (when (> (line-number-at-pos) 1)
+                     (previous-line)))
+                 (beginning-of-line)
+                 (buffer-substring-no-properties (point) spot)))
+
+         ;; create new prompt for this interaction
+         (system "\
+You are an Emacs code generator. \
+Writing comments is forbidden. \
+Writing test code is forbidden. \
+Writing English explanations is forbidden. ")
+         (prompt (format
+                  "[INST]%sGenerate %s code to complete:[/INST]\n```%s\n%s"
+                  (if (file-exists-p cash) "" system) lang lang code)))
+
+    ;; iterate text deleted within editor then purge it from prompt
+    (when kill-ring
+      (save-current-buffer
+        (find-file hist)
+        (dotimes (i 10)
+          (let ((substring (current-kill i t)))
+            (when (and substring (string-match-p "\n.*\n" substring))
+              (goto-char (point-min))
+              (while (search-forward substring nil t)
+                (delete-region (- (point) (length substring)) (point))))))
+        (save-buffer 0)
+        (kill-buffer (current-buffer))))
+
+    ;; append prompt for current interaction to the big old prompt
+    (write-region prompt nil hist 'append 'silent)
+
+    ;; run llamafile streaming stdout into buffer catching ctrl-g
+    (with-local-quit
+      (call-process copilot-bin nil (list (current-buffer) nil) t
+                    "--prompt-cache" cash
+                    "--prompt-cache-all"
+                    "--silent-prompt"
+                    "--temp" "0"
+                    "-c" "1024"
+                    "-ngl" "35"
+                    "-r" "```"
+                    "-r" "\n}"
+                    "-f" hist))
+
+    ;; get rid of most markdown syntax
+    (let ((end (point)))
+      (save-excursion
+        (goto-char spot)
+        (while (search-forward "\\_" end t)
+          (backward-char)
+          (delete-backward-char 1 nil)
+          (setq end (- end 1)))
+        (goto-char spot)
+        (while (search-forward "```" end t)
+          (delete-backward-char 3 nil)
+          (setq end (- end 3))))
+
+      ;; append generated code to prompt
+      (write-region spot end hist 'append 'silent))))
+
+;; define `ctrl-c ctrl-k` keybinding for llm code completion
+(defun copilot-c-hook ()
+  (define-key c-mode-base-map (kbd "C-c C-k") 'copilot-complete))
+(add-hook 'c-mode-common-hook 'copilot-c-hook)
+(defun copilot-py-hook ()
+  (define-key python-mode-map (kbd "C-c C-k") 'copilot-complete))
+(add-hook 'python-common-hook 'copilot-py-hook)
+;; (global-set-key (kbd "C-c C-k") 'copilot-complete)
+
+(provide 'copilot)
+
+;;; ansi-mode.el ends here
+#+end_src
 
 ***** json-to-org-table.el
 :PROPERTIES:
@@ -17295,14 +18344,14 @@ eval "docker run --rm --volumes-from gcloud-config gcr.io/google.com/cloudsdktoo
 :PROPERTIES:
 :ID:       09a964e2-400a-4fd0-b379-d5acf0e1933f
 :CREATED:  [2023-04-03 Mon 13:05]
-:UPDATED:  [2023-07-18 Tue 12:12]
+:UPDATED:  [2024-01-19 Fri 12:12]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src shell :tangle ~/.local/bin/gcloud
 #!/usr/bin/env sh
 
-eval "docker run --rm --volumes-from gcloud-config gcr.io/google.com/cloudsdktool/google-cloud-cli gcloud" "$@"
+eval "docker run --rm --volumes-from gcloud-config -v $PWD:/home/cloudsdk -w  /home/cloudsdk gcr.io/google.com/cloudsdktool/google-cloud-cli gcloud" "$@"
 #+end_src
 
 **** gsutil
