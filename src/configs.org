@@ -3966,14 +3966,14 @@ emacs-spacious-padding
 :PROPERTIES:
 :ID:       7fca8716-000f-4794-b174-2ed192d51c26
 :CREATED:  [2022-08-01 Mon 12:46]
-:UPDATED:  [2024-01-28 Sun 13:58]
+:UPDATED:  [2024-04-01 Mon 15:56]
 :ROAM_EXCLUDE: t
 :END:
 #+begin_src scheme :noweb-ref main
 (feature-emacs-org
  #:org-directory my-org-directory
- #:org-indent? #f
- #:org-modern? #f
+ #:org-indent? #t
+ #:org-modern? #t
  ;;#:org-agenda-directory my-notes-directory ;; TODO qzdl
  )
 #+end_src
