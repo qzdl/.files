@@ -1,13 +1,17 @@
-# To rebuild channels-lock.scm use `make -B guix`
+# To rebuild lock.scm use `make -B guix`
 
 # Also defined in .envrc to make proper guix version available project-wide
 GUIX_PROFILE=target/profiles/guix
+GUIX_PROFILE_LOCAL=${GUIX_PROFILE}-local
 GUIX=./pre-inst-env ${GUIX_PROFILE}/bin/guix
+GUIX_LOCAL=./pre-inst-env ${GUIX_PROFILE}/bin/guix
 
-GRAPH := neato
+GRAPH := fdp
 EMACS := emacs
 EBATCH := $(EMACS) -Q --batch \
-	--eval '(setq python-indent-guess-indent-offset nil)'
+	--eval '(setq python-indent-guess-indent-offset nil)' \
+	--eval '(setq org-id-locations nil org-id-locations-file nil)'
+
 
 RDE_LOCAL ?= qzdl
 SRC_DIR=./src
@@ -28,7 +32,7 @@ TANGLES=$(shell rg -o ':tangle .+' src/configs.org | cut -d' ' -f2 | sed 's/:tan
 
 ###
 all:    check ixy/home/reconfigure ixy/system/reconfigure
-home:   ixy/home/reconfigure
+home:   tangle ixy/home/reconfigure
 system: ixy/system/reconfigure
 
 hbuild: check ixy/home/build
@@ -90,17 +94,23 @@ test-b:
 
 graph:
 	RDE_TARGET=ixy-home ${GUIX} home \
+		shepherd-graph ${CONFIGS} \
+		> shepherd.dot;
+	RDE_TARGET=ixy-home ${GUIX} home \
 		extension-graph ${CONFIGS} \
-		> /tmp/graph.dot;
-	xdot --filter=$(GRAPH) /tmp/graph.dot
+		> extension.dot;
+	@echo xdot --filter=$(GRAPH) extension.dot
+	@echo xdot --filter=$(GRAPH) shepherd.dot
 
 search:
 	RDE_TARGET=ixy-home ${GUIX} home \
 		search "cron" ${CONFIGS}
-
+# TODO # --root target/profiles/pin-build-dependencies
 ixy/home/build: guix
-	RDE_TARtangleGET=ixy-home ${GUIX} home \
-		build ${CONFIGS}
+	RDE_TARGET=ixy-home ${GUIX} home \
+		build -c 32 \
+                ${CONFIGS}
+
 
 ixy/home/container: guix
 	RDE_TARGET=ixy-home ${GUIX} home \
@@ -108,8 +118,7 @@ ixy/home/container: guix
 
 ixy/home/reconfigure:
 	RDE_TARGET=ixy-home ${GUIX} home \
-		--allow-downgrades \
-		reconfigure ${CONFIGS}
+		reconfigure -c 32 ${CONFIGS}
 
 ixy/system/build:
 	RDE_TARGET=ixy-system ${GUIX} system \
@@ -178,11 +187,11 @@ mixxx:
 
 # guix
 # -> target/profiles/guix.lock
-#    -> rde/channels-lock.scm       ; init lock
-#       -> rde/channels.scm
+#    -> channels/lock.scm       ; init lock
+#       -> channels/channels.scm
 #    -> target/profiles/guix        ; pull
 #       -> target/profiles
-#       -> rde/channels-lock.scm
+#       -> channels/lock.scm
 
 
 # Store items doesn't have useful mtime, so we rely on guix.lock to prevent
@@ -200,38 +209,37 @@ target/profiles:
 	@echo ... target/profiles
 	mkdir -p target/profiles
 
-target/profiles/guix-time-marker: rde/channels-lock.scm
+target/profiles/guix-time-marker: channels/lock.scm
 	@echo ... target/profiles/guix-time-marker
 	make target/profiles/guix
 	touch $@
 
-target/profiles/guix-local-time-marker: rde/channels-lock-local.scm
+target/profiles/guix-local-time-marker: channels/lock-local.scm
 	@echo ... target/profiles/guix-time-marker
 	make target/profiles/guix-local
 	touch $@
 
-target/profiles/guix: target/profiles rde/channels-lock.scm
+target/profiles/guix: target/profiles channels/lock.scm
 	@echo ... target/profiles/guix
-	guix pull -C rde/channels-lock.scm -p ${GUIX_PROFILE} \
+	guix pull -C channels/lock.scm -p ${GUIX_PROFILE} \
 		${PULL_EXTRA_OPTIONS}
 
-target/profiles/guix-local: target/profiles rde/channels-lock-local.scm
+target/profiles/guix-local: target/profiles channels/lock-local.scm
 	@echo ... target/profiles/guix-local
-	guix pull -C rde/channels-lock-local.scm -p ${GUIX_PROFILE}-home \
-		--allow-downgrades --disable-authentication \
+	guix pull -C channels/lock-local.scm -p ${GUIX_PROFILE_LOCAL} \
 		${PULL_EXTRA_OPTIONS}
 
-rde/channels-lock.scm: rde/channels.scm
-	@echo ... rde/channels-lock.scm
-	echo -e "(use-modules (guix channels))\n" > ./rde/channels-lock-tmp.scm
-	guix time-machine -C ./rde/channels.scm -- \
-		describe -f channels >> ./rde/channels-lock-tmp.scm
-	mv ./rde/channels-lock-tmp.scm ./rde/channels-lock.scm
+channels/lock.scm: channels/channels.scm
+	@echo ... channels/lock.scm
+	echo -e "(use-modules (guix channels))\n" > ./channels/lock-tmp.scm
+	guix time-machine -C ./channels/channels.scm -- \
+		describe -f channels >> ./channels/lock-tmp.scm
+	mv ./channels/lock-tmp.scm ./channels/lock.scm
 
-rde/channels-lock-local.scm: rde/channels-local.scm
-	@echo ... rde/channels-lock-local.scm
-	echo -e "(use-modules (guix channels))\n" > ./rde/channels-lock-tmp.scm
-	guix time-machine -C ./rde/channels-local.scm \
+channels/lock-local.scm: channels/channels-local.scm
+	@echo ... channels/lock-local.scm
+	echo -e "(use-modules (guix channels))\n" > ./channels/lock-tmp.scm
+	guix time-machine -C ./channels/channels-local.scm \
 		--disable-authentication \
-		-- describe -f channels >> ./rde/channels-lock-tmp.scm
-	mv ./rde/channels-lock-tmp.scm ./rde/channels-lock-local.scm
+		-- describe -f channels >> ./channels/lock-tmp.scm
+	mv ./channels/lock-tmp.scm ./channels/lock-local.scm
