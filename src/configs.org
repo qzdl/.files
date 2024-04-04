@@ -3588,7 +3588,7 @@ annoying! cannot fathom why this doesn't work
 :PROPERTIES:
 :ID:       5f892275-23ad-429c-9651-f48f5e8576ec
 :CREATED:  [2022-09-28 Wed 16:14]
-:UPDATED:  [2024-03-31 Sun 20:18]
+:UPDATED:  [2024-04-01 Mon 02:55]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -3608,7 +3608,7 @@ annoying! cannot fathom why this doesn't work
 "emacs-eglot"
 "emacs-elfeed"
 "emacs-eros"
-"emacs-ess"
+;; "emacs-ess" ;; TODO broken [2024-04-01 Mon 02:55]
 "emacs-forge"
 "emacs-fountain-mode" ;; TODO feature-emacs-fountain-mode
 "emacs-ggtags"
@@ -3743,7 +3743,7 @@ emacs-spacious-padding
 (feature-emacs-dired)
 ;;(feature-emacs-vterm) ;; TODO QZDL merge with feature-vterm
 (feature-emacs-monocle)
-(feature-emacs-message)
+;; (feature-emacs-message) ;; TODO compose mail.  broken with emacs-feature-portableu
 #+end_src
 
 ****** emacs-smartparens
@@ -3893,24 +3893,24 @@ emacs-spacious-padding
 :PROPERTIES:
 :ID:       c1f0a657-91fc-4a27-b33b-df85bfaa9ff1
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2022-08-01 Mon 10:52]
+:UPDATED:  [2024-04-01 Mon 02:20]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme :noweb-ref main
-(feature-emacs-pdf-tools)
+;; (feature-emacs-pdf-tools) ;; TODO broken [2024-04-01 Mon 02:19] portable emacs
 #+end_src
 
 ****** emacs-nov-el
 :PROPERTIES:
 :ID:       1103af98-4018-4f7d-b59d-89e4b844ce2e
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2022-08-01 Mon 10:52]
+:UPDATED:  [2024-04-01 Mon 02:20]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme :noweb-ref main
-(feature-emacs-nov-el)
+;; (feature-emacs-nov-el) ;; TODO broken [2024-04-01 Mon 02:19] portable emacs
 #+end_src
 
 ****** emacs-git
@@ -4034,12 +4034,12 @@ emacs-spacious-padding
 :PROPERTIES:
 :ID:       dc8200af-d1cd-4911-8c42-0b01e9361da2
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2022-09-29 Thu 11:44]
+:UPDATED:  [2024-04-01 Mon 00:21]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme :noweb-ref main
-(feature-mpv)
+;; (feature-mpv)
 #+end_src
 
 ***** mail
@@ -4070,12 +4070,12 @@ emacs-spacious-padding
 :PROPERTIES:
 :ID:       bd9b236d-db39-449b-8314-77a79ce89fe1
 :CREATED:  [2022-08-01 Mon 10:55]
-:UPDATED:  [2022-08-01 Mon 13:21]
+:UPDATED:  [2024-04-01 Mon 02:53]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme :noweb-ref main
-(feature-l2md)
+;; (feature-l2md) ;; TODO  public-inbox mirrors& istupdate
 #+end_src
 
 ****** msmtp                                                                   :mail:
