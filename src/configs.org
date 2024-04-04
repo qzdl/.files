@@ -3569,7 +3569,7 @@ annoying! cannot fathom why this doesn't work
 :PROPERTIES:
 :ID:       d2fc9152-8683-46c1-9ef2-4ca84510bb49
 :CREATED:  [2022-09-28 Wed 16:14]
-:UPDATED:  [2024-03-31 Sun 20:06]
+:UPDATED:  [2024-04-01 Mon 03:09]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -3577,10 +3577,10 @@ annoying! cannot fathom why this doesn't work
 (feature-emacs
  ;;-portable
  ;;#:emacs (@ (declantsien packages emacs) emacs-next-wr)
- #:emacs (@ (rde packages emacs) emacs-next-pgtk-latest)
+ ;; #:emacs (@ (rde packages emacs) emacs-next-pgtk-latest)
  ;; #:emacs emacs-next-pgtk
  ;; #:emacs emacs-pgtk
- #:native-comp? #t
+ ;; #:native-comp? #f
  )
 #+end_src
 
