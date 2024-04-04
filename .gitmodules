@@ -1,3 +1,6 @@
 [submodule "nonguix"]
 	path = nonguix
 	url = https://gitlab.com/nonguix/nonguix
+[submodule "guix"]
+	path = guix
+	url = git://git.savannah.gnu.org/guix.git
