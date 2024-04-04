@@ -8335,7 +8335,7 @@ it will therefore interface with any model.
                                "generateContent"))))))
      (prog1 backend
        (setf (alist-get name gptel--known-backends
-                        nil nil #'equal)
+                        nil nil 'equal)
              backend))))
 #+end_src
 ******* TODO check debug utils from gptel
@@ -8766,7 +8766,7 @@ consult-recoll--search-flags
 ;;; https://www.reddit.com/r/emacs/comments/pac8kp/how_to_send_an_embark_command_without_pulling_up/
 ;;; (defun shell-command-on-current-completion-candidate ()
 ;;;   (interactive)
-;;;   (embark--act #'shell-command (car (embark--targets))))
+;;;   (embark--act 'shell-command (car (embark--targets))))
 
 (defun qz/example-embark-act-arbitrary ()
   (interactive)
