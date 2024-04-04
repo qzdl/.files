@@ -4,3 +4,6 @@
 [submodule "guix"]
 	path = guix
 	url = git://git.savannah.gnu.org/guix.git
+[submodule "rde"]
+	path = rde
+	url = https://git.sr.ht/~abcdw/rde
