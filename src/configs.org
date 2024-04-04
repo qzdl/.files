@@ -1988,6 +1988,17 @@ n****** custom-services
   ;;                  (rebuild-elisp-packages? #t)))
 
   )
+  (simple-service 'emacs-my-package-list
+                  home-emacs-service-type
+                  (home-emacs-extension
+                   (elisp-packages
+                    (append
+                      (list
+                       <<emacs-pkg-my>>
+                       )
+                      (pkgs
+                       <<emacs-pkg>>
+                       ))))))
  #:system-services
  (remove
   unspecified?
@@ -3570,15 +3581,6 @@ annoying! cannot fathom why this doesn't work
  ;; #:emacs emacs-next-pgtk
  ;; #:emacs emacs-pgtk
  #:native-comp? #t
- #:additional-elisp-packages
- ;; TODO if feature-emacs-PACKAGE exists, advise its use
- (append
-  (list
-   <<emacs-pkg-my>>
-   )
-  (pkgs
-   <<emacs-pkg>>
-   ))
  )
 #+end_src
 
