@@ -5101,11 +5101,14 @@ emacs-spacious-padding
 :ID:       1b524325-ce8c-4d9a-8496-69a393a036e1
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:  [2024-04-06 Sat 15:18]
+:UPDATED:  [2024-04-06 Sat 15:38]
 :END:
 
-- see :: ~/.config/emacs/init.el
-- see also :: ~/.config/emacs/early-init.el
+
+installed files:
+- user :: ~/.config/emacs/init.el
+- rde loader :: ~/.config/emacs/early-init.el
+
 #+begin_src scheme :tangle src/emacs.scm :noweb-ref base-emacs
 (define-module (emacs)
   #:use-module (rde serializers elisp)
