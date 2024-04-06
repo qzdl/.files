@@ -5,7 +5,7 @@
         (url "file:///home/samuel/git/qz/dotfiles/guix")
         (branch "master")
         (commit
-          "188d18fc47f0d38edfe06e3e5834fa8587bd300b")
+          "9b50a35fc0764f48688974af106fd7a6809f33ee")
         (introduction
           (make-channel-introduction
             "9edb3f66fd807b096b48283debdcddccfea34bad"
@@ -16,7 +16,7 @@
         (url "file:///home/samuel/git/qz/dotfiles/rde")
         (branch "master")
         (commit
-          "01862ccf84b7dca7ad214a4b4504ccf9ce0e7dc9")
+          "0c49f451cc2de56043ce95169a5406d1ac340e94")
         (introduction
           (make-channel-introduction
             "257cebd587b66e4d865b3537a9a88cccd7107c95"
@@ -27,7 +27,7 @@
         (url "file:///home/samuel/git/qz/dotfiles/nonguix")
         (branch "master")
         (commit
-          "a79f2b58e24c4c54389329cf3b313f40846a201e")
+          "ec1daa71c7f03e7401d05136c290630f03f9a560")
         (introduction
           (make-channel-introduction
             "897c1a470da759236cc11798f4e0a5f7d4d59fbc"
