@@ -439,7 +439,7 @@ all the host/user specific things.
 :PROPERTIES:
 :ID:       5508a976-f9ad-457c-b4bb-46dbf3b73fb0
 :CREATED:  [2022-07-29 Fri 17:36]
-:UPDATED:  [2024-03-31 Sun 19:03]
+:UPDATED:  [2024-04-06 Sat 12:11]
 :END:
 
 **** pkgs, pkgs-vanilla (helper)                                               :func:
@@ -480,11 +480,11 @@ all the host/user specific things.
 :ROAM_EXCLUDE: t
 :END:
 
-***** imports
+***** TODO imports (remove this)
 :PROPERTIES:
 :ID:       7cdd0670-d06b-4310-9239-e39c1e938624
 :CREATED:  [2022-08-08 Mon 11:39]
-:UPDATED:  [2022-08-08 Mon 12:06]
+:UPDATED:  [2024-04-06 Sat 12:11]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -4180,11 +4180,11 @@ emacs-spacious-padding
   (templates "$HOME")))
 #+end_src
 
-***** base packages/rest                                                        :pkg:
+***** TODO base packages/rest (extract to profiles)                  :pkg:
 :PROPERTIES:
 :ID:       9490f8c2-7074-4a89-a62e-f82b6bfc2f2b
 :CREATED:  [2022-08-01 Mon 10:55]
-:UPDATED:  [2024-03-31 Sun 20:26]
+:UPDATED:  [2024-04-06 Sat 12:12]
 :ROAM_EXCLUDE: t
 :END:
 
