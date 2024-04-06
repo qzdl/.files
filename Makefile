@@ -21,7 +21,7 @@ SRC_DIR=./src
 _CONFIG_DIR=${SRC_DIR}
 _CONFIG=${_CONFIG_DIR}/configs
 
-CONFIGO=${_CONFIG}.org
+CONFIGO=config.org
 CONFIGS=${_CONFIG}.scm
 CONFIGE=${_CONFIG_DIR}/emacs.scm
 
@@ -64,11 +64,17 @@ check: tangle inputs lint-elisp
 inputs:
 	@echo "HEAD:		$(shell git rev-parse HEAD)"
 	@echo
+	git show HEAD --stat --oneline
+	@echo
+	@echo
 	@echo "PROFILE (REMOTE):"
 	guix describe -p target/profiles/guix
 	@echo
 	@echo "CHANNELS (LOCAL):"
 	git submodule status
+	@echo
+	git submodule foreach --recursive \
+		git show HEAD --stat --oneline
 	@echo
 	@echo "PROFILE (LOCAL):"
 	guix describe -p target/profiles/guix-local
@@ -256,8 +262,7 @@ target/profiles/guix-local: target/profiles channels/lock-local.scm
 channels/local.scm:
 	$(call T, "(update local channel checkouts)")
 	git submodule status
-	git submodule sync --recursive
-	git submodule update --recursive --remote
+	git submodule foreach --recursive git pull
 	git submodule status
 
 channels/lock-local.scm: channels/local.scm
