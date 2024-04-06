@@ -1,7 +1,7 @@
 :PROPERTIES:
 :ID:       12f7748c-7095-4969-8261-94ad0169a24c
 :CREATED:  [2022-08-30 Tue 11:12]
-:UPDATED:  [2024-04-06 Sat 12:12]
+:UPDATED:  [2024-04-06 Sat 16:20]
 :END:
 #+property: header-args            :tangle-mode (identity #o444) :noweb yes
 #+property: header-args:sh         :tangle-mode (identity #o755)
@@ -15,7 +15,7 @@
 :PROPERTIES:
 :ID:       d5a65665-c696-493b-a426-89a0ce6c1fbd
 :CREATED:  [2023-07-12 Wed 19:42]
-:UPDATED:  [2024-03-31 Sun 19:04]
+:UPDATED:  [2024-04-06 Sat 15:17]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -28,7 +28,7 @@ all the host/user specific things.
 (rde features gnupg)
 #+end_src
 
-#+begin_src scheme :tangle header.scm :noweb-ref null
+#+begin_src scheme :tangle src/header.scm :noweb-ref null
 (define-module (header)
   #:use-module <<header-imports>>
   )
@@ -163,11 +163,11 @@ all the host/user specific things.
 :PROPERTIES:
 :ID:       98f42608-b5c0-455d-bb02-9a326af8bc42
 :CREATED:  [2022-08-01 Mon 09:49]
-:UPDATED:  [2023-07-12 Wed 19:56]
+:UPDATED:  [2024-04-06 Sat 15:17]
 :ROAM_EXCLUDE: t
 :END:
 
-#+begin_src scheme :tangle configs.scm :noweb-ref base-rde
+#+begin_src scheme :tangle src/configs.scm :noweb-ref base-rde
 <<conf-rde>>
 #+end_src
 
@@ -3169,11 +3169,11 @@ host	all	all	0.0.0.0/0       md5
 :PROPERTIES:
 :ID:       1f073518-b77a-460c-abc8-bc265c4f9e6c
 :CREATED:  [2022-11-03 Thu 15:18]
-:UPDATED:  [2022-11-03 Thu 15:34]
+:UPDATED:  [2024-04-06 Sat 15:18]
 :ROAM_EXCLUDE: t
 :END:
 
-#+begin_src conf :tangle ./config/git/config_work
+#+begin_src conf :tangle src/config/git/config_work
 [includeif "gitdir:~/git/ns"]
     [user]
         signingkey = "290D5A69F2021C4E"
@@ -4911,11 +4911,11 @@ emacs-spacious-padding
 :PROPERTIES:
 :ID:       21ce54e0-18e0-460f-82c7-2b43e243ad45
 :CREATED:  [2022-08-29 Mon 16:40]
-:UPDATED:  [2023-08-31 Thu 10:21]
+:UPDATED:  [2024-04-06 Sat 15:18]
 :ROAM_EXCLUDE: t
 :END:
 
-#+begin_src scheme :tangle ../channels/channels.scm :noweb-ref 2chan
+#+begin_src scheme :tangle channels/channels.scm :noweb-ref 2chan
 ;; -*- mode: scheme -*-
 (use-modules (guix ci)
              (guix channels))
@@ -4968,7 +4968,7 @@ emacs-spacious-padding
 :PROPERTIES:
 :ID:       334b6dee-e142-4020-9417-23b3ff933cb9
 :CREATED:  [2023-07-12 Wed 19:20]
-:UPDATED:  [2024-04-06 Sat 12:10]
+:UPDATED:  [2024-04-06 Sat 15:18]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -4977,7 +4977,7 @@ emacs-spacious-padding
 - path formatting inspired by :: https://github.com/migalmoreno/guix-config/blob/master/rde/channels-local.scm
 
 
-#+begin_src scheme :tangle ../channels/local.scm :noweb-ref 2chan
+#+begin_src scheme :tangle channels/local.scm :noweb-ref 2chan
 ;; -*- mode: scheme -*-
 (use-modules (guix ci)
              (guix channels))
@@ -5101,12 +5101,12 @@ emacs-spacious-padding
 :ID:       1b524325-ce8c-4d9a-8496-69a393a036e1
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:  [2024-02-20 Tue 16:08]
+:UPDATED:  [2024-04-06 Sat 15:18]
 :END:
 
 - see :: ~/.config/emacs/init.el
 - see also :: ~/.config/emacs/early-init.el
-#+begin_src scheme :tangle emacs.scm :noweb-ref base-emacs
+#+begin_src scheme :tangle src/emacs.scm :noweb-ref base-emacs
 (define-module (emacs)
   #:use-module (rde serializers elisp)
   #:export (init-el))
@@ -9134,11 +9134,11 @@ it's [2022-10-04 Tue]; I have just retrieved the dirtiest hack in a while from t
 :PROPERTIES:
 :ID:       0f7be177-127d-4476-9a0f-a1ed3a570400
 :CREATED:  [2022-10-04 Tue 18:13]
-:UPDATED:  [2022-10-04 Tue 18:13]
+:UPDATED:  [2024-04-06 Sat 15:22]
 :END:
 
 #+DOWNLOADED: screenshot @ 2022-10-04 18:13:11
-[[file:configs/2022-10-04_18-13-11_screenshot.png]]
+[[file:images/2022-10-04_18-13-11_screenshot.png]]
 
 **** hl-phrase                                                          :mode:global:
 :PROPERTIES:
@@ -15872,13 +15872,13 @@ I'm using tags and auto-tags rather sporadically
 :ID:       bebc4bc6-3ed0-49a1-b76a-ffe7ee11dd33
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:
+:UPDATED:  [2024-04-06 Sat 15:22]
 :END:
 640px is a good size, at approximately 64 columns
 
 ----------------------------------------------------------------
 #+DOWNLOADED: screenshot @ 2021-12-12 22:14:04
-[[file:configs/2021-12-12_22-14-04_screenshot.png]]
+[[file:images/2021-12-12_22-14-04_screenshot.png]]
 
 check with (org-redisplay-inline-images)
 -----------------------------------------------------------------
@@ -16762,7 +16762,7 @@ the major mode specifies support for Font Lock."
 these settings end up looking like this:
 
 #+DOWNLOADED: screenshot @ 2022-05-23 11:02:39
-[[file:configs/2022-05-23_11-02-39_screenshot.png]]
+[[file:images/2022-05-23_11-02-39_screenshot.png]]
 
 ***** interactive customisation
 :PROPERTIES:
@@ -18508,6 +18508,26 @@ select 5,
 |-----|
 |   5 |
 
+** sanity
+:PROPERTIES:
+:CREATED:  [2024-04-06 Sat 15:20]
+:UPDATED:  [2024-04-06 Sat 16:00]
+:ID:       05d3a298-fbd5-4566-b771-c77565d56356
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme :tangle src/sanity.scm :noweb-ref null
+(define-module (sanity)
+  #:use-module (ice-9 pretty-print)
+  #:use-module (srfi srfi-1))
+
+(format #t "\n\nchecking emacs\n\n")
+(use-modules (emacs))
+
+(format #t "\n\nchecking user header\n\n")
+(use-modules (header))
+#+end_src
+
 * etc
 :PROPERTIES:
 :ID:       88c5af73-609a-4019-ba2f-543528a7b6e2
@@ -18953,7 +18973,7 @@ CLOCK: [2022-08-15 Mon 12:02]--[2022-08-15 Mon 12:18] =>  0:16
 :ID:       476ef762-1350-4afa-a8ad-2cd3e42eb730
 :CREATED:  <2022-02-22 Tue 15:27>
 :ROAM_EXCLUDE: t
-:UPDATED:  [2023-07-07 Fri 14:42]
+:UPDATED:  [2024-04-06 Sat 16:20]
 :END:
 
 [fn:6] :uniformity:
