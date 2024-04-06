@@ -110,12 +110,12 @@ lint-org:
 graph:
 	RDE_TARGET=ixy-home ${GUIX} home \
 		shepherd-graph ${CONFIGS} \
-		> shepherd.dot;
+		> docs/shepherd.dot;
 	RDE_TARGET=ixy-home ${GUIX} home \
 		extension-graph ${CONFIGS} \
-		> extension.dot;
-	@echo xdot --filter=$(GRAPH) extension.dot
-	@echo xdot --filter=$(GRAPH) shepherd.dot
+		> docs/extension.dot;
+	@echo xdot --filter=$(GRAPH) docs/extension.dot
+	@echo xdot --filter=$(GRAPH) docs/shepherd.dot
 
 search:
 	RDE_TARGET=ixy-home ${GUIX} home \
