@@ -2407,6 +2407,8 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 breathe.  do some pullups
 breathe.  do some pushups
 breathe.  work on your pancake stretch
+breathe.  shut your eyes
+breathe.  engage your spine
 breathe.  do some dips
 breathe.  do some hangboarding
 #+end_src
