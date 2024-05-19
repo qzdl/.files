@@ -175,7 +175,7 @@ all the host/user specific things.
 :PROPERTIES:
 :ID:       6bb15998-32c1-4674-890a-85180a89d66a
 :CREATED:  [2022-07-29 Fri 18:22]
-:UPDATED:  [2024-03-31 Sun 19:01]
+:UPDATED:  [2024-05-17 Fri 20:30]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -192,8 +192,11 @@ all the host/user specific things.
   #:use-module (gnu home-services shells)
   #:use-module (gnu home-services ssh)
 
+  #:use-module (gnu packages cmake)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages fonts)
+  #:use-module (gnu packages freedesktop)
+  #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages video)
   #:use-module (gnu packages wm)
   #:use-module (gnu packages)
@@ -484,7 +487,7 @@ all the host/user specific things.
 :PROPERTIES:
 :ID:       7cdd0670-d06b-4310-9239-e39c1e938624
 :CREATED:  [2022-08-08 Mon 11:39]
-:UPDATED:  [2024-04-06 Sat 12:11]
+:UPDATED:  [2024-05-17 Fri 20:10]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -501,6 +504,7 @@ all the host/user specific things.
  (gnu packages emacs-xyz)
  (guix build-system emacs)
  (guix build-system gnu)
+ (guix build-system meson)
  ((guix licenses) #:prefix license:))
 
 #+end_src
@@ -1701,6 +1705,152 @@ done
 
 
 :end:
+
+****** mpvpaper
+:PROPERTIES:
+:CREATED:  [2024-05-17 Fri 20:03]
+:UPDATED:  [2024-05-17 Fri 20:03]
+:ID:       99654a9f-cbcb-4d91-852d-cb4df4c78dfa
+:ROAM_EXCLUDE: t
+:END:
+
+******* mpv example
+:PROPERTIES:
+:CREATED:  [2024-05-17 Fri 20:03]
+:UPDATED:  [2024-05-17 Fri 20:08]
+:ID:       5d62b6e3-5fbb-479a-9627-0847631e0ab8
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src lisp
+(define-public mpv
+  (package
+    (name "mpv")
+    (version "0.37.0")
+    (source (origin
+              (method git-fetch)
+              (uri (git-reference
+                    (url "https://github.com/mpv-player/mpv")
+                    (commit (string-append "v" version))))
+              (file-name (git-file-name name version))
+              (sha256
+               (base32 "1xcyfpd543lbmg587wi0mahrz8vhyrlr4432054vp6wsi3s36c4b"))))
+    (build-system meson-build-system)
+    (arguments
+     (list
+      #:phases
+      #~(modify-phases %standard-phases
+          (add-after 'unpack 'patch-file-names
+            (lambda* (#:key inputs #:allow-other-keys)
+              (substitute* "player/lua/ytdl_hook.lua"
+                (("\"yt-dlp\",")
+                 (string-append
+                  "\"" (search-input-file inputs "bin/yt-dlp") "\",")))))
+          (add-before 'configure 'build-reproducibly
+            (lambda _
+              ;; Somewhere in the build system library dependencies are enumerated
+              ;; and passed as linker flags, but the order in which they are added
+              ;; varies.  See <https://github.com/mpv-player/mpv/issues/7855>.
+              ;; Set PYTHONHASHSEED as a workaround for deterministic results.
+              (setenv "PYTHONHASHSEED" "1"))))
+      #:configure-flags
+      #~(list "-Dlibmpv=true"
+              "-Dcdda=enabled"
+              "-Ddvdnav=enabled"
+              "-Dbuild-date=false")))
+    (native-inputs
+     (list perl                         ;for zsh completion file
+           pkg-config
+           python-docutils
+           python-wrapper))
+    ;; Missing features: libguess, V4L2.
+    (inputs
+     (list enca
+           ladspa
+           lcms
+           libbs2b
+           mpg123
+           rsound
+           vulkan-headers
+           vulkan-loader
+           yt-dlp))
+    ;; XXX: These are propagated for the mpv pkg-config package, as they are
+    ;; listed in Requires.private and would break 'pkg-config --exists mpv' if
+    ;; unavailable.
+    (propagated-inputs
+     (list alsa-lib
+           ffmpeg
+           jack-1
+           libass
+           libbluray
+           libcaca
+           libcdio-paranoia
+           libdrm
+           libdvdnav
+           libdvdread
+           libjpeg-turbo
+           libplacebo
+           libva
+           libvdpau
+           libx11
+           libxext
+           libxinerama
+           libxkbcommon
+           libxpresent
+           libxrandr
+           libxscrnsaver
+           libxv
+           ;; XXX: lua > 5.2 is not currently supported; see meson.build
+           lua-5.2
+           mesa
+           pulseaudio
+           shaderc
+           wayland
+           wayland-protocols
+           zimg
+           zlib))
+    (home-page "https://mpv.io/")
+    (synopsis "Audio and video player")
+    (description "mpv is a general-purpose audio and video player.  It is a
+fork of mplayer2 and MPlayer.  It shares some features with the former
+projects while introducing many more.")
+    (license license:gpl2+)))
+#+end_src
+
+******* src
+:PROPERTIES:
+:CREATED:  [2024-05-17 Fri 20:03]
+:UPDATED:  [2024-05-17 Fri 20:29]
+:ID:       14e89915-62e1-4953-a875-93f5a5c98b04
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme
+(define-public mpvpaper
+  (package
+    (name "mpvpaper")
+    (version "1.6")
+    (source (origin
+              (method git-fetch)
+              (uri (git-reference
+                    (url "https://github.com/GhostNaN/mpvpaper")
+                    (commit "d8164bb6bd2960d2f7f6a9573e086d07d440f037" ;;(string-append "v" version)
+                            )))
+              (file-name (git-file-name name version))
+              (sha256
+               (base32 "0iid3ml36kc4mzcfqkylml5wv2k3ysn7kkyx713fagz07vlq43gw"))))
+    (build-system meson-build-system)
+    (inputs (list cmake pkg-config))
+    ;;(propated-inputs (list ))
+    (native-inputs
+     (list mpv
+           wayland
+           wayland-protocols))
+    (home-page "https://github.com/GhostNaN/mpvpaper")
+    (synopsis "Audio and video player")
+    (description "A video wallpaper program for wlroots based wayland compositors. ")
+    (license license:gpl3+)))
+#+end_src
+
 ***** collectors
 :PROPERTIES:
 :CREATED:  [2024-03-31 Sun 16:11]
@@ -1711,7 +1861,7 @@ done
 ****** home
 :PROPERTIES:
 :CREATED:  [2024-03-31 Sun 16:11]
-:UPDATED:  [2024-03-31 Sun 16:11]
+:UPDATED:  [2024-05-17 Fri 20:08]
 :ID:       02017447-da21-465d-a80e-5b1230936486
 :ROAM_EXCLUDE: t
 :END:
@@ -1719,6 +1869,7 @@ done
 #+begin_src scheme :noweb-ref pkg-home
 ;; python-keyring-pass ;; TODO broken [2024-03-31 Sun 16:24]soehitng
 ;; perl-graph-easy
+mpvpaper
 #+end_src
 
 ****** emacs
