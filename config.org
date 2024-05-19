@@ -201,11 +201,13 @@ all the host/user specific things.
   #:use-module (gnu packages wm)
   #:use-module (gnu packages)
 
+  #:use-module (gnu services admin)
   #:use-module (gnu services base)
   #:use-module (gnu services desktop)
+  #:use-module (gnu services nfs)
+  #:use-module (gnu services samba)
   #:use-module (gnu services ssh)
   #:use-module (gnu services xorg)
-  #:use-module (gnu services nfs)
 
   #:use-module (gnu system file-systems)
   #:use-module (gnu system keyboard)
@@ -2133,7 +2135,38 @@ Install and configure redshift, an adaptive light-temperature controller.")))
            <<services-sys>>
            ))))
 #+end_src
+****** base-services
+:PROPERTIES:
+:CREATED:  [2024-05-02 Thu 17:27]
+:UPDATED:  [2024-05-02 Thu 17:27]
+:ID:       922c75fe-ce8e-437a-a8f0-698dc7c7dd84
+:ROAM_EXCLUDE: t
+:END:
 
+#+begin_src scheme :noweb-ref services-base
+(define %qz-base-system-services
+  (list
+   (service greetd-service-type)
+   (service virtual-terminal-service-type)
+   (service console-font-service-type '())
+   (service syslog-service-type (syslog-configuration))
+   (service static-networking-service-type
+            (list %loopback-static-networking))
+   (service urandom-seed-service-type)
+   (service guix-service-type)
+   (service nscd-service-type)
+
+   (service udev-service-type
+            (udev-configuration
+             (rules (list lvm2 fuse alsa-utils crda))))
+
+   (service sysctl-service-type)
+
+   (service special-files-service-type
+            `(("/bin/sh" ,(file-append bash "/bin/sh"))
+              ("/usr/bin/env" ,(file-append coreutils "/bin/env"))))))
+;; base-system-services %rde-base-system-services
+#+end_src
 ****** <<services>>-home
 :PROPERTIES:
 :ID:       32e2ffde-ff51-4a10-9256-e032d58629bf
