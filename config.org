@@ -2307,20 +2307,19 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 :ROAM_EXCLUDE: t
 :END:
 
+- ~error = sh: line 1: git: command not found~
+
 #+name: guile-job-notes
 #+begin_src scheme :noweb-ref jobs
      ;;; job: commit my notes
-#~(job '(next-minute '(15))
+#~(job '(next-minute (range 0 60 15))
        ;;(lambda ()
          ;; (system*
          ;;  (format #f "~a add . && ~a commit -m \"auto-commit | $( ~a -uIs )\""
          ;;          #$(file-append (@ (gnu packages version-control) git) "/bin/git")
          ;;          #$(file-append (@ (gnu packages version-control) git) "/bin/git")
          ;;          #$(file-append (@ (gnu packages base) coreutils) "/bin/date"))))
-         "cd life \\
-&& echo job: note-commit \\
-&& git add . \\
-&& git commit -m \"auto-commit | $(date -uIs)\""
+         "(cd ~/life && echo job: note-commit && git add . && git commit -m \"auto-commit | $(date -uIs)\") &>> ~/.local/var/lib/log/mcron.notes-commit.log"
        "backup: notes-commit"
        #:user #$my-user)
 
@@ -2422,7 +2421,7 @@ breathe.  do some hangboarding
 :END:
 
 #+begin_src scheme :noweb-ref jobs
-;;; job: generate tags
+;;; job:  hourly reminder
 ;; ref :: https://guix.gnu.org/en/manual/devel/en/html_node/Scheduled-Job-Execution.html
 #~(job '(next-hour) ;; every hour
        "aplay ~/vids/gong-cut.wav &>/dev/null; shuf -n1 ~/.config/cron/humanity | espeak -s 150"
@@ -2437,6 +2436,22 @@ breathe.  do some hangboarding
 :UPDATED:  [2023-04-15 Sat 14:10]
 :ROAM_EXCLUDE: t
 :END:
+********* mail pull
+:PROPERTIES:
+:ID:       8ee735e1-a113-42e8-8939-74c6c82dc0fd
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme :noweb-ref jobs
+;;; job: mail-pull
+;; ref :: https://guix.gnu.org/en/manual/devel/en/html_node/Scheduled-Job-Execution.html
+#~(job '(next-minute (range 0 60 15)) ;; every 15 mins
+       ;;"(mbsync -Va && notmuch new) &>> ~/.local/var/lib/log/mcron.mail-pull.log"
+       (lambda ()
+         (system* "mbsync" "-Va")
+         (system* "notmuch" "new"))
+       "mail-pull"
+       #:user #$my-user)
+#+end_src
 
 ********* TODO forge-pull
 :PROPERTIES:
