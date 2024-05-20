@@ -255,7 +255,7 @@ all the host/user specific things.
   #:use-module (rde features wm)
   #:use-module (rde features xdg)
   #:use-module (rde features xdisorg)
-  ;;#:use-module (rde features irc)
+  #:use-module (rde features irc)
 
   #:use-module (rde gexp)
 
@@ -4056,41 +4056,43 @@ emacs-spacious-padding
 :PROPERTIES:
 :ID:       1019ae2e-1221-4883-bb1e-35270a6fb25d
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2023-03-02 Thu 17:58]
+:UPDATED:  [2024-05-20 Mon 12:37]
 :ROAM_EXCLUDE: t
 :END:
 
 
-#+begin_src scheme :noweb-ref null
+#+begin_src scheme
 (feature-emacs-erc
- #:erc-kill-buffers-on-quit #t
+ ;; #:erc-kill-buffers-on-quit #t
  #:erc-nick "qzdl"
- #:align-nicknames? #f
+ ;; #:align-nicknames? #f
  #:erc-autojoin-channels-alist
  '((Libera.Chat "#guix" "#emacs" "#tropin" "#rde" "#sway")
    (OFTC        "#pipewire" "#wayland"))
- #:log? #t
  ;; #:erc-server "chat.sr.ht"
- #:extra-config
- `((setq rde-bouncer-network-alist
-         `((irc.libera.chat . "qzdl")
-           (irc.oftc.net . "qzdl")))
-   (setq rde-bouncer-nick "qzdl")
+ #:erc-log? #t
+ ;; #:extra-config
+ ;; `((setq rde-bouncer-network-alist
+ ;;         `((irc.libera.chat . "qzdl")
+ ;;           (irc.oftc.net . "qzdl")))
+ ;;   (setq rde-bouncer-nick "qzdl")
 
-   ;; Rename server buffers to reflect the current network name instead
-   ;; of SERVER:PORT (e.g., "freenode" instead of "irc.freenode.net:6667").
-   ;; This is useful when using a bouncer like ZNC where you have multiple
-   ;; connections to the same server.
-   (setq erc-rename-buffers t)
+ ;;   ;; Rename server buffers to reflect the current network name instead
+ ;;   ;; of SERVER:PORT (e.g., "freenode" instead of "irc.freenode.net:6667").
+ ;;   ;; This is useful when using a bouncer like ZNC where you have multiple
+ ;;   ;; connections to the same server.
+ ;;   (setq erc-rename-buffers t)
 
-   (defun rde-erc-connect-bouncer-oftc ()
-     (interactive)
-     (setq erc-email-userid "qzdl/irc.oftc.net")
-     (erc-tls :server "chat.sr.ht" :nick rde-bouncer-nick))
-   (defun rde-erc-connect-bouncer-libera ()
-     (interactive)
-     (setq erc-email-userid "qzdl/irc.libera.chat")
-     (erc-tls :server "chat.sr.ht" :nick rde-bouncer-nick))))
+ ;;   (defun rde-erc-connect-bouncer-oftc ()
+ ;;     (interactive)
+ ;;     (setq erc-email-userid "qzdl/irc.oftc.net")
+ ;;     (erc-tls :server "chat.sr.ht" :nick rde-bouncer-nick))
+ ;;   (defun rde-erc-connect-bouncer-libera ()
+ ;;     (interactive)
+ ;;     (setq erc-email-userid "qzdl/irc.libera.chat")
+ ;;     (erc-tls :server "chat.sr.ht" :nick rde-bouncer-nick))))
+
+ )
 #+end_src
 
 ****** emacs-elpher
