@@ -5572,12 +5572,12 @@ raspberry-pi-64
 (define (dispatcher)
   (let ((rde-target (getenv "RDE_TARGET")))
     (match rde-target
-      ("ixy-home" ixy-he)
-      ("ixy-system" ixy-os)
-      ("bogg-home" bogg-he)
-      ("bogg-system" bogg-os)
+      ("ixy-home"   (assq-ref host-ixy 'he))
+      ("ixy-system" (assq-ref host-ixy 'os))
+      ;; ("bogg-home"   (assq-ref host-bogg 'he))
+      ;; ("bogg-system" (assq-ref host-bogg 'os))
       ("live-system" live-os)
-      (_ ixy-he))))
+      (_ (assq-ref host-ixy 'he)))))
 #+end_src
 
 **** COMMENT debug
