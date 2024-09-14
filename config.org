@@ -1142,6 +1142,38 @@ independently.  Clock instances ared updated automatically.  Their resources
 #+RESULTS:
 : qz/dogears--format-record-list
 
+******* build-error (elc, helm-make-source)
+:PROPERTIES:
+:CREATED:  [2024-05-19 Sun 18:33]
+:UPDATED:  [2024-05-19 Sun 18:33]
+:ID:       3ff7be56-a284-4434-b72d-2dbab191975a
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_quote
+starting phase `validate-compiled-autoloads'
+Loading /gnu/store/25fhs8wwpx45jjp3p1yfv3p5amq9n27k-emacs-dogears-20240412.850/share/emacs/site-lisp/dogears-20240412.850/dogears-autoloads.elc...
+Symbol’s function definition is void: helm-make-source
+
+Error: void-function (helm-make-source)
+mapbacktrace(#f(compiled-function (evald func args flags) #<bytecode -0x1bffad046510e41>))
+debug-early-backtrace()
+debug-early(error (void-function helm-make-source))
+helm-make-source("Dogears" helm-source-sync :candidates #f(compiled-function () #<bytecode -0x454904b23ca65be>) :action (("Go to place" . dogears-go)))
+byte-code("\300\301\302\303\304\305\306\307BC&\6\207" [helm-make-source "Dogears" helm-source-sync :candidates #f(compiled-function () #<bytecode -0x454904b23ca65be>) :action "Go to place" dogears-go] 8)
+(defvar helm-dogears-source (byte-code "\300\301\302\303\304\305\306\307BC&\6\207" [helm-make-source "Dogears" helm-source-sync :candidates #f(compiled-function () #<bytecode -0x454904b23ca65be>) :action "Go to place" dogears-go] 8))
+load("/gnu/store/25fhs8wwpx45jjp3p1yfv3p5amq9n27k-emacs-dogears-20240412.850/share/emacs/site-lisp/dogears-20240412.850/dogears-autoloads.elc")
+mapc(load ("/gnu/store/25fhs8wwpx45jjp3p1yfv3p5amq9n27k-emacs-dogears-20240412.850/share/emacs/site-lisp/dogears-20240412.850/dogears-autoloads.elc"))
+eval((mapc #'load '("/gnu/store/25fhs8wwpx45jjp3p1yfv3p5amq9n27k-emacs-dogears-20240412.850/share/emacs/site-lisp/dogears-20240412.850/dogears-autoloads.elc")) t)
+eval((eval '(mapc #'load '("/gnu/store/25fhs8wwpx45jjp3p1yfv3p5amq9n27k-emacs-dogears-20240412.850/share/emacs/site-lisp/dogears-20240412.850/dogears-autoloads.elc")) t) t)
+command-line-1(("--eval=(eval '(mapc #'load '(\"/gnu/store/25fhs8wwpx45jjp3p1yfv3p5amq9n27k-emacs-dogears-20240412.850/share/emacs/site-lisp/dogears-20240412.850/dogears-autoloads.elc\")) t)"))
+command-line()
+normal-top-level()
+error: in phase 'validate-compiled-autoloads': uncaught exception:
+%exception #<&invoke-error program: "emacs" arguments: ("--quick" "--batch" "--eval=(eval '(mapc #'load '(\"/gnu/store/25fhs8wwpx45jjp3p1yfv3p5amq9n27k-emacs-dogears-20240412.850/share/emacs/site-lisp/dogears-20240412.850/dogears-autoloads.elc\")) t)") exit-status: 255 term-signal: #f stop-signal: #f>
+phase `validate-compiled-autoloads' failed after 0.0 seconds
+command "emacs" "--quick" "--batch" "--eval=(eval '(mapc #'load '(\"/gnu/store/25fhs8wwpx45jjp3p1yfv3p5amq9n27k-emacs-dogears-20240412.850/share/emacs/site-lisp/dogears-20240412.850/dogears-autoloads.elc\")) t)" failed with status 255
+#+end_quote
 ****** emacs-chatgpt-shell
 :PROPERTIES:
 :ID:       9809acde-26e3-4bc8-bb47-a43759be7568
