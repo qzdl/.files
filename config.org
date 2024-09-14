@@ -3072,7 +3072,7 @@ WHOOGLE_PROXY_TYPE
 :ROAM_EXCLUDE: t
 :END:
 
-******** OLD udev-nvidia                                                   :inactive:
+******** OLD udev-nvidia                                            :inactive:
 :PROPERTIES:
 :ID:       e005dec1-7261-4fcd-84b6-49209ea7d7b0
 :CREATED:  [2022-09-28 Wed 15:52]
@@ -3088,7 +3088,7 @@ WHOOGLE_PROXY_TYPE
 ;;    (list nvidia-driver)))
 #+end_src
 
-******** OLD X11 gdm with nvidia                                           :inactive:
+******** OLD X11 gdm with nvidia                                    :inactive:
 :PROPERTIES:
 :ID:       a91bb43f-465e-4a4a-99fa-a8b4a5ba03e6
 :CREATED:  [2022-09-28 Wed 15:52]
@@ -3120,7 +3120,6 @@ WHOOGLE_PROXY_TYPE
 
 ;;(service nvidia-service-type)
 #+end_src
-
 
 ******* udev
 :PROPERTIES:
@@ -3206,20 +3205,23 @@ WHOOGLE_PROXY_TYPE
    "SUBSYSTEMS==\"usb\", ATTRS{idVendor}==\"3297\", MODE:=\"0666\", SYMLINK+=\"ignition_dfu\""
    )))
 #+end_src
+
 ******** udev-sdmount
 :PROPERTIES:
 :ID:       c3963cdf-a521-4647-b76c-4128b42457ce
 :CREATED:  [2023-03-14 Tue 17:49]
-:UPDATED:  [2024-02-08 Thu 15:13]
+:UPDATED:  [2024-09-01 Sun 12:19]
 :END:
 
 ********* exposition
 :PROPERTIES:
 :ID:       b665d4a3-0e73-45fb-acf1-747ee64d49ce
 :CREATED:  [2023-03-14 Tue 18:18]
-:UPDATED:  [2023-03-14 Tue 18:21]
+:UPDATED:  [2024-09-01 Sun 12:19]
 :ROAM_EXCLUDE: t
 :END:
+
+- [[id:0802e399-02bc-4122-9e15-3966851f9249][[17:36:07] sys: SD card dumping (mount + copy + delete)]]
 
 In plain english:
 
@@ -3272,11 +3274,11 @@ o="/mnt/chopi/zv/$(date +%s)"
 
 mkdir -p "${o}"
 sudo rsync \
-    --archive \
-    --recursive \
-    --remove-source-files \
-    "${i}" \
-    "${o}" &&  echo i am fucking done copying |  espeak
+     --archive \
+     --recursive \
+     --remove-source-files \
+     "${i}" \
+     "${o}" &&  echo i am fucking done copying |  espeak
 #+end_src
 ********* TODO src
 :PROPERTIES:
@@ -3288,13 +3290,13 @@ sudo rsync \
 
 #+begin_src scheme :noweb-ref null
 (udev-rules-service
-      'ydotool
-      (udev-rule
-       "80-uinput.rules"
-       ;; TODO: Take it from ydotool package
-       (string-append
-        "KERNEL==\"uinput\", MODE==\"0660\", "
-        "GROUP=\"input\", OPTIONS+=\"static_node=uinput\"")))
+ 'ydotool
+ (udev-rule
+  "80-uinput.rules"
+  ;; TODO: Take it from ydotool package
+  (string-append
+   "KERNEL==\"uinput\", MODE==\"0660\", "
+   "GROUP=\"input\", OPTIONS+=\"static_node=uinput\"")))
 
 #+end_src
 ******** ydotool
@@ -3308,13 +3310,13 @@ sudo rsync \
 
 #+begin_src scheme :noweb-ref services-sys
 (udev-rules-service
-      'ydotool
-      (udev-rule
-       "80-uinput.rules"
-       ;; TODO: Take it from ydotool package
-       (string-append
-        "KERNEL==\"uinput\", MODE==\"0660\", "
-        "GROUP=\"input\", OPTIONS+=\"static_node=uinput\"")))
+ 'ydotool
+ (udev-rule
+  "80-uinput.rules"
+  ;; TODO: Take it from ydotool package
+  (string-append
+   "KERNEL==\"uinput\", MODE==\"0660\", "
+   "GROUP=\"input\", OPTIONS+=\"static_node=uinput\"")))
 
 #+end_src
 
