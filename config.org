@@ -430,19 +430,6 @@ all the host/user specific things.
    ))
 #+end_src
 
-**** org dirs
-:PROPERTIES:
-:ID:       844e60fb-8235-4249-8aa8-27c8348c5dcb
-:CREATED:  [2022-07-29 Fri 17:48]
-:UPDATED:  [2022-07-29 Fri 17:48]
-:ROAM_EXCLUDE: t
-:END:
-#+begin_src scheme
-(define my-org-directory "~/life")
-(define my-notes-directory
-  (string-append my-org-directory "/roam"))
-#+end_src
-
 **** flag: gaming?
 :PROPERTIES:
 :ID:       a5883df9-7c45-442b-82a4-fe57ac98f7f8
