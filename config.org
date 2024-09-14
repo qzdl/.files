@@ -4458,12 +4458,22 @@ emacs-spacious-padding
 :PROPERTIES:
 :ID:       1019ae2e-1221-4883-bb1e-35270a6fb25d
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2024-05-20 Mon 12:37]
+:UPDATED:  [2024-05-20 Mon 14:13]
 :ROAM_EXCLUDE: t
 :END:
 
 
-#+begin_src scheme
+#+begin_src scheme :noweb-ref main
+(feature-irc-settings
+ #:irc-accounts (list
+                 (irc-account
+                  (id 'libera)
+                  (network "irc.libera.chat")
+                  (nick "qzdl"))
+                 (irc-account
+                  (id 'oftc)
+                  (network "irc.oftc.net")
+                  (nick "qzdl"))))
 (feature-emacs-erc
  ;; #:erc-kill-buffers-on-quit #t
  #:erc-nick "qzdl"
