@@ -12,23 +12,48 @@
 #+title: GNU Guix (RDE) & Emacs
 -----
 
-* header
+* configs
+:PROPERTIES:
+:ID:       7c9c9408-15b7-4d3e-be98-9b2bda19e7d5
+:CREATED:  [2022-09-28 Wed 16:24]
+:UPDATED:  [2024-08-24 Sat 18:31]
+:ROAM_EXCLUDE: t
+:END:
+
+** header
 :PROPERTIES:
 :ID:       d5a65665-c696-493b-a426-89a0ce6c1fbd
 :CREATED:  [2023-07-12 Wed 19:42]
-:UPDATED:  [2024-04-06 Sat 15:17]
+:UPDATED:  [2024-08-24 Sat 18:31]
 :ROAM_EXCLUDE: t
 :END:
 
 all the host/user specific things.
 
+Custom Variables for the main user.
 
+Not convinced about this means of hoisting global state.
+
+*** imports
+:PROPERTIES:
+:CREATED:  [2024-07-09 Tue 17:07]
+:UPDATED:  [2024-08-24 Sat 18:31]
+:ID:       79c0c62e-f52b-4798-899b-edbb3549ec27
+:ROAM_EXCLUDE: t
+:END:
 #+begin_src scheme :noweb-ref header-imports
 (rde features mail)
 (rde features base)
 (rde features gnupg)
 #+end_src
 
+*** defmod header
+:PROPERTIES:
+:CREATED:  [2024-07-09 Tue 17:07]
+:UPDATED:  [2024-08-24 Sat 18:31]
+:ID:       5228355e-6c90-42ad-90ec-7c79e2ad4406
+:ROAM_EXCLUDE: t
+:END:
 #+begin_src scheme :tangle src/header.scm :noweb-ref null
 (define-module (header)
   #:use-module <<header-imports>>
