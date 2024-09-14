@@ -3540,7 +3540,7 @@ host	all	all	0.0.0.0/0       md5
 "))))
 #+end_src
 
-******* desktop-services
+****** desktop-services
 :PROPERTIES:
 :ID:       f2840489-2e7e-483b-960c-3bc8e3b41412
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3551,7 +3551,7 @@ host	all	all	0.0.0.0/0       md5
 (unless gaming? (feature-desktop-services))
 #+end_src
 
-****** docker
+***** docker
 :PROPERTIES:
 :ID:       07f0f4f4-500d-488f-b678-88865aa775e0
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3562,7 +3562,7 @@ host	all	all	0.0.0.0/0       md5
 #+begin_src scheme :noweb-ref main
 (feature-docker)
 #+end_src
-****** qemu
+***** qemu
 :PROPERTIES:
 :ID:       92a2bcf9-b388-4331-85c3-14a24657f0b4
 :CREATED:  [2022-09-29 Thu 11:37]
@@ -3572,18 +3572,8 @@ host	all	all	0.0.0.0/0       md5
 #+begin_src scheme :noweb-ref main
 (feature-qemu)
 #+end_src
-****** backlight
-:PROPERTIES:
-:ID:       10a02289-4033-4be5-a364-555a29d77849
-:CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2022-09-29 Thu 11:49]
-:ROAM_EXCLUDE: t
-:END:
-#+begin_src scheme :noweb-ref main
-(feature-backlight #:step 5)
-#+end_src
 
-****** pipewire
+***** pipewire
 :PROPERTIES:
 :ID:       9a824aa7-0fed-4f84-a076-f2a5efc8f1b9
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3594,7 +3584,7 @@ host	all	all	0.0.0.0/0       md5
 (unless gaming? (feature-pipewire))
 #+end_src
 
-****** fonts
+***** fonts
 :PROPERTIES:
 :ID:       e4de9c1d-4566-4a53-b77b-6e2ad7662d58
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3612,7 +3602,7 @@ host	all	all	0.0.0.0/0       md5
   (weight 'light)))
 #+end_src
 
-****** shell
+***** shell
 :PROPERTIES:
 :ID:       d6f26fbc-df9f-4a1f-8875-78fd654ecb64
 :CREATED:  [2022-09-28 Wed 15:41]
@@ -3631,28 +3621,6 @@ host	all	all	0.0.0.0/0       md5
 (feature-vterm)
 #+end_src
 
-****** bash
-:PROPERTIES:
-:ID:       c5e6bc9f-9c77-46b2-a41e-883d81ae1fc5
-:CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2022-08-01 Mon 10:52]
-:ROAM_EXCLUDE: t
-:END:
-#+begin_src scheme :noweb-ref main
-(feature-bash)
-#+end_src
-
-****** direnv
-:PROPERTIES:
-:ID:       4ce3bb66-ccbb-4cf3-b92d-2e3bda91adf7
-:CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2022-09-07 Wed 18:16]
-:ROAM_EXCLUDE: t
-:END:
-#+begin_src scheme :noweb-ref main
-(feature-direnv)
-#+end_src
-
 ****** zsh
 :PROPERTIES:
 :ID:       62082caa-8650-4eca-b90d-be7f82439d55
@@ -3665,11 +3633,29 @@ host	all	all	0.0.0.0/0       md5
  #:enable-zsh-autosuggestions? #t)
 #+end_src
 
+****** bash
+:PROPERTIES:
+:ID:       c5e6bc9f-9c77-46b2-a41e-883d81ae1fc5
+:CREATED:  [2022-08-01 Mon 10:52]
+:UPDATED:  [2022-08-01 Mon 10:52]
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme :noweb-ref main
+(feature-bash)
+#+end_src
+
+***** network
+:PROPERTIES:
+:ID:       d9d8aa24-494b-4906-b5ab-0dd56c0bf070
+:CREATED:  [2022-09-28 Wed 15:41]
+:UPDATED:  [2023-03-30 Thu 10:40]
+:ROAM_EXCLUDE: t
+:END:
 ****** ssh
 :PROPERTIES:
 :ID:       855bb3df-f74b-4fff-9122-7c334a878dcc
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2023-09-24 Sun 16:44]
+:UPDATED:  [2024-07-17 Wed 18:41]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -3677,9 +3663,8 @@ host	all	all	0.0.0.0/0       md5
 (feature-ssh
  #:ssh-configuration
  (home-ssh-configuration
-  ;; (default-options
-  ;;   '((hostkey-algorithms . "+ssh-rsa")
-  ;;     (pubkey-accepted-algorithms "+ssh-rsa")))
+  (default-options
+    '((identities-only . "yes")))
   (extra-config
    (list (ssh-host
           (host "qz")
@@ -3714,65 +3699,17 @@ host	all	all	0.0.0.0/0       md5
                      (identity-file . "~/.ssh/ixy-medmac"))))))))
 #+end_src
 
-
-****** git
-:PROPERTIES:
-:ID:       dcd3cd89-5c4d-41e3-9ed5-324a48dc3546
-:CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2023-09-24 Sun 16:43]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src scheme :noweb-ref main
-(feature-git
- #:extra-config
- '((pull
-    ((rebase . #t)))
-   (diff
-    ((context . 4)  ;; magit default=3;  4 shows org prop-drawer & heading.
-     ))
-   ;; (slurp-file-like (local-file "./etc/git/work_config"))
-   ;; '(#~"[includeIf \"gitdir:~/git/ns\"]
-   ;;     [user]
-   ;;         signingkey = \"290D5A69F2021C4E\"
-   ;;         email = \"sculpepper@newstore.com\"
-   ;; ")
-   ))
-#+end_src
-
-******* config_work
-:PROPERTIES:
-:ID:       1f073518-b77a-460c-abc8-bc265c4f9e6c
-:CREATED:  [2022-11-03 Thu 15:18]
-:UPDATED:  [2024-04-06 Sat 15:18]
-:ROAM_EXCLUDE: t
-:END:
-
-#+begin_src conf :tangle src/config/git/config_work
-[includeif "gitdir:~/git/ns"]
-    [user]
-        signingkey = "290D5A69F2021C4E"
-        email = "sculpepper@newstore.com"
-#+end_src
-
-****** network
-:PROPERTIES:
-:ID:       d9d8aa24-494b-4906-b5ab-0dd56c0bf070
-:CREATED:  [2022-09-28 Wed 15:41]
-:UPDATED:  [2023-03-30 Thu 10:40]
-:ROAM_EXCLUDE: t
-:END:
-******* bluetooth
+****** bluetooth
 :PROPERTIES:
 :ID:       4f2da545-1b08-4465-9e3e-060a5dcbc4c5
 :CREATED:  [2022-08-26 Fri 11:49]
-:UPDATED:  [2023-03-23 Thu 15:54]
+:UPDATED:  [2024-05-20 Mon 14:12]
 :ROAM_EXCLUDE: t
 :END:
 #+begin_src scheme :noweb-ref main
 (feature-bluetooth)
 #+end_src
-******* sshsocks
+****** TODO sshsocks
 :PROPERTIES:
 :ID:       a94c429f-77eb-4e96-b1d3-1019071e6f6e
 :CREATED:  [2022-08-01 Mon 09:49]
@@ -3785,7 +3722,7 @@ host	all	all	0.0.0.0/0       md5
 ;; #:host "204:cbf:3e07:e67a:424f:93bc:fc5c:b3dc")
 #+end_src
 
-******* ip2d
+****** TODO ip2d
 :PROPERTIES:
 :ID:       73a80c20-ac38-4929-abc1-171090b6c4dd
 :CREATED:  [2022-08-01 Mon 10:41]
@@ -3800,11 +3737,11 @@ host	all	all	0.0.0.0/0       md5
 ;; #:less-anonymous? #t)
 #+end_src
 
-******* transmission
+****** TODO transmission
 :PROPERTIES:
 :ID:       6357a61f-0d61-4e62-9b8b-b4442b6923d6
 :CREATED:  [2022-08-01 Mon 10:55]
-:UPDATED:  [2022-09-28 Wed 15:58]
+:UPDATED:  [2024-05-20 Mon 14:10]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -3812,14 +3749,33 @@ host	all	all	0.0.0.0/0       md5
 (feature-transmission #:auto-start? #f)
 #+end_src
 
-****** wm
+****** see also :: [[id:9ef8dfa6-b484-49f4-884b-a2be9cef3ade][network filesystem]]
+:PROPERTIES:
+:CREATED:  [2024-04-23 Tue 20:27]
+:UPDATED:  [2024-04-23 Tue 20:27]
+:ID:       5c3f993f-cef2-4cf7-8423-dd41974dd4d8
+:ROAM_EXCLUDE: t
+:END:
+
+***** wm
 :PROPERTIES:
 :ID:       ffb41d6f-7d79-4bee-8f4a-809240572cf9
 :CREATED:  [2022-09-28 Wed 15:41]
 :UPDATED:  [2022-09-28 Wed 15:41]
 :ROAM_EXCLUDE: t
 :END:
-******* swaywm
+****** backlight
+:PROPERTIES:
+:ID:       10a02289-4033-4be5-a364-555a29d77849
+:CREATED:  [2022-08-01 Mon 10:52]
+:UPDATED:  [2022-09-29 Thu 11:49]
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme :noweb-ref main
+(feature-backlight #:step 5)
+#+end_src
+
+****** swaywm
 :PROPERTIES:
 :ID:       6b5b3a48-ad8a-4fa9-af06-325fd71530a0
 :CREATED:  [2022-09-28 Wed 15:41]
@@ -3827,11 +3783,11 @@ host	all	all	0.0.0.0/0       md5
 :ROAM_EXCLUDE: t
 :END:
 
-******** sway
+******* sway
 :PROPERTIES:
 :ID:       05be317e-8f65-4a14-a83f-db104b19788f
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2023-09-25 Mon 18:29]
+:UPDATED:  [2024-07-30 Tue 10:27]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -3920,7 +3876,7 @@ swaymsg -m -t subscribe '["window"]' | \
   done
 #+end_src
 
-******* sway-run-on-tty
+****** sway-run-on-tty
 :PROPERTIES:
 :ID:       1a67a54c-b9c9-4957-8bb7-24633e88c432
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3936,7 +3892,7 @@ swaymsg -m -t subscribe '["window"]' | \
 
 #+end_src
 
-******** TODO sway X nvidia
+******* TODO sway X nvidia
 :PROPERTIES:
 :CREATED:  [2023-09-24 Sun 15:57]
 :UPDATED:  [2023-09-24 Sun 15:57]
@@ -3944,7 +3900,7 @@ swaymsg -m -t subscribe '["window"]' | \
 :ROAM_EXCLUDE: t
 :END:
 
-******* sway-screenshot
+****** sway-screenshot
 :PROPERTIES:
 :ID:       af8a8d1a-38ce-4e25-9c34-f1f0c8518394
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3956,7 +3912,7 @@ swaymsg -m -t subscribe '["window"]' | \
 (unless gaming? (feature-sway-screenshot))
 #+end_src
 
-******* waybar
+****** waybar
 :PROPERTIES:
 :ID:       ddc53ffa-d988-47ee-b8cf-0ced515be0a8
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3981,7 +3937,7 @@ swaymsg -m -t subscribe '["window"]' | \
     (waybar-clock))))
 #+end_src
 
-******* swayidle
+****** swayidle
 :PROPERTIES:
 :ID:       95052943-1d47-455f-903f-a40a1b8e086c
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3997,7 +3953,7 @@ swaymsg -m -t subscribe '["window"]' | \
   (feature-swayidle))
 #+end_src
 
-******* swaylock
+****** swaylock
 :PROPERTIES:
 :ID:       3f203601-b2fa-4e25-802a-65a539120fc7
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -4018,7 +3974,7 @@ swaymsg -m -t subscribe '["window"]' | \
                     (clock))))
 #+end_src
 
-******* swaynotificationcenter
+****** swaynotificationcenter
 :PROPERTIES:
 :ID:       e28ec2ac-d302-4816-b875-6663016cf7ff
 :CREATED:  [2023-08-31 Thu 10:10]
@@ -4032,7 +3988,7 @@ swaymsg -m -t subscribe '["window"]' | \
 ;; not found...
 #+end_src
 
-******* rofi
+****** rofi
 :PROPERTIES:
 :ID:       3edaad94-3afa-47cf-8317-dadea891c9cf
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -4126,6 +4082,58 @@ annoying! cannot fathom why this doesn't work
 :ROAM_EXCLUDE: t
 :END:
 
+****** direnv
+:PROPERTIES:
+:ID:       4ce3bb66-ccbb-4cf3-b92d-2e3bda91adf7
+:CREATED:  [2022-08-01 Mon 10:52]
+:UPDATED:  [2022-09-07 Wed 18:16]
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme :noweb-ref main
+(feature-direnv)
+#+end_src
+
+****** git
+:PROPERTIES:
+:ID:       dcd3cd89-5c4d-41e3-9ed5-324a48dc3546
+:CREATED:  [2022-08-01 Mon 10:52]
+:UPDATED:  [2023-09-24 Sun 16:43]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme :noweb-ref main
+(feature-git
+ #:extra-config
+ '((pull
+    ((rebase . #t)))
+   (diff
+    ((context . 4)  ;; magit default=3;  4 shows org prop-drawer & heading.
+     ))
+   ;; (slurp-file-like (local-file "./etc/git/work_config"))
+   ;; '(#~"[includeIf \"gitdir:~/git/ns\"]
+   ;;     [user]
+   ;;         signingkey = \"290D5A69F2021C4E\"
+   ;;         email = \"sculpepper@newstore.com\"
+   ;; ")
+   ))
+#+end_src
+
+******* config_work
+:PROPERTIES:
+:ID:       1f073518-b77a-460c-abc8-bc265c4f9e6c
+:CREATED:  [2022-11-03 Thu 15:18]
+:UPDATED:  [2024-04-06 Sat 15:18]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src conf :tangle src/config/git/config_work
+[includeif "gitdir:~/git/ns"]
+    [user]
+        signingkey = "290D5A69F2021C4E"
+        email = "sculpepper@newstore.com"
+#+end_src
+
+
 ****** python
 :PROPERTIES:
 :ID:       e76dad31-73f3-4fac-bd9b-d7d3bb95cb63
@@ -4159,7 +4167,27 @@ annoying! cannot fathom why this doesn't work
 #+begin_src scheme :noweb-ref main
 (feature-plantuml)
 #+end_src
-
+****** TODO rust
+:PROPERTIES:
+:CREATED:  [2024-05-20 Mon 14:07]
+:UPDATED:  [2024-05-20 Mon 14:07]
+:ID:       341ead7e-7736-4b7d-bb22-871fa4be9f57
+:ROAM_EXCLUDE: t
+:END:
+****** TODO c/cpp
+:PROPERTIES:
+:CREATED:  [2024-05-20 Mon 14:08]
+:UPDATED:  [2024-05-20 Mon 14:08]
+:ID:       8657c90c-5a06-4f4f-b131-07f3c141bc21
+:ROAM_EXCLUDE: t
+:END:
+****** TODO go
+:PROPERTIES:
+:CREATED:  [2024-05-20 Mon 14:08]
+:UPDATED:  [2024-05-20 Mon 14:08]
+:ID:       7337e7c2-1155-4867-8778-0b5b0290d7f9
+:ROAM_EXCLUDE: t
+:END:
 ***** emacs-related
 :PROPERTIES:
 :ID:       c0924a65-73cc-4693-ba65-6abd6c6634dd
@@ -4481,11 +4509,11 @@ emacs-spacious-padding
 (feature-emacs-elpher)
 #+end_src
 
-****** emacs-ement
+****** TODO emacs-ement
 :PROPERTIES:
 :ID:       18bb85c9-07d5-4b46-8719-5aac67d10670
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2022-08-01 Mon 12:41]
+:UPDATED:  [2024-05-20 Mon 14:09]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -4654,7 +4682,7 @@ emacs-spacious-padding
 :UPDATED:  [2022-09-28 Wed 15:41]
 :ROAM_EXCLUDE: t
 :END:
-****** TODO isync                                                              :mail:
+****** TODO isync                                                         :mail:
 :PROPERTIES:
 :ID:       5f12520a-369e-43bf-ab36-64a44c5bfb98
 :CREATED:  [2022-08-01 Mon 10:55]
@@ -4671,7 +4699,7 @@ emacs-spacious-padding
            (gmail-tls . ,gmail-tls-isync-settings))))
 #+end_src
 
-****** l2md                                                                    :mail:
+****** l2md                                                               :mail:
 :PROPERTIES:
 :ID:       bd9b236d-db39-449b-8314-77a79ce89fe1
 :CREATED:  [2022-08-01 Mon 10:55]
@@ -4683,7 +4711,7 @@ emacs-spacious-padding
 ;; (feature-l2md) ;; TODO  public-inbox mirrors& istupdate
 #+end_src
 
-****** msmtp                                                                   :mail:
+****** msmtp                                                              :mail:
 :PROPERTIES:
 :ID:       c5548269-6010-4a9c-b92f-83b27a722b76
 :CREATED:  [2022-08-01 Mon 10:55]
@@ -4704,7 +4732,7 @@ emacs-spacious-padding
                   (tls_starttls . off))))))
 #+end_src
 
-****** notmuch                                                                 :mail:
+****** notmuch                                                            :mail:
 :PROPERTIES:
 :ID:       3b57f1e4-e156-4505-8d82-085ef082408c
 :CREATED:  [2022-08-01 Mon 10:55]
@@ -4757,11 +4785,11 @@ emacs-spacious-padding
   (templates "$HOME")))
 #+end_src
 
-***** TODO base packages/rest (extract to profiles)                  :pkg:
+***** TODO base packages/rest (extract to profiles)                         :pkg:
 :PROPERTIES:
 :ID:       9490f8c2-7074-4a89-a62e-f82b6bfc2f2b
 :CREATED:  [2022-08-01 Mon 10:55]
-:UPDATED:  [2024-04-06 Sat 12:12]
+:UPDATED:  [2024-08-03 Sat 21:17]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -4930,7 +4958,7 @@ emacs-spacious-padding
 :ID:       00f22464-570c-4033-9801-0b71f80202c6
 :ROAM_EXCLUDE: t
 :END:
-***** abcdw features
+***** %user-features
 :PROPERTIES:
 :ID:       1532c6ba-0d0c-499e-bddd-ae1caa1dc778
 :CREATED:  [2022-07-29 Fri 17:48]
