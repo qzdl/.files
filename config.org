@@ -4400,6 +4400,9 @@ emacs-spacious-padding
 :ROAM_EXCLUDE: t
 :END:
 
+#+begin_src scheme :noweb-ref main
+(feature-emacs-eglot)
+#+end_src
 ****** emacs-corfu
 :PROPERTIES:
 :ID:       2a3598dc-be14-4f8c-ae66-100d8d3f9552
