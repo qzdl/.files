@@ -3824,7 +3824,7 @@ host	all	all	0.0.0.0/0       md5
      ;; (for_window "[title=\"pass - Emacs Client\"]" floating enable, border pixel)
 
      (bindsym $mod+Ctrl+o opacity set 1)
-     (bindsym $mod+Ctrl+p opacity minus 0.1)
+     (bindsym $mod+Ctrl+p opacity minus 0.05)
 
      ;;(bindsym $mod+x exec $menu)
 
