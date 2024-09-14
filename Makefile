@@ -1,22 +1,28 @@
+default: help
 # To rebuild lock.scm use `make -B guix`
 
+HOST ?= $(shell hostname)
+RDE_TARGET ?= $(HOST)
+
 # Also defined in .envrc to make proper guix version available project-wide
-GUIX_PROFILE=target/profiles/guix
-GUIX_PROFILE_LOCAL=${GUIX_PROFILE}-local
-GUIX=./pre-inst-env ${GUIX_PROFILE}/bin/guix
-GUIX_LOCAL=./pre-inst-env ${GUIX_PROFILE}/bin/guix
+GUIX_PROFILE      ?= target/profiles/guix-local
+GUIX_PROFILE_HEAD := $(shell basename $(GUIX_PROFILE))
+GUIX_CHANNELS     := channels/$(GUIX_PROFILE_HEAD).scm
+GUIX_LOCK         := $(GUIX_CHANNELS).lock
+GUIX_LOCK_TMP     := $(GUIX_LOCK).tmp
+GUIX              := RDE_TARGET=$(RDE_TARGET)./pre-inst-env ${GUIX_PROFILE}/bin/guix
 
 # logging, w/ timestamp
 T = @echo -e "\n`date -u +'[%Y-%m-%d %H:%M:%S] $1'`"
 T_START=$(shell date -u +'[%Y-%m-%d %H:%M:%S]')
 
+GIT := git
 GRAPH := fdp
 EMACS := emacs
 EBATCH := $(EMACS) -Q --batch \
 	--eval '(setq python-indent-guess-indent-offset nil)' \
 	--eval '(setq org-id-locations nil org-id-locations-file nil)'
 
-RDE_LOCAL ?= qzdl
 SRC_DIR=./src
 _CONFIG_DIR=${SRC_DIR}
 _CONFIG=${_CONFIG_DIR}/configs
@@ -31,26 +37,21 @@ PULL_EXTRA_OPTIONS=
 ROOT_MOUNT_POINT=/mnt
 
 VERSION=latest
-TANGLES=$(shell rg -o ':tangle .+' src/configs.org | cut -d' ' -f2 | sed 's/:tangle //g' | grep -vE 'no|ident' | sort -n)
+TANGLES=$(shell rg -o ':tangle .+' $(CONFIGO) | cut -d' ' -f2 | sed 's/:tangle //g' | grep -vE 'no|ident' | sort -n)
 
 ###
-all:    check reconfigure/home/ixy reconfigure/system/ixy
-home:   tangle reconfigure/home/ixy
-system: reconfigure/system/ixy
+all:    check guix reconfigure/home reconfigure/system
+reconfigure: all
+home:   reconfigure/home
+system: reconfigure/system
 
-hbuild: check build/home/ixy
-sbuild: check build/system/ixy
+build: guix build/home build/system
 
-build/local/ixy: # guix-local  # how to pin?
-	make build/home/ixy   GUIX_PROFILE=$(GUIX_PROFILE_LOCAL)
-	make build/system/ixy GUIX_PROFILE=$(GUIX_PROFILE_LOCAL)
 
-container/local/ixy: # guix-local  # how to pin?
-	make container/home/ixy   GUIX_PROFILE=$(GUIX_PROFILE_LOCAL)
-	make container/system/ixy GUIX_PROFILE=$(GUIX_PROFILE_LOCAL)
 
-reconfigure/local/ixy: # guix-local  # how to pin?
+reconfigure/local/home/ixy:
 	make reconfigure/home/ixy           GUIX_PROFILE=$(GUIX_PROFILE_LOCAL)
+reconfigure/local/system/ixy:
 	sudo -E make reconfigure/system/ixy GUIX_PROFILE=$(GUIX_PROFILE_LOCAL)
 
 sanity:
@@ -67,8 +68,8 @@ inputs:
 	git show HEAD --stat --oneline
 	@echo
 	@echo
-	@echo "PROFILE (REMOTE):"
-	guix describe -p target/profiles/guix
+	@echo "PROFILE (GUIX_PROFILE=$(GUIX_PROFILE)):"
+	guix describe -p $(GUIX_PROFILE)
 	@echo
 	@echo "CHANNELS (LOCAL):"
 	git submodule status
@@ -128,14 +129,11 @@ search:
 		search "cron" ${CONFIGS}
 
 # TODO # --root target/profiles/pin-build-dependencies
-build/home/ixy:
-	RDE_TARGET=ixy-home ${GUIX} home \
-		build -c 32 \
-                ${CONFIGS}
+build/home:
+	RDE_TARGET=$(HOST)-home ${GUIX} home build -c 32 ${CONFIGS}
 
 build/system/ixy:
 	RDE_TARGET=ixy-system ${GUIX} system \
-		--allow-downgrades \
 		build ${CONFIGS}
 
 container/home/ixy: guix
@@ -148,7 +146,6 @@ reconfigure/home/ixy:
 
 reconfigure/system/ixy:
 	RDE_TARGET=ixy-system ${GUIX} system \
-		--allow-downgrades \
 		reconfigure ${CONFIGS}
 
 cow-store:
@@ -199,7 +196,7 @@ clean: clean-target
 mixxx:
 	ln -s $$HOME/git/sys/mixxx-Old-School-Skin \
 		$$HOME/.mixxx/skins/mixxx-Old-School-Skin
-### GUIX PROFILE tooling
+
 
 
 #
@@ -219,55 +216,75 @@ mixxx:
 #
 # REMOTE (PROFILE UPDATE)
 #
-guix: target/profiles/guix-time-marker
+guix: target/profiles/guix-time-marker lock
 
 target/profiles:
 	$(call T, " target/profiles (init profiles dir)")
-	mkdir -p target/profiles
+	mkdir -p $@
 
-# Store items doesn't have useful mtime, so we rely on guix.lock to prevent
-# unnecessary rebuilds
-target/profiles/guix-time-marker: channels/lock.scm
-	$(call T, " target/profiles/guix-time-marker (create remote file-lock)")
-	make target/profiles/guix
+# Store items doesn't have useful mtime, so we rely on lockfiles to
+# prevent unnecessary rebuilds
+target/profiles/guix-time-marker:
+	$(call T, target/profiles/guix-time-marker (create update-lock))
+	make $(GUIX_PROFILE)
 	touch $@
 
-target/profiles/guix: target/profiles channels/lock.scm
-	$(call T, " target/profiles/guix (update remote profile from remote lock)")
-	guix pull -C channels/lock.scm -p ${GUIX_PROFILE} \
-		${PULL_EXTRA_OPTIONS}
+$(GUIX_LOCK): $(GUIX_CHANNELS)
+	$(call T, $(GUIX_LOCK) (create channel-locks))
+	echo -e "(use-modules (guix channels))\n" > $(GUIX_LOCK_TMP)
+	guix time-machine -C $(GUIX_CHANNELS) -- \
+		describe -f channels >> $(GUIX_LOCK_TMP)
+	mv $(GUIX_LOCK_TMP) $(GUIX_LOCK)
 
-channels/lock.scm: channels/channels.scm
-	$(call T, " channels/lock.scm (update remote locks)")
-	echo -e "(use-modules (guix channels))\n" > ./channels/lock-tmp.scm
-	guix time-machine -C ./channels/channels.scm -- \
-		describe -f channels >> ./channels/lock-tmp.scm
-	mv ./channels/lock-tmp.scm ./channels/lock.scm
+$(GUIX_PROFILE): target/profiles $(GUIX_LOCK)
+	$(call T, $(GUIX_PROFILE) (update profile from lock))
+	guix pull -C $(GUIX_LOCK) -p ${GUIX_PROFILE} ${PULL_EXTRA_OPTIONS}
+
+lock: $(GUIX_LOCK)
+
+channels/guix-local.scm:
+	$(call T, "(update local channel checkouts)")
+	$(GIT) submodule status
+	$(GIT) submodule foreach --recursive git pull --all
+	$(GIT) submodule status
 
 #
 # LOCAL (PROFILE UPDATE)
 #
-guix-local: target/profiles/guix-local-time-marker
+# guix-local: target/profiles/guix-local-time-marker
 
-target/profiles/guix-local-time-marker: channels/lock-local.scm
-	$(call T, "target/profiles/guix-time-marker (create local file-lock)")
-	make target/profiles/guix-local
-	touch $@
+# target/profiles/guix-local-time-marker: channels/lock-local.scm
+# 	$(call T, "target/profiles/guix-time-marker (create local file-lock)")
+# 	make target/profiles/guix-local
+# 	touch $@
 
-target/profiles/guix-local: target/profiles channels/lock-local.scm
-	$(call T, "target/profiles/guix-local (update local profile from local lock)")
-	guix pull -C channels/lock-local.scm -p ${GUIX_PROFILE_LOCAL} \
-		${PULL_EXTRA_OPTIONS}
+# target/profiles/guix-local: target/profiles channels/lock-local.scm
+# 	$(call T, "target/profiles/guix-local (update local profile from local lock)")
+# 	$(GUIX) pull -C channels/lock-local.scm -p ${GUIX_PROFILE_LOCAL} \
+# 		${PULL_EXTRA_OPTIONS}
 
-channels/local.scm:
-	$(call T, "(update local channel checkouts)")
-	git submodule status
-	git submodule foreach --recursive git pull
-	git submodule status
 
-channels/lock-local.scm: channels/local.scm
-	$(call T, "channels/lock-local.scm (update local locks)")
-	echo -e "(use-modules (guix channels))\n" > ./channels/lock-local-tmp.scm
-	guix time-machine -C ./channels/local.scm \
-		-- describe -f channels >> ./channels/lock-local-tmp.scm
-	mv ./channels/lock-local-tmp.scm ./channels/lock-local.scm
+channels/local.scm: local_checkouts
+
+# channels/lock-local.scm: channels/local.scm
+# 	$(call T, "channels/lock-local.scm (update local locks)")
+# 	echo -e "(use-modules (guix channels))\n" > ./channels/lock-local-tmp.scm
+# 	$(GUIX) time-machine -C ./channels/local.scm \
+# 		-- describe -f channels >> ./channels/lock-local-tmp.scm
+# 	mv ./channels/lock-local-tmp.scm ./channels/lock-local.scm
+
+pi:
+	# guix build --list-targets
+	guix build --target=aarch64-linux-gnu  -f rpi.scm
+
+help:
+	@echo "GUIX=$(GUIX)"
+	@echo "GUIX_LOCK=$(GUIX_LOCK)"
+	@echo "GUIX_PROFILE=$(GUIX_PROFILE)"
+	@echo "HOST=$(HOST)"
+	@echo "PULL_EXTRA_OPTIONS=$(PULL_EXTRA=OPTIONS)"
+	@echo "RDE_TARGET=$(RDE_TARGET)"
+	@echo "ROOT_MOUNT_POINT=$(ROOT_MOUNT_POINT)"
+	@echo "TANGLES=$(TANGLES)"
+	@echo "T_START=$(T_START)"
+	@echo "VERSION=$(VERSION)"
