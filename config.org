@@ -3801,9 +3801,10 @@ host	all	all	0.0.0.0/0       md5
    ;; #:wallpaper "$HOME/.cache/wallpaper.png" ;; TODO qzdl
    #:extra-config
    `(
-     ;;(include ,(local-file "./config/sway/config"))
-
-     ;; TODO sway: toggle opacity for WINDOW
+     ;;; Toggle Waybar
+     (bindsym $mod+Shift+b exec killall -SIGUSR1 waybar)
+     (bindsym $mod+Shift+v gaps inner current set 0)
+     (bindsym $mod+v gaps inner current set 10)
 
      (,#~"output * bg ~/.cache/wallpaper.png fill")
      ;;(,#~"output eDP-1 bg ~/.cache/wallpaper.png fill")
