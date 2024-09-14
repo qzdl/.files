@@ -4324,7 +4324,8 @@ emacs-bigquery-mode
 emacs-selectric-mode
 emacs-atomic-chrome
 emacs-spacious-padding
-
+emacs-org-noter
+emacs-org-remark
 ;;
 ;; emacs-code-review    ; TODO qzdl pkg
 #+end_src

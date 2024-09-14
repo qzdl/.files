@@ -650,6 +650,54 @@ Backronyms: Space Perception Adjusted Consistently Impacts Overall Usability
 State ...  padding; Spacious ...  Precise Adjustments to Desktop Divider
 Internals Neatly Generated.")
    (license license:gpl3+)))
+(define-public emacs-org-noter
+  (package
+   (name "emacs-org-noter")
+   (version "20240509.1756")
+   (source
+    (origin
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/org-noter/org-noter.git")
+           (commit "68646b685a0d8c02419234922a9e2d885d6419df")))
+     (file-name (git-file-name name version))
+     (sha256
+      (base32 "17kgy2b89cc0v3q49pgrp6x46f2908v6vscxg4pczf6zc83rmwzp"))))
+   (build-system emacs-build-system)
+   (propagated-inputs (list emacs-org emacs-org-roam))
+   (arguments
+    '(#:include '("^[^/]+.el$" "modules")
+      #:exclude '("^[^/]+-test-utils.el$" "^[^/]+-devel.el$")))
+   (home-page "https://github.com/org-noter/org-noter")
+   (synopsis "A synchronized, Org-mode, document annotator")
+   (description
+    "The idea is to let you create notes that are kept in sync when you scroll
+through the document, but that are external to it - the notes themselves live in
+an Org-mode file.  As such, this leverages the power of Org-mode (the notes may
+have outlines, latex fragments, babel, etc...) while acting like notes that are
+made /in/ the document.  Also, I must thank Sebastian for the original idea and
+inspiration! Link to the original Interleave package:
+https://github.com/rudolfochrist/interleave.")
+   (license #f)))
+(define-public emacs-org-remark
+  (package
+   (name "emacs-org-remark")
+   (version "1.2.2")
+   (source
+    (origin
+     (method url-fetch)
+     (uri (string-append "https://elpa.gnu.org/packages/org-remark-" version
+                         ".tar"))
+     (sha256
+      (base32 "01iprzgbyvbfpxp6fls4lfx2lxx7xkff80m35s9kc0ih5jlxc5qs"))))
+   (build-system emacs-build-system)
+   (propagated-inputs (list emacs-org))
+   (home-page "https://github.com/nobiot/org-remark")
+   (synopsis "Highlight & annotate text, Info, EPUB, EWW")
+   (description
+    "Org-remark lets you highlight and annotate text files, websites,
+EPUB books and Info documentation using Org mode.")
+   (license license:gpl3+)))
 (use-modules (guix build-system python)  ; pypi-uri
              (gnu packages python-xyz)   ; python-lsp-server
              (gnu packages python-check) ; python-mypy
