@@ -4862,7 +4862,6 @@ notmuch-saved-searches
    "thunar"
    ;; "glib:bin"
 
-   ;; TODO: Fix telega package!
    "ffmpeg"
 
    "ripgrep" "curl" "make"
@@ -4897,6 +4896,7 @@ notmuch-saved-searches
 
    "v4l-utils"
    "qmk-udev-rules"
+   "espeak" ;; for notifying the user
    ))
  #:system-packages
  (pkgs "fwupd-nonfree")
@@ -4905,49 +4905,145 @@ notmuch-saved-searches
 
 #+RESULTS:
 
-***** TODO unsorted
+****** TODO extract to profiles
 :PROPERTIES:
-:ID:       72ecbbb1-860b-471e-a2e8-d96cf8c3dac3
-:CREATED:  [2023-03-30 Thu 12:47]
-:UPDATED:  [2024-01-28 Sun 14:00]
+:CREATED:  [2024-08-03 Sat 21:19]
+:UPDATED:  [2024-08-03 Sat 21:19]
+:ID:       5fcedd94-bd34-4b29-ab7f-55fd726723be
 :ROAM_EXCLUDE: t
 :END:
 
+
+******* status quo: default guix for samuel
+:PROPERTIES:
+:CREATED:  [2024-08-03 Sat 21:19]
+:UPDATED:  [2024-08-03 Sat 21:21]
+:ID:       8b8677e6-77b8-4149-803b-ee86c33bc16e
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src shell
+guix package --export-manifest
+#+end_src
+
+#+RESULTS:
+:results:
+;; This "manifest" file can be passed to 'guix package -m' to reproduce
+;; the content of your profile.  This is "symbolic": it only specifies
+;; package names.  To reproduce the exact same profile, you also need to
+;; capture the channels being used, as returned by "guix describe".
+;; See the "Replicating Guix" section in the manual.
+
+(specifications->manifest
+(list "qgis"
+"gpxsee"
+"openjdk@16:jdk"
+"openjdk@16"
+"unzip"
+"coreutils"
+"python-pyvista"
+"vtk"
+"cups"
+"vlc"
+"strace"
+"guvcview"
+"awscli@1"
+"darktable"
+"blender"
+"lm-sensors"
+"htop"
+"bluez"
+"docker-compose"
+"poetry"
+"parallel"
+"firefox"
+"flatpak"
+"torbrowser"
+"torsocks"
+"tor-client"
+"tor"
+"nmap"
+"gron"
+"acpi"
+"hdparm"
+"cryptsetup"
+"python"
+"tree"
+"jq"))
+:end:
+
+***** TODO unsorted features
+:PROPERTIES:
+:ID:       72ecbbb1-860b-471e-a2e8-d96cf8c3dac3
+:CREATED:  [2023-03-30 Thu 12:47]
+:UPDATED:  [2024-07-09 Tue 16:38]
+:ROAM_EXCLUDE: t
+:END:
+
+***** yt-dlp
+:PROPERTIES:
+:CREATED:  [2024-07-09 Tue 16:41]
+:UPDATED:  [2024-07-09 Tue 16:41]
+:ID:       eeb1c4df-3384-4ef9-ac4c-5dffede65c9e
+:ROAM_EXCLUDE: t
+:END:
 #+begin_src scheme :noweb-ref main
 (feature-yt-dlp
  #:emacs-ytdl emacs-ytdl-next)
-;;(feature-nyxt)
-(feature-emacs-dashboard
- #:show-on-startup? #f)
-(feature-emacs-ednc)
-(feature-emacs-pulseaudio-control)
+#+end_src
+
+***** nyxt
+:PROPERTIES:
+:CREATED:  [2024-07-09 Tue 16:41]
+:UPDATED:  [2024-07-09 Tue 16:41]
+:ID:       b4405bf1-e95d-4b0e-ac2a-78fda1ea8006
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme :noweb-ref main
+;; (feature-nyxt)
+#+end_src
+
+***** wttr
+:PROPERTIES:
+:CREATED:  [2024-07-09 Tue 16:41]
+:UPDATED:  [2024-07-09 Tue 16:41]
+:ID:       118a5e36-3455-4809-b431-acaf37c2260e
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme :noweb-ref main
 (feature-emacs-display-wttr)
+#+end_src
+
+***** slack
+:PROPERTIES:
+:CREATED:  [2024-07-09 Tue 16:41]
+:UPDATED:  [2024-07-09 Tue 16:41]
+:ID:       a532c674-b42d-4f29-80cc-c34364281736
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme :noweb-ref main
 (feature-slack-settings
  #:slack-accounts (list (slack-account
                          (workspace "newstoreinc")
                          (nick "sculpepper")
                          (cookie? #t))))
 (feature-emacs-slack)
+#+end_src
+
+#+begin_src scheme :noweb-ref main
 (feature-pantalaimon)
 (feature-matrix-settings
  #:matrix-accounts (list (matrix-account
                           (id "@sculp-ns:matrix.org")
                           (server "localhost:8009"))))
 (feature-emacs-ement)
-(feature-emacs-geiser)
-(feature-emacs-guix)
-(feature-emacs-elisp)
-(feature-emacs-emms)
-(feature-emacs-flymake)
-(feature-emacs-org-protocol)
-(feature-emacs-spelling)
 #+end_src
 
 ***** TODO pending
 :PROPERTIES:
 :ID:       5bbe74bc-777b-4dfe-ad73-8650e9ee9ec2
 :CREATED:  [2023-07-04 Tue 10:59]
-:UPDATED:  [2023-07-04 Tue 10:59]
+:UPDATED:  [2024-07-09 Tue 16:41]
 :ROAM_EXCLUDE: t
 :END:
 
