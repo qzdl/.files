@@ -3847,6 +3847,9 @@ host	all	all	0.0.0.0/0       md5
      (bindgesture swipe:up scratchpad show)
      (bindgesture swipe:right workspace prev)
      (bindgesture swipe:left workspace next)
+
+     (bindsym XF86Display "output eDP-1 toggle; output eDP-2 toggle")
+
      ;;; Middle Mouse.
      (bindsym $mod+button2 "[con_mark=_prev]" focus)
 
