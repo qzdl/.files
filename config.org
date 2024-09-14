@@ -2309,7 +2309,7 @@ removing default rotation jobs from RDE
 :PROPERTIES:
 :ID:       5b5d963a-b70c-4867-87b8-8beb1633fa02
 :CREATED:  [2022-09-28 Wed 15:47]
-:UPDATED:  [2024-03-31 Sun 20:02]
+:UPDATED:  [2024-08-04 Sun 17:25]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -2407,6 +2407,7 @@ removing default rotation jobs from RDE
                (list "$PATH"
                      "$HOME/go/bin"
                      "$HOME/.local/bin"
+                     "$HOME/.cargos/bin"
                      "$HOME/.krew/bin"
                      "${XDG_CACHE_HOME}/npm/bin")
                ":"))))
