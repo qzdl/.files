@@ -353,14 +353,14 @@ Not convinced about this means of hoisting global state.
 (use-modules (rde features mail))
 
 (define bravehost-folder-mapping
-  '(("inbox"  . "INBOX")
+  '(("inbox"    . "INBOX")
     ("accounts" . "INBOX/Accounts")
-    ("cv" . "INBOX/CV")
-    ("info" . "INBOX/info")
-    ("sent"   . "Sent")
-    ("drafts" . "Drafts")
-    ("trash"  . "Deleted Items")
-    ("spam"   . "Junk")))
+    ("cv"       . "INBOX/CV")
+    ("info"     . "INBOX/info")
+    ("sent"     . "Sent")
+    ("drafts"   . "Drafts")
+    ("trash"    . "Deleted Items")
+    ("spam"     . "Junk")))
 
 ;; https://wiki.bravenet.com/Using_your_Bravenet_e-mail_account
 (define bravehost-isync-settings
