@@ -4607,7 +4607,6 @@ emacs-spacious-padding
 #+begin_src scheme :noweb-ref main
 ;; TODO: <https://www.labri.fr/perso/nrougier/GTD/index.html#table-of-contents>
 (feature-emacs-org-roam
- ;; TODO: Rewrite to states
  #:org-roam-directory my-notes-directory
  #:org-roam-todo? #f
  ;;#:org-roam-dailies-directory (string-append my-notes-directory "/daily")) ;; TODO qzdl
