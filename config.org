@@ -3843,6 +3843,10 @@ host	all	all	0.0.0.0/0       md5
             ((pointer_accel "0.2")
              (accel_profile flat)))
 
+     ;;; MacOS has no moat
+     (bindgesture swipe:up scratchpad show)
+     (bindgesture swipe:right workspace prev)
+     (bindgesture swipe:left workspace next)
      ;;; Middle Mouse.
      (bindsym $mod+button2 "[con_mark=_prev]" focus)
 
