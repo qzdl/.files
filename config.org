@@ -5046,14 +5046,23 @@ emacs-spacious-padding
 
 #+end_src
 
-**** hw/host features
+*** hosts
 :PROPERTIES:
 :ID:       b34224fa-7b5c-4292-9a0d-27439812a042
 :CREATED:  [2022-07-29 Fri 17:53]
 :UPDATED:  [2022-07-29 Fri 17:53]
 :ROAM_EXCLUDE: t
 :END:
-***** COMMENT future
+
+**** builder
+:PROPERTIES:
+:ID:       bdb6fa1b-e189-4e8e-823a-3506ee654c5c
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme
+
+#+end_src
+**** COMMENT future
 :PROPERTIES:
 :ID:       23664f9a-bd24-460b-8537-22f9efd3d298
 :CREATED:  [2022-07-29 Fri 18:22]
@@ -5061,7 +5070,7 @@ emacs-spacious-padding
 :ROAM_EXCLUDE: t
 :END:
 
-****** TODO Switch from UUIDs to partition labels For better reproducibilty and easier setup.
+***** TODO Switch from UUIDs to partition labels For better reproducibilty and easier setup.
 :PROPERTIES:
 :ID:       8983d989-12c3-4e1b-8645-e346571cddcd
 :CREATED:  [2022-07-29 Fri 18:22]
@@ -5069,7 +5078,7 @@ emacs-spacious-padding
 :ROAM_EXCLUDE: t
 :END:
 
-****** TODO Grub doesn't support luks2 yet.
+***** TODO Grub doesn't support luks2 yet.
 :PROPERTIES:
 :ID:       ea1aa05f-0279-4d55-a733-f40322f3c8f5
 :CREATED:  [2022-07-29 Fri 18:22]
@@ -5077,21 +5086,81 @@ emacs-spacious-padding
 :ROAM_EXCLUDE: t
 :END:
 
-***** ixy                                                                  :host:ixy:
+**** ixy                                                                :host:ixy:
 :PROPERTIES:
 :ID:       ffec3337-a453-4b25-8919-bdacb6c93562
 :CREATED:  [2022-07-29 Fri 17:53]
 :UPDATED:  [2022-07-29 Fri 17:53]
 :ROAM_EXCLUDE: t
 :END:
-****** mapped devices                                                      :untangle:
+#+begin_src scheme
+(define* (host
+          #:key
+          user-info
+          mapped-devices
+          file-systems
+          (bootloader (feature-bootloader
+                       #:bootloader-configuration
+                       (bootloader-configuration
+                        (bootloader grub-efi-removable-bootloader)
+                        (targets '("/boot/efi")))))
+          (kernel
+           (feature-kernel
+            #:kernel nongnu-pkg-linux:linux
+            #:kernel-arguments '("quiet" "ipv6.disable=1"
+                                 "net.ifnames=0" "nouveau.modeset=1")
+            #:firmware (list nongnu-pkg-linux:linux-firmware
+                             nongnu-pkg-linux:sof-firmware
+                             intel-vaapi-driver)
+            #:initrd nongnu-sys:microcode-initrd
+            #:kernel-loadable-modules (list v4l2loopback-linux-module)))
+          (networking (feature-networking #:mdns? #t))
+          (other-file-systems '())
+          (other-system-services '()))
+  (define config
+    (rde-config
+     (features (append %user-features %main-features
+                       (list user-info
+                             (feature-file-systems
+                              #:mapped-devices mapped-devices
+                              #:file-systems (append file-systems
+                                                     other-file-systems))
+                             bootloader kernel
+                             networking)
+                       other-system-services))))
+  `((config . ,config)
+    (os     . ,(rde-config-operating-system config))
+    (he     . ,(rde-config-home-environment config))))
+
+(define ixy-mapped-devices
+  (list (mapped-device
+         (source (uuid "cb453366-cc17-4742-ada1-91f7f569103f"))
+         (target "sys-root")
+         (type luks-device-mapping))))
+(define host-ixy
+  (host #:user-info (feature-host-info
+                     #:host-name "ixy"
+                     #:timezone  my-timezone)
+        #:mapped-devices ixy-mapped-devices
+        #:file-systems (list
+                        (file-system
+                          (device (file-system-label "sys-root"))
+                          (mount-point "/")
+                          (type "ext4")
+                          (dependencies ixy-mapped-devices))
+                        (file-system
+                          (device "/dev/nvme0n1p1")
+                          (mount-point "/boot/efi")
+                          (type "vfat")))))
+(pretty-print "ixy")
+#+end_src
+***** mapped devices                                                   :untangle:
 :PROPERTIES:
 :ID:       602eb92a-7d29-4c3a-8ca4-d6e9d61f0e4b
 :CREATED:  [2022-07-29 Fri 17:53]
 :UPDATED:  [2022-07-29 Fri 17:53]
 :ROAM_EXCLUDE: t
 :END:
-
 #+begin_src scheme
 (define ixy-mapped-devices
   (list (mapped-device
@@ -5099,36 +5168,34 @@ emacs-spacious-padding
          (target "sys-root")
          (type luks-device-mapping))))
 #+end_src
-****** file systems                                                        :untangle:
+***** file systems                                                     :untangle:
 :PROPERTIES:
 :ID:       40a378fb-a7a1-456a-b5e8-f15f2f7c7dd3
 :CREATED:  [2022-07-29 Fri 17:53]
-:UPDATED:  [2022-07-29 Fri 17:53]
+:UPDATED:  [2024-08-31 Sat 17:07]
 :ROAM_EXCLUDE: t
 :END:
-
 #+begin_src scheme
 (define ixy-file-systems
-  (list (file-system
-          (device (file-system-label "sys-root"))
-          (mount-point "/")
-          (type "ext4")
-          (dependencies ixy-mapped-devices))
-        (file-system
-          (device "/dev/nvme0n1p1")
-          (mount-point "/boot/efi")
-          (type "vfat"))))
+  (list
+   (file-system
+    (device (file-system-label "sys-root"))
+    (mount-point "/")
+    (type "ext4")
+    (dependencies ixy-mapped-devices))
+   (file-system
+    (device "/dev/nvme0n1p1")
+    (mount-point "/boot/efi")
+    (type "vfat"))))
 #+end_src
-
-
-******* file systems (from andrew)
+****** COMMENT file systems (from andrew)
 :PROPERTIES:
 :ID:       4228ac9b-1665-4978-9ded-bfa6e174961c
 :CREATED:  [2022-07-29 Fri 17:53]
 :UPDATED:  [2022-07-29 Fri 17:53]
 :ROAM_EXCLUDE: t
 :END:
-#+begin_src scheme
+#+begin_src scheme :tangle no :noweb-ref null
 ;; (define ixy-file-systems
 ;;   (append
 ;;    (map (match-lambda
@@ -5151,29 +5218,18 @@ emacs-spacious-padding
 ;;       (type "vfat")
 ;;       (device (uuid "8C99-0704" 'fat32))))))
 #+end_src
-
-****** imports
+****** TODO btrfs / bcachefs
 :PROPERTIES:
-:ID:       5b8720fd-bc7e-4a8d-bbf7-3030b057d1b7
-:CREATED:  [2022-07-29 Fri 17:53]
-:UPDATED:  [2022-07-29 Fri 17:53]
+:ID:       9b814a7b-d651-43c1-bf26-a24acd996b4c
 :ROAM_EXCLUDE: t
 :END:
-#+begin_src scheme
-(use-modules
- (gnu packages linux)
- ((nongnu packages linux) #:prefix nongnu:)
- ((nongnu system linux-initrd) #:prefix nongnu-sys:))
-#+end_src
-
-****** features                                                            :untangle:
+***** features  (system)                                               :untangle:
 :PROPERTIES:
 :ID:       3e09d87e-4895-4ab0-9109-4693e44ecb2d
 :CREATED:  [2022-07-29 Fri 17:53]
-:UPDATED:  [2023-09-26 Tue 15:50]
+:UPDATED:  [2024-07-17 Wed 19:01]
 :ROAM_EXCLUDE: t
 :END:
-
 #+begin_src scheme
 (define %ixy-features
   (list
@@ -5189,13 +5245,12 @@ emacs-spacious-padding
      (targets '("/boot/efi"))))
    ;; os
    (feature-kernel
-    ;;#:kernel nongnu:linux-lts ;;; NVIDIA
-    #:kernel nongnu:linux ;;; DEFAULT
+    ;;#:kernel nongnu-pkg-linux:linux-lts ;;; NVIDIA
+    #:kernel nongnu-pkg-linux:linux ;;; DEFAULT
     #:kernel-arguments
     '("quiet" "ipv6.disable=1" "net.ifnames=0"
-
       ;;; DEFAULT
-       "nouveau.modeset=1"
+      "nouveau.modeset=1"
 
       ;;; FORUM NVIDIA ATTEMPT https://forums.developer.nvidia.com/t/nvidia-495-on-sway-tutorial-questions-arch-based-distros/192212
       ;;"nvidia-drm.modeset=1" "nouveau.blacklist=1" "modprobe.blacklist=nouveau"
@@ -5210,8 +5265,8 @@ emacs-spacious-padding
       ;;"modprobe.blacklist=nouveau"
       )
     ;; removed "modprobe.blacklist=snd_hda_intel,snd_soc_skl"
-    #:firmware (list nongnu:linux-firmware
-                     nongnu:sof-firmware
+    #:firmware (list nongnu-pkg-linux:linux-firmware
+                     nongnu-pkg-linux:sof-firmware
                      intel-vaapi-driver)
     #:initrd nongnu-sys:microcode-initrd
     #:kernel-loadable-modules (list v4l2loopback-linux-module
@@ -5226,7 +5281,7 @@ emacs-spacious-padding
 (pretty-print "post-%ixy-features")
 #+end_src
 
-****** config
+***** config
 :PROPERTIES:
 :ID:       797b1544-85d0-4a89-b0fe-be6ba45ab847
 :CREATED:  [2022-07-29 Fri 17:53]
@@ -5235,21 +5290,16 @@ emacs-spacious-padding
 :END:
 
 #+begin_src scheme
-
-;;; rde-config and helpers for generating home-environment and
-;;; operating-system records.
-
 (define-public ixy-config
   (rde-config
    (features
-    (append
-     %user-features
-     %main-features
-     %ixy-features
-     ))))
-#+end_src
+    (append %user-features
+            %main-features
+            %ixy-features))))
+(pretty-print "ixy-config")
+            #+end_src
 
-****** debug: config args (features)
+***** debug: config args (features)
 :PROPERTIES:
 :ID:       49cef365-d12e-41eb-9e29-b04123e4db0a
 :CREATED:  [2022-07-29 Fri 18:04]
@@ -5264,7 +5314,7 @@ emacs-spacious-padding
 ;;              %ixy-features))
 #+end_src
 
-****** os
+***** os
 :PROPERTIES:
 :ID:       9fa5b517-515a-4ce0-8b08-3717080553da
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -5275,20 +5325,12 @@ emacs-spacious-padding
 #+begin_src scheme
 (define-public ixy-os
   (rde-config-operating-system ixy-config))
+(pretty-print "ixy-os")
 #+end_src
 
-******* COMMENT debug: os
-:PROPERTIES:
-:ID:       24fc8fe1-79e9-45c9-a8b8-8e89db1161c5
-:CREATED:  [2022-07-29 Fri 18:19]
-:UPDATED:  [2022-07-29 Fri 18:19]
-:ROAM_EXCLUDE: t
-:END:
-#+begin_src scheme
-(pretty-print "post-ixy-os")
-#+end_src
 
-****** home-environment
+
+***** home-environment
 :PROPERTIES:
 :ID:       a8b0c3bc-c2f6-4460-8a67-9519d36f204c
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -5300,7 +5342,7 @@ emacs-spacious-padding
   (rde-config-home-environment ixy-config))
 #+end_src
 
-******* COMMENT debug: post-ixy-he
+****** COMMENT debug: post-ixy-he
 :PROPERTIES:
 :ID:       58a97450-1bec-4243-b9b0-938862431fbf
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -5311,7 +5353,7 @@ emacs-spacious-padding
 (pretty-print "post-ixy-he")
 #+end_src
 
-***** TODO live                                                           :host:live:
+**** TODO live                                                         :host:live:
 :PROPERTIES:
 :ID:       f0223612-a7d9-4a9e-a6c9-993ac3cadcb2
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -5319,7 +5361,7 @@ emacs-spacious-padding
 :ROAM_EXCLUDE: t
 :END:
 
-****** filesystem
+***** filesystem
 :PROPERTIES:
 :ID:       fca68375-9c08-4e3d-96e0-7856e9d13268
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -5331,9 +5373,9 @@ emacs-spacious-padding
 
 (define live-file-systems
   (list (file-system
-          (mount-point "/")
-          (device (file-system-label "Guix_image"))
-          (type "ext4"))
+         (mount-point "/")
+         (device (file-system-label "Guix_image"))
+         (type "ext4"))
 
         ;; Make /tmp a tmpfs instead of keeping the overlayfs.  This
         ;; originally was used for unionfs because FUSE creates
@@ -5342,10 +5384,10 @@ emacs-spacious-padding
         ;; <http://bugs.gnu.org/23056>).  We keep this for overlayfs to be
         ;; on the safe side.
         (file-system
-          (mount-point "/tmp")
-          (device "none")
-          (type "tmpfs")
-          (check? #f))
+         (mount-point "/tmp")
+         (device "none")
+         (type "tmpfs")
+         (check? #f))
 
         ;; XXX: This should be %BASE-FILE-SYSTEMS but we don't need
         ;; elogind's cgroup file systems.
@@ -5356,7 +5398,7 @@ emacs-spacious-padding
         ))
 #+end_src
 
-****** config
+***** config
 :PROPERTIES:
 :ID:       6f2c9531-48c8-4bed-b843-e271888e207c
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -5400,7 +5442,7 @@ emacs-spacious-padding
         )))))))
 #+end_src
 
-****** os
+***** os
 :PROPERTIES:
 :ID:       2c7c2f23-a1bd-4db4-8218-72035ff32495
 :CREATED:  [2022-07-29 Fri 18:19]
@@ -5412,7 +5454,7 @@ emacs-spacious-padding
   (rde-config-operating-system live-config))
 #+end_src
 
-****** COMMENT debug: post live
+***** COMMENT debug: post live
 :PROPERTIES:
 :ID:       735d9883-dafd-4b64-bca8-ba5559995532
 :CREATED:  [2022-07-29 Fri 18:19]
