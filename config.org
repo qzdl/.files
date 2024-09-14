@@ -4627,23 +4627,20 @@ emacs-spacious-padding
 ;; (feature-emacs-org-roam-ui)
 #+end_src
 
-****** TODO emacs-ref
+****** emacs-citation
 :PROPERTIES:
 :ID:       a122ca1d-751b-4af2-8abd-6980bb1a761b
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2022-08-01 Mon 12:43]
+:UPDATED:  [2024-07-09 Tue 16:26]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme :noweb-ref main
-;; (feature-emacs-ref
-;;  ;; why error with nil for reftex-default-bibliography
-;;  ;; TODO: Rewrite to states
-;;  #:bibliography-paths
-;;  (list (string-append my-org-directory "/tex.bib"))
-;;  #:bibliography-notes
-;;  (list(string-append my-org-directory "/bib.org")
-;;       #:bibliography-directory my-notes-directory)
+(feature-emacs-citation
+ #:citar-library-paths (list "~/life/data/docs"
+                             "~/docs/work"
+                             "~/life/calib")
+ #:global-bibliography (list "~/life/tex.bib"))
 #+end_src
 
 ****** TODO emacs-es/rest
