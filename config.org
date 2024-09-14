@@ -4749,7 +4749,7 @@ emacs-spacious-padding
  #:notmuch-saved-searches
  (cons*
   '(:name "Inbox :: Personal"  :key "P"
-    :query "tag:unread and tag:inbox and tag:personal")
+    :query "tag:unread and tag:inbox and tag:personal thread:{tag:personal}")
   '(:name "Inbox :: Work"      :key "Ww"
     :query "tag:unread and tag:inbox and tag:/work/")
   '(:name "Inbox :: Guix Home" :key "H"
@@ -4762,6 +4762,38 @@ emacs-spacious-padding
     :query "tag:work and (from:/jlunan/ or to:/dre/)")
   %rde-notmuch-saved-searches))
 #+end_src
+
+******* testing saved-searches
+:PROPERTIES:
+:ID:       8714cf04-cbcf-477a-9ba1-e77c46e61b1f
+:ROAM_EXCLUDE: t
+:CREATED:  [2024-08-24 Sat 18:31]
+:END:
+
+******** inspect current
+:PROPERTIES:
+:ID:       ee3411ec-11a1-483c-860d-95c0de3959b2
+:ROAM_EXCLUDE: t
+:CREATED:  [2024-08-24 Sat 18:31]
+:END:
+#+begin_src emacs-lisp :results table
+notmuch-saved-searches
+#+end_src
+
+#+RESULTS:
+| :name | Inbox :: Personal  | :key   | P                                 | :query | tag:unread and tag:inbox and tag:personal |
+| :name | Inbox :: Work      | :key   | Ww                                | :query | tag:unread and tag:inbox and tag:/work/   |
+| :name | Inbox :: Guix Home | :key   | H                                 | :query | tag:unread and tag:guix-home              |
+| :name | Inbox :: RDE       | :key   | R                                 | :query | tag:unread and (to:/rde/ or cc:/rde/)     |
+| :name | Watching           | :key   | tw                                | :query | thread:{tag:watch}                        |
+| :name | Work :: data       | :key   | Wd                                | :query | tag:work and (from:/jlunan/ or to:/dre/)  |
+| :name | TODO               | :query | tag:todo                          | :key   | t                                         |
+| :name | Inbox              | :query | tag:inbox                         | :key   | i                                         |
+| :name | Watching           | :query | thread:{tag:watch} and tag:unread | :key   | w                                         |
+| :name | Drafts             | :query | tag:draft                         | :key   | d                                         |
+| :name | Flagged            | :query | tag:flagged                       | :key   | f                                         |
+| :name | Sent               | :query | tag:sent                          | :key   | s                                         |
+| :name | All mail           | :query | *                                 | :key   | a                                         |
 
 ***** xdg
 :PROPERTIES:
