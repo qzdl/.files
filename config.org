@@ -2591,7 +2591,10 @@ breathe.  do some hangboarding
 ;;; job:  hourly reminder
 ;; ref :: https://guix.gnu.org/en/manual/devel/en/html_node/Scheduled-Job-Execution.html
 #~(job '(next-hour) ;; every hour
-       "aplay ~/vids/gong-cut.wav &>/dev/null; shuf -n1 ~/.config/cron/humanity | espeak -s 150"
+       ;;; hit a gong
+       "aplay ~/vids/gong-cut.wav &>/dev/null;"
+       ;;; robot affirmations
+       ;; "shuf -n1 ~/.config/cron/humanity | espeak -s 150"
        "gong"
        #:user #$my-user)
 #+end_src
