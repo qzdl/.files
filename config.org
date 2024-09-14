@@ -4212,7 +4212,7 @@ annoying! cannot fathom why this doesn't work
 :PROPERTIES:
 :ID:       d2fc9152-8683-46c1-9ef2-4ca84510bb49
 :CREATED:  [2022-09-28 Wed 16:14]
-:UPDATED:  [2024-04-06 Sat 12:12]
+:UPDATED:  [2024-07-15 Mon 15:16]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -4224,14 +4224,15 @@ annoying! cannot fathom why this doesn't work
  ;; #:emacs emacs-next-pgtk
  ;; #:emacs emacs-pgtk
  #:native-comp? #f
+ ;; #:org-appear #f
  )
 #+end_src
 
-****** my/emacs-packages                                                        :pkg:
+****** my/emacs-packages                                                   :pkg:
 :PROPERTIES:
 :ID:       5f892275-23ad-429c-9651-f48f5e8576ec
 :CREATED:  [2022-09-28 Wed 16:14]
-:UPDATED:  [2024-04-01 Mon 02:55]
+:UPDATED:  [2024-08-04 Sun 10:41]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -4248,10 +4249,8 @@ annoying! cannot fathom why this doesn't work
 "emacs-debbugs"
 "emacs-dimmer"
 "emacs-edit-server"
-"emacs-eglot"
 "emacs-elfeed"
 "emacs-eros"
-;; "emacs-ess" ;; TODO broken [2024-04-01 Mon 02:55]
 "emacs-forge"
 "emacs-fountain-mode" ;; TODO feature-emacs-fountain-mode
 "emacs-ggtags"
@@ -4265,6 +4264,7 @@ annoying! cannot fathom why this doesn't work
 "emacs-jq-mode"
 "emacs-json-snatcher"
 "emacs-jupyter"
+"emacs-ein"
 "emacs-ligature"
 "emacs-logview" ;; https://github.com/doublep/logview
 "emacs-lsp-mode"
@@ -4272,6 +4272,7 @@ annoying! cannot fathom why this doesn't work
 "emacs-lua-mode"
 "emacs-magit-todos"  ;; TODO feature-version-control
 "emacs-ob-async"
+"emacs-org-brain"
 "emacs-org-download"
 "emacs-org-edit-latex"
 "emacs-org-fragtog"
@@ -4279,6 +4280,7 @@ annoying! cannot fathom why this doesn't work
 "emacs-org-ql"
 "emacs-org-reveal"
 "emacs-org-roam-ui"
+"emacs-org-sidebar"
 "emacs-org-super-agenda"
 "emacs-org-transclusion"
 "emacs-org-tree-slide"
@@ -4292,12 +4294,16 @@ annoying! cannot fathom why this doesn't work
 "emacs-py-isort"
 "emacs-python-black"
 "emacs-restart-emacs"
+"emacs-rust-mode"
+"emacs-rustic"
+"emacs-scala-mode"
 "emacs-slime"
 "emacs-slime-repl-ansi-color"
 "emacs-slime-volleyball"
 "emacs-string-inflection"
 "emacs-terraform-mode"
 "emacs-yaml-mode"
+;; "emacs-ess" ;; TODO broken [2024-04-01 Mon 02:55]
 ;; "emacs-explain-pause-mode" ;; FIXME upon reload, check fails :: https://ci.guix.gnu.org/search?query=emacs-explain-pause-mode%20spec:master
 ;; "emacs-impostman"
 ;; "emacs-org-autotangle"
@@ -4305,12 +4311,13 @@ annoying! cannot fathom why this doesn't work
 ;;"emacs-artbollocks"
 ;;"emacs-repology"
 ;;"emacs-vlf" ;; TODO guix: package emacs-vlf
+
 #+end_src
 
 ****** misc/emacs-packages
 :PROPERTIES:
 :CREATED:  [2024-03-31 Sun 16:08]
-:UPDATED:  [2024-03-31 Sun 16:08]
+:UPDATED:  [2024-07-15 Mon 15:28]
 :ID:       6e4db0e4-2fc8-4751-a108-a1345cc839cd
 :ROAM_EXCLUDE: t
 :END:
