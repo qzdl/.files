@@ -3828,7 +3828,7 @@ host	all	all	0.0.0.0/0       md5
 
      ;;(bindsym $mod+x exec $menu)
 
-     (gaps inner 20)
+     (gaps inner 10)
 
      ;;; Mousepad sensitivity & behaviorr
      (input type:touchpad
