@@ -2264,6 +2264,15 @@ Install and configure redshift, an adaptive light-temperature controller.")))
 :ROAM_EXCLUDE: t
 :END:
 
+removing default rotation jobs from RDE
+
+#+begin_quote scheme
+(service rottlog-service-type)
+(service log-cleanup-service-type
+(log-cleanup-configuration
+(directory "/var/log/guix/drvs")))
+#+end_quote
+
 #+begin_src scheme :noweb-ref services-base
 (define %qz-base-system-services
   (list
