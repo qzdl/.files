@@ -2526,16 +2526,16 @@ removing default rotation jobs from RDE
 
 #+name: guile-job-recoll
 #+begin_src scheme :noweb-ref jobs
-         ;;; job: fulltext index the universe
-#~(job '(next-hour)
-       (lambda ()
-         (system*
-          #$(file-append (@ (gnu packages search) recoll) "/bin/recollindex")))
-       "index: recollindex"
-       #:user #$my-user)
+;;; job: fulltext index the universe
+;; #~(job '(next-hour)
+;;        (lambda ()
+;;          (system*
+;;           #$(file-append (@ (gnu packages search) recoll) "/bin/recollindex")))
+;;        "index: recollindex"
+;;        #:user #$my-user)
 #+end_src
 
-******** generate source tags                                                   :12h:
+******** generate source tags                                            :12h:
 :PROPERTIES:
 :ID:       0681c613-5415-46d7-a079-e940c503941c
 :CREATED:  [2022-09-28 Wed 15:43]
