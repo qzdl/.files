@@ -3412,6 +3412,13 @@ host	all	all	0.0.0.0/0       md5
                           (create-database? #t)))))))
 #+end_src
 
+******* ssh
+:PROPERTIES:
+:CREATED:  [2024-04-23 Tue 20:20]
+:UPDATED:  [2024-04-23 Tue 20:20]
+:ID:       f8a052cf-bf51-440a-80ff-efb035f0da57
+:ROAM_EXCLUDE: t
+:END:
 ******** openssh server
 :PROPERTIES:
 :ID:       1cda9c5a-ef77-4735-aac7-b732054413c3
