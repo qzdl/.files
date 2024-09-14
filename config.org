@@ -3990,12 +3990,12 @@ swaymsg -m -t subscribe '["window"]' | \
 :PROPERTIES:
 :ID:       e28ec2ac-d302-4816-b875-6663016cf7ff
 :CREATED:  [2023-08-31 Thu 10:10]
-:UPDATED:  [2023-08-31 Thu 10:16]
+:UPDATED:  [2024-04-23 Tue 12:53]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme :noweb-ref main
-;;(feature-swaynotificationcenter)
+(feature-swaynotificationcenter)
 
 ;; not found...
 #+end_src
