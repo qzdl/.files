@@ -2440,7 +2440,7 @@ removing default rotation jobs from RDE
 ;;      #$(file-append (@ (gnu packages base) coreutils) "/bin/ls"))))
 #+end_src
 
-******* mcron                                                                  :jobs:
+******* mcron                                                            :jobs:
 :PROPERTIES:
 :ID:       c3c092d2-4cee-48eb-abc8-e76e393b5967
 :CREATED:  [2022-09-28 Wed 15:42]
@@ -2463,11 +2463,11 @@ removing default rotation jobs from RDE
  )
 #+end_src
 
-******** notes-commit                                                          :1min:
+******** notes-commit                                                   :1min:
 :PROPERTIES:
 :ID:       c8903598-d72e-4539-884b-a60096be7fbe
 :CREATED:  [2022-09-28 Wed 15:42]
-:UPDATED:  [2023-04-16 Sun 15:21]
+:UPDATED:  [2024-08-28 Wed 21:09]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -2477,13 +2477,14 @@ removing default rotation jobs from RDE
 #+begin_src scheme :noweb-ref jobs
      ;;; job: commit my notes
 #~(job '(next-minute (range 0 60 15))
-       ;;(lambda ()
-         ;; (system*
-         ;;  (format #f "~a add . && ~a commit -m \"auto-commit | $( ~a -uIs )\""
-         ;;          #$(file-append (@ (gnu packages version-control) git) "/bin/git")
-         ;;          #$(file-append (@ (gnu packages version-control) git) "/bin/git")
-         ;;          #$(file-append (@ (gnu packages base) coreutils) "/bin/date"))))
-         "(cd ~/life && echo job: note-commit && git add . && git commit -m \"auto-commit | $(date -uIs)\") &>> ~/.local/var/lib/log/mcron.notes-commit.log"
+       (lambda ()
+         (chdir "/home/samuel/life")
+         (system*
+          (format #f "~a add . && ~a commit -m \"auto-commit | $( ~a -uIs )\""
+                  #$(file-append (@ (gnu packages version-control) git) "/bin/git")
+                  #$(file-append (@ (gnu packages version-control) git) "/bin/git")
+                  #$(file-append (@ (gnu packages base) coreutils) "/bin/date"))))
+       ;; "(cd ~/life && echo job: note-commit && git add . && git commit -m \"auto-commit | $(date -uIs)\") &>> ~/.local/var/lib/log/mcron.notes-commit.log"
        "backup: notes-commit"
        #:user #$my-user)
 
@@ -2503,7 +2504,7 @@ removing default rotation jobs from RDE
 ;;                          ;;(file-append #$(@ (gnu packages version-control) git) "/bin/git")
 ;;                          ;;(file-append #$(@ (gnu packages base) coreutils) "/bin/date")
 ;;                          ))
-       ;;                 port)))))))
+;;                 port)))))))
 ;;   (f))
 
 ;; (call-with-output-file "/tmp/commit.log"
@@ -2513,7 +2514,9 @@ removing default rotation jobs from RDE
 ;;    port)))
 #+end_src
 
-******** fulltext index (recoll)                                                 :1h:
+#+RESULTS: guile-job-notes
+
+******** fulltext index (recoll)                                          :1h:
 :PROPERTIES:
 :ID:       ccd773a9-5a5e-41da-b050-6fa461c9a427
 :CREATED:  [2022-09-28 Wed 15:42]
