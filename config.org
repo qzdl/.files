@@ -43,9 +43,33 @@ all the host/user specific things.
   ;; live
   )
 
-
 (define-public my-user "samuel")
 (define-public my-timezone "Europe/Berlin")
+
+(define-public my-org-directory "~/life")
+(define-public my-notes-directory
+  (string-append my-org-directory "/roam"))
+
+(define-public fs-chopi
+  (file-system
+   (device (uuid "06FA631CFA630771" 'ntfs))
+   (mount-point "/mnt/chopi")
+   (mount? #f)
+   (type "ntfs-3g")))
+
+(define-public fs-zv
+  (file-system
+   (device (uuid "3735-3131" 'fat))
+   (mount-point "/mnt/zv")
+   (mount? #f)
+   (type "fat")))
+
+(define-public my-common-filesystems
+  (list fs-chopi
+        fs-zv
+        ;; fs-nikon
+        ;; fz-xhdd
+        ))
 
 (define-public my-feature-mail-settings
   (feature-mail-settings
@@ -128,14 +152,6 @@ all the host/user specific things.
 #+end_src
 
 
-* configs
-:PROPERTIES:
-:ID:       7c9c9408-15b7-4d3e-be98-9b2bda19e7d5
-:CREATED:  [2022-09-28 Wed 16:24]
-:UPDATED:  [2023-09-23 Sat 21:22]
-:ROAM_EXCLUDE: t
-:END:
-
 ** rde
 :PROPERTIES:
 :ID:       c5578b40-1344-4d48-9b24-5c8f13fa3f77
@@ -152,15 +168,8 @@ all the host/user specific things.
 :ROAM_EXCLUDE: t
 :END:
 
-**** boiler
-:PROPERTIES:
-:ID:       70c315de-8a81-4ce7-b5aa-9a5b679859c2
-:CREATED:  [2023-07-23 Sun 11:33]
-:UPDATED:  [2023-07-23 Sun 11:33]
-:ROAM_EXCLUDE: t
-:END:
 
-***** AAA tangle rde
+**** AAA tangle rde
 :PROPERTIES:
 :ID:       98f42608-b5c0-455d-bb02-9a326af8bc42
 :CREATED:  [2022-08-01 Mon 09:49]
@@ -172,11 +181,12 @@ all the host/user specific things.
 <<conf-rde>>
 #+end_src
 
-***** defmodule
+
+**** defmodule
 :PROPERTIES:
 :ID:       6bb15998-32c1-4674-890a-85180a89d66a
 :CREATED:  [2022-07-29 Fri 18:22]
-:UPDATED:  [2024-05-17 Fri 20:30]
+:UPDATED:  [2024-08-31 Sat 17:06]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -306,11 +316,11 @@ all the host/user specific things.
             (urls urls)))))
 #+end_src
 
-****** mail serializers (bravehost | gmail-tls)
+***** mail serializers (bravehost | gmail-tls)
 :PROPERTIES:
 :ID:       fb637534-e1ae-493b-bf5e-0cdc5ec1cc2f
 :CREATED:  [2022-08-29 Mon 17:06]
-:UPDATED:  [2024-03-04 Mon 11:52]
+:UPDATED:  [2024-07-09 Tue 17:10]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -344,28 +354,31 @@ all the host/user specific things.
 #+end_src
 
 
-******* keyboard
+***** pkgs, pkgs-vanilla (helper)                                          :func:
 :PROPERTIES:
-:ID:       2ff244bf-5916-4a3b-afa6-6b2e34cb7e21
-:CREATED:  [2022-07-29 Fri 17:48]
-:UPDATED:  [2022-07-29 Fri 17:48]
+:ID:       5fb5abba-de52-453a-8cfb-875f6d6897ba
+:CREATED:  [2022-08-08 Mon 11:41]
+:UPDATED:  [2023-07-13 Thu 09:46]
 :ROAM_EXCLUDE: t
 :END:
-
-******** thinkpad
-:PROPERTIES:
-:ID:       f0d98fbe-0033-47e3-81c3-c592f70c0b8a
-:CREATED:  [2022-07-29 Fri 17:48]
-:UPDATED:  [2022-08-02 Tue 13:31]
-:ROAM_EXCLUDE: t
-:END:
-
 #+begin_src scheme
-(define %thinkpad-layout
-  (keyboard-layout
-   "us" "altgr-intl"
-   #:model "thinkpad"
-   #:options '("ctrl:nocaps")))
+(define* (pkgs #:rest lst)
+  (map specification->package+output lst))
+
+(define* (pkgs-vanilla #:rest lst)
+  "Packages from guix channel."
+  (define channel-guix
+    (list (channel
+           (name 'guix)
+           (url "https://git.savannah.gnu.org/git/guix.git")
+           ;;;; [2023-07-13 Thu 09:46]
+           (commit "2794caed7c813f2ec4249236de36eaccafee8361"))))
+
+  (define inferior (inferior-for-channels channel-guix))
+  (define (get-inferior-pkg pkg-name)
+    (car (lookup-inferior-packages inferior pkg-name)))
+
+  (map get-inferior-pkg lst))
 #+end_src
 
 *** state
@@ -441,44 +454,46 @@ all the host/user specific things.
 (define gaming? #f)
 #+end_src
 
+**** keyboard
+:PROPERTIES:
+:ID:       2ff244bf-5916-4a3b-afa6-6b2e34cb7e21
+:CREATED:  [2022-07-29 Fri 17:48]
+:UPDATED:  [2022-07-29 Fri 17:48]
+:ROAM_EXCLUDE: t
+:END:
+
+***** thinkpad
+:PROPERTIES:
+:ID:       f0d98fbe-0033-47e3-81c3-c592f70c0b8a
+:CREATED:  [2022-07-29 Fri 17:48]
+:UPDATED:  [2022-08-02 Tue 13:31]
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme
+(define %thinkpad-layout
+  (keyboard-layout
+   "us" "altgr-intl"
+   #:model "thinkpad"
+   #:options '("ctrl:nocaps")))
+#+end_src
+
+***** TODO asus
+:PROPERTIES:
+:ID:       75a3cb23-f883-4827-9443-3c09d6d36325
+:ROAM_EXCLUDE: t
+:END:
+
 *** packages
 :PROPERTIES:
 :ID:       5508a976-f9ad-457c-b4bb-46dbf3b73fb0
 :CREATED:  [2022-07-29 Fri 17:36]
-:UPDATED:  [2024-04-06 Sat 12:11]
-:END:
-
-**** pkgs, pkgs-vanilla (helper)                                               :func:
-:PROPERTIES:
-:ID:       5fb5abba-de52-453a-8cfb-875f6d6897ba
-:CREATED:  [2022-08-08 Mon 11:41]
-:UPDATED:  [2023-07-13 Thu 09:46]
+:UPDATED:  [2024-05-19 Sun 18:16]
 :ROAM_EXCLUDE: t
 :END:
-#+begin_src scheme
-
-;;; Generic features should be applicable for various hosts/users/etc
 
-(define* (pkgs #:rest lst)
-  (map specification->package+output lst))
 
-(define* (pkgs-vanilla #:rest lst)
-  "Packages from guix channel."
-  (define channel-guix
-    (list (channel
-           (name 'guix)
-           (url "https://git.savannah.gnu.org/git/guix.git")
-           ;;;; [2023-07-13 Thu 09:46]
-           (commit "2794caed7c813f2ec4249236de36eaccafee8361"))))
-
-  (define inferior (inferior-for-channels channel-guix))
-  (define (get-inferior-pkg pkg-name)
-    (car (lookup-inferior-packages inferior pkg-name)))
-
-  (map get-inferior-pkg lst))
-#+end_src
-
-**** my packages
+**** custom
 :PROPERTIES:
 :ID:       98d207f1-31fa-40cb-9deb-c39e0026ef22
 :CREATED:  [2022-08-08 Mon 11:38]
@@ -615,62 +630,62 @@ https://github.com/ndwarshuis/org-ml")
 #+begin_src scheme
 (define-public emacs-moldable-emacs
   (package
-    (name "emacs-moldable-emacs")
-    (version "20220825.0037")
-    (source
-     (origin
-       (method git-fetch)
-       (uri (git-reference
-             (url "https://github.com/ag91/moldable-emacs")
-             (commit "53f8b3af4572ab12be9f1f96da848278507ef350")))
-       (sha256
-        (base32 "1jcac4hiyh98q8cvim6yjaw1xihsy3r5lnjhijr3p89z2bv481xl"))))
-    (arguments
-     (list
-      ;; #:tests? #true
-      ;; #:test-command
-      ;; #~(list "emacs" "-Q" "--batch"
-      ;;         "-L" "test"
-      ;;         "--load" "test/testein-loader.el")
-      #:phases
-      #~(modify-phases %standard-phases
-          (add-after 'unpack 'install-molds
-            (lambda _
-              (for-each
-               (lambda (f)
-                 (install-file
-                  f (string-append (elpa-directory #$output)
-                                   "/molds")))
-               (find-files "./molds" ".*"))
-              (for-each
-               (lambda (f)
-                 (install-file
-                  f (string-append (elpa-directory #$output)
-                                   "/tutorials")))
-               (find-files "./tutorials" ".*")))))))
-    (build-system emacs-build-system)
+   (name "emacs-moldable-emacs")
+   (version "20220825.0037")
+   (source
+    (origin
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/ag91/moldable-emacs")
+           (commit "53f8b3af4572ab12be9f1f96da848278507ef350")))
+     (sha256
+      (base32 "1jcac4hiyh98q8cvim6yjaw1xihsy3r5lnjhijr3p89z2bv481xl"))))
+   (arguments
+    (list
+     ;; #:tests? #true
+     ;; #:test-command
+     ;; #~(list "emacs" "-Q" "--batch"
+     ;;         "-L" "test"
+     ;;         "--load" "test/testein-loader.el")
+     #:phases
+     #~(modify-phases %standard-phases
+                      (add-after 'unpack 'install-molds
+                                 (lambda _
+                                   (for-each
+                                    (lambda (f)
+                                      (install-file
+                                       f (string-append (elpa-directory #$output)
+                                                        "/molds")))
+                                    (find-files "./molds" ".*"))
+                                   (for-each
+                                    (lambda (f)
+                                      (install-file
+                                       f (string-append (elpa-directory #$output)
+                                                        "/tutorials")))
+                                    (find-files "./tutorials" ".*")))))))
+   (build-system emacs-build-system)
    ;;; propagated (external)
-    ;; (check these via the mold “WhatMoldsCanIUse?”)
-    ;; graph-cli
-    ;; graphviz
-    ;; imgclip
-    ;; emacs-csv-mode OPTIONAL (buffer size to bar chart)
-    (propagated-inputs
-     (list emacs-dash
-           emacs-s
-           emacs-async
-           ;; emacs-thunk builtin
-           emacs-esxml
-           emacs-org-ql
-           ;; emacs-tree-sitter
-           ;; emacs-code-compass
-           ))
-    (home-page "https://github.com/ag91/moldable-emacs")
+   ;; (check these via the mold “WhatMoldsCanIUse?”)
+   ;; graph-cli
+   ;; graphviz
+   ;; imgclip
+   ;; emacs-csv-mode OPTIONAL (buffer size to bar chart)
+   (propagated-inputs
+    (list emacs-dash
+          emacs-s
+          emacs-async
+          ;; emacs-thunk builtin
+          emacs-esxml
+          emacs-org-ql
+          ;; emacs-tree-sitter
+          ;; emacs-code-compass
+          ))
+   (home-page "https://github.com/ag91/moldable-emacs")
 
-    (synopsis "TODO")
-    (description
-     "TODO")
-    (license license:gpl3+)))
+   (synopsis "TODO")
+   (description
+    "TODO")
+   (license license:gpl3+)))
 #+end_src
 
 ****** emacs-ob-go
@@ -784,8 +799,8 @@ JIRA issues.")
                   "^doc/[^/]+.info$"
                   "^doc/[^/]+.texi$"
                   "^doc/[^/]+.texinfo$")
-                #:exclude '("^.dir-locals.el$" "^test.el$" "^tests.el$" "^[^/]+-test.el$"
-                            "^[^/]+-tests.el$" "^kubernetes-evil.el$")))
+      #:exclude '("^.dir-locals.el$" "^test.el$" "^tests.el$" "^[^/]+-test.el$"
+                  "^[^/]+-tests.el$" "^kubernetes-evil.el$")))
    (home-page "https://github.com/kubernetes-el/kubernetes-el")
    (synopsis "Magit-like porcelain for Kubernetes")
    (description
@@ -871,23 +886,23 @@ independently.  Clock instances ared updated automatically.  Their resources
 #+begin_src scheme
 (define-public emacs-consult-recoll
   (package
-    (name "emacs-consult-recoll")
-    (version "0.8")
-    (source (origin
-              (method url-fetch)
-              (uri (string-append
-                    "https://elpa.gnu.org/packages/consult-recoll-" version
-                    ".tar"))
-              (sha256
-               (base32
-                "02vg1rr2fkcqrrivqgggdjdq0ywvlyzazwq1xd02yah3j4sbv4ag"))))
-    (build-system emacs-build-system)
-    (propagated-inputs (list emacs-consult))
-    (home-page "https://codeberg.org/jao/consult-recoll")
-    (synopsis "Recoll queries using consult")
-    (description "This package provides an emacs interface to perform recoll queries, and display its results, via consult. It is also recommened that you use a a package for vertical display of completions that works well with consult, such as vertico.")
-    (license license:gpl3+)))
-    #+end_src
+   (name "emacs-consult-recoll")
+   (version "0.8")
+   (source (origin
+            (method url-fetch)
+            (uri (string-append
+                  "https://elpa.gnu.org/packages/consult-recoll-" version
+                  ".tar"))
+            (sha256
+             (base32
+              "02vg1rr2fkcqrrivqgggdjdq0ywvlyzazwq1xd02yah3j4sbv4ag"))))
+   (build-system emacs-build-system)
+   (propagated-inputs (list emacs-consult))
+   (home-page "https://codeberg.org/jao/consult-recoll")
+   (synopsis "Recoll queries using consult")
+   (description "This package provides an emacs interface to perform recoll queries, and display its results, via consult. It is also recommened that you use a a package for vertical display of completions that works well with consult, such as vertico.")
+   (license license:gpl3+)))
+#+end_src
 
 ****** emacs-bigquery-mode
 :PROPERTIES:
@@ -916,24 +931,24 @@ independently.  Clock instances ared updated automatically.  Their resources
 
 (define-public emacs-bigquery-mode
   (package
-    (name "emacs-bigquery-mode")
-    (version "20200412.155")
-    (source
-     (origin
-       (method git-fetch)
-       (uri (git-reference
-             (url "https://github.com/christophstockhusen/bigquery-mode")
-             (commit "308bdccf194f1bca230de3a070459836e30b502a")))
-       (file-name (git-file-name name version))
-       (sha256
-        (base32 "0w1b2d64hdzxk58lq0zfpfavmi8w80lmgqybvgfkl7l3mhnwzgj2"))))
-    (propagated-inputs
-     (list emacs-sql-indent))
-    (build-system emacs-build-system)
-    (home-page "https://github.com/christophstockhusen/bigquery-mode")
-    (synopsis "Major mode for interacting with Google Cloud Platform's BigQuery")
-    (description "Major mode for interacting with Google Cloud Platform's BigQuery")
-    (license license:gpl3+)))
+   (name "emacs-bigquery-mode")
+   (version "20200412.155")
+   (source
+    (origin
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/christophstockhusen/bigquery-mode")
+           (commit "308bdccf194f1bca230de3a070459836e30b502a")))
+     (file-name (git-file-name name version))
+     (sha256
+      (base32 "0w1b2d64hdzxk58lq0zfpfavmi8w80lmgqybvgfkl7l3mhnwzgj2"))))
+   (propagated-inputs
+    (list emacs-sql-indent))
+   (build-system emacs-build-system)
+   (home-page "https://github.com/christophstockhusen/bigquery-mode")
+   (synopsis "Major mode for interacting with Google Cloud Platform's BigQuery")
+   (description "Major mode for interacting with Google Cloud Platform's BigQuery")
+   (license license:gpl3+)))
 
 #+end_src
 
@@ -941,45 +956,36 @@ independently.  Clock instances ared updated automatically.  Their resources
 :PROPERTIES:
 :ID:       11e33a8f-f5e3-4081-a337-23fe0ed7733c
 :CREATED:  [2023-04-03 Mon 16:45]
-:UPDATED:  [2023-04-03 Mon 16:48]
+:UPDATED:  [2024-05-19 Sun 18:32]
 :ROAM_EXCLUDE: t
 :END:
+
+- https://github.com/babariviere/guix-emacs/blob/acc581a/emacs/packages/melpa.scm#L26388
 
 #+begin_src scheme
 (define-public emacs-dogears
   (package
-  (name "emacs-dogears")
-  (version "20220829.441")
-  (source (origin
-            (method git-fetch)
-            (uri (git-reference
-                  (url "https://github.com/alphapapa/dogears.el.git")
-                  (commit "5b8a85d03ca17d8b8185868fdbacf320784026d5")))
-            (sha256
-             (base32
-              "0h4gh4ja9dnslj286skc8nzp9dvpyp53ig9y4kniq5lji6gn3r1f"))))
-  (build-system emacs-build-system)
-  (propagated-inputs (list emacs-map))
-  (arguments
-   '(#:include '("^[^/]+.el$" "^[^/]+.el.in$"
-                 "^dir$"
-                 "^[^/]+.info$"
-                 "^[^/]+.texi$"
-                 "^[^/]+.texinfo$"
-                 "^doc/dir$"
-                 "^doc/[^/]+.info$"
-                 "^doc/[^/]+.texi$"
-                 "^doc/[^/]+.texinfo$")
-     #:exclude '("^.dir-locals.el$" "^test.el$" "^tests.el$" "^[^/]+-test.el$"
-                 "^[^/]+-tests.el$" "^helm-dogears.el$")))
-  (home-page "https://github.com/alphapapa/dogears.el")
-  (synopsis "Never lose your place again")
-  (description
-   "This library automatically and smartly remembers where you've been, in and
-across buffers, and helps you quickly return to any of those places.  It uses
-the Emacs bookmarks system internally (but without modifying the
-bookmarks-alist) to save and restore places with mode-specific functionality.")
-  (license license:gpl3+)))
+   (name "emacs-dogears")
+   (version "20240412.850")
+   (source
+    (origin
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/alphapapa/dogears.el.git")
+           (commit
+            "162671e66cac601f1cfd5d22f7da2671af2e9866")))
+     (sha256
+      (base32
+       "1n0yhs4vcl9h10slqck1zd5h2p34lim3xrra9zcj1pa6qp5a2i56"))))
+   (build-system emacs-build-system)
+   (arguments
+    '(#:exclude '("helm-dogears.el")))
+   (home-page
+    "https://github.com/alphapapa/dogears.el")
+   (synopsis "Never lose your place again")
+   (description
+    "Documentation at https://melpa.org/#/dogears")
+   (license #f)))
 #+end_src
 
 #+RESULTS:
@@ -988,7 +994,7 @@ bookmarks-alist) to save and restore places with mode-specific functionality.")
 :PROPERTIES:
 :ID:       74f332b7-de08-4ca7-b1bb-3e8d017d579c
 :CREATED:  [2023-07-15 Sat 17:30]
-:UPDATED:  [2023-07-15 Sat 19:13]
+:UPDATED:  [2024-08-24 Sat 18:31]
 :END:
 
 #+begin_src emacs-lisp
@@ -1149,22 +1155,22 @@ bookmarks-alist) to save and restore places with mode-specific functionality.")
 #+begin_src scheme
 (define-public emacs-chatgpt-shell
   (package
-    (name "emacs-chatgpt-shell")
-    (version "2023-04-21")
-    (source
-     (origin
-       (method git-fetch)
-       (uri (git-reference
-             (url "https://github.com/xenodium/chatgpt-shell")
-             (commit "0ae307045fdad451f7a6e2a56ffec70c6300b8da")))
-       (sha256
-        (base32 "1s7pn8v79x2l02cj41z89f8rda2xd3naq6yv8vjzd0z4kag3jmzv"))))
-    (build-system emacs-build-system)
-    (home-page "")
-    (synopsis "A minimal ChatGPT Emacs shel")
-    (description
-     "A minimal ChatGPT Emacs shell")
-    (license license:gpl3+)))
+   (name "emacs-chatgpt-shell")
+   (version "2023-04-21")
+   (source
+    (origin
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/xenodium/chatgpt-shell")
+           (commit "0ae307045fdad451f7a6e2a56ffec70c6300b8da")))
+     (sha256
+      (base32 "1s7pn8v79x2l02cj41z89f8rda2xd3naq6yv8vjzd0z4kag3jmzv"))))
+   (build-system emacs-build-system)
+   (home-page "")
+   (synopsis "A minimal ChatGPT Emacs shel")
+   (description
+    "A minimal ChatGPT Emacs shell")
+   (license license:gpl3+)))
 #+end_src
 
 ****** emacs-ytdl-next
@@ -1179,28 +1185,28 @@ bookmarks-alist) to save and restore places with mode-specific functionality.")
 #+begin_src scheme
 (define-public emacs-ytdl-next
   (package
-    (name "emacs-ytdl")
-    (version "20230331.1804")
-    (source (origin
-              (method git-fetch)
-              (uri (git-reference
-                    (url "https://gitlab.com/tuedachu/ytdl.git")
-                    (commit "2ea3daf2f6aa9d18b71fe3e15f05c30a56fca228")))
-              (sha256
-               (base32
-                "0y62lkgsg19j05dpd6sp6zify8vq8xvpc8caqiy4rwi7p4ahacsf"))))
-    (build-system emacs-build-system)
-    (propagated-inputs (list emacs-async emacs-transient emacs-dash))
-    (home-page "https://gitlab.com/tuedachu/ytdl")
-    (synopsis "Emacs Interface for youtube-dl")
-    (description
-     "ytdl.el is an Emacs-based interface for youtube-dl, written in emacs-lisp.
+   (name "emacs-ytdl")
+   (version "20230331.1804")
+   (source (origin
+            (method git-fetch)
+            (uri (git-reference
+                  (url "https://gitlab.com/tuedachu/ytdl.git")
+                  (commit "2ea3daf2f6aa9d18b71fe3e15f05c30a56fca228")))
+            (sha256
+             (base32
+              "0y62lkgsg19j05dpd6sp6zify8vq8xvpc8caqiy4rwi7p4ahacsf"))))
+   (build-system emacs-build-system)
+   (propagated-inputs (list emacs-async emacs-transient emacs-dash))
+   (home-page "https://gitlab.com/tuedachu/ytdl")
+   (synopsis "Emacs Interface for youtube-dl")
+   (description
+    "ytdl.el is an Emacs-based interface for youtube-dl, written in emacs-lisp.
 youtube-dl is a command-line program to download videos from YouTube and a few
 more sites.  More information at https://yt-dl.org.  youtube-dl supports many
 more sites: PeerTube, BBC, IMDB, InternetVideoArchive (non-exhaustive list) *
 Setup Add \"(require ytdl)\" to your \"init.el\" file.  Further customization can be
 found in the documentation online.")
-    (license license:gpl3+)))
+   (license license:gpl3+)))
 #+end_src
 
 #+RESULTS:
@@ -1235,33 +1241,33 @@ guix import elpa -a melpa ytdl
 #+begin_src scheme
 (define-public emacs-selectric-mode
   (package
-    (name "emacs-selectric-mode")
-    (version "20200209.2107")
-    (source (origin
-              (method git-fetch)
-              (uri (git-reference
-                    (url "https://github.com/rbanffy/selectric-mode.git")
-                    (commit "1840de71f7414b7cd6ce425747c8e26a413233aa")))
-              (sha256 (base32
-                       "1aabqqqcafkqmyarf5kb1k0gglmlpn6kr3h3x0yph5gd6sk3l4ll"))))
-    (build-system emacs-build-system)
-    (arguments '(#:include '("^[^/]+.el$" "^[^/]+.el.in$"
-                             "^dir$"
-                             "^[^/]+.info$"
-                             "^[^/]+.texi$"
-                             "^[^/]+.texinfo$"
-                             "^doc/dir$"
-                             "^doc/[^/]+.info$"
-                             "^doc/[^/]+.texi$"
-                             "^doc/[^/]+.texinfo$"
-                             "^[^/]+.wav$")
-                 #:exclude '("^.dir-locals.el$" "^test.el$" "^tests.el$"
-                             "^[^/]+-test.el$" "^[^/]+-tests.el$")))
-    (home-page "https://github.com/rbanffy/selectric-mode")
-    (synopsis "IBM Selectric mode for Emacs")
-    (description
-     "This minor mode plays the sound of an IBM Selectric typewriter as you type.")
-    (license license:gpl3+)))
+   (name "emacs-selectric-mode")
+   (version "20200209.2107")
+   (source (origin
+            (method git-fetch)
+            (uri (git-reference
+                  (url "https://github.com/rbanffy/selectric-mode.git")
+                  (commit "1840de71f7414b7cd6ce425747c8e26a413233aa")))
+            (sha256 (base32
+                     "1aabqqqcafkqmyarf5kb1k0gglmlpn6kr3h3x0yph5gd6sk3l4ll"))))
+   (build-system emacs-build-system)
+   (arguments '(#:include '("^[^/]+.el$" "^[^/]+.el.in$"
+                            "^dir$"
+                            "^[^/]+.info$"
+                            "^[^/]+.texi$"
+                            "^[^/]+.texinfo$"
+                            "^doc/dir$"
+                            "^doc/[^/]+.info$"
+                            "^doc/[^/]+.texi$"
+                            "^doc/[^/]+.texinfo$"
+                            "^[^/]+.wav$")
+                #:exclude '("^.dir-locals.el$" "^test.el$" "^tests.el$"
+                            "^[^/]+-test.el$" "^[^/]+-tests.el$")))
+   (home-page "https://github.com/rbanffy/selectric-mode")
+   (synopsis "IBM Selectric mode for Emacs")
+   (description
+    "This minor mode plays the sound of an IBM Selectric typewriter as you type.")
+   (license license:gpl3+)))
 #+end_src
 
 ******* import from melpa
@@ -1280,33 +1286,33 @@ guix import elpa -a melpa selectric-mode
 :results:
 2023-06-30T21:00:14+00:00
 (package
-  ((name "emacs-selectric-mode")
-   (version "20200209.2107")
-   (source (origin
-             (method git-fetch)
-             (uri (git-reference
-                   (url "https://github.com/rbanffy/selectric-mode.git")
-                   (commit "1840de71f7414b7cd6ce425747c8e26a413233aa")))
-             (sha256 (base32
-                      "1aabqqqcafkqmyarf5kb1k0gglmlpn6kr3h3x0yph5gd6sk3l4ll"))))
-   (build-system emacs-build-system)
-   (arguments '(#:include '("^[^/]+.el$" "^[^/]+.el.in$"
-                            "^dir$"
-                            "^[^/]+.info$"
-                            "^[^/]+.texi$"
-                            "^[^/]+.texinfo$"
-                            "^doc/dir$"
-                            "^doc/[^/]+.info$"
-                            "^doc/[^/]+.texi$"
-                            "^doc/[^/]+.texinfo$"
-                            "^[^/]+.wav$")
-                #:exclude '("^.dir-locals.el$" "^test.el$" "^tests.el$"
-                            "^[^/]+-test.el$" "^[^/]+-tests.el$")))
-   (home-page "https://github.com/rbanffy/selectric-mode")
-   (synopsis "IBM Selectric mode for Emacs")
-   (description
-    "This minor mode plays the sound of an IBM Selectric typewriter as you type.")
-   (license #f)))
+((name "emacs-selectric-mode")
+(version "20200209.2107")
+(source (origin
+(method git-fetch)
+(uri (git-reference
+(url "https://github.com/rbanffy/selectric-mode.git")
+(commit "1840de71f7414b7cd6ce425747c8e26a413233aa")))
+(sha256 (base32
+"1aabqqqcafkqmyarf5kb1k0gglmlpn6kr3h3x0yph5gd6sk3l4ll"))))
+(build-system emacs-build-system)
+(arguments '(#:include '("^[^/]+.el$" "^[^/]+.el.in$"
+"^dir$"
+"^[^/]+.info$"
+"^[^/]+.texi$"
+"^[^/]+.texinfo$"
+"^doc/dir$"
+"^doc/[^/]+.info$"
+"^doc/[^/]+.texi$"
+"^doc/[^/]+.texinfo$"
+"^[^/]+.wav$")
+#:exclude '("^.dir-locals.el$" "^test.el$" "^tests.el$"
+"^[^/]+-test.el$" "^[^/]+-tests.el$")))
+(home-page "https://github.com/rbanffy/selectric-mode")
+(synopsis "IBM Selectric mode for Emacs")
+(description
+"This minor mode plays the sound of an IBM Selectric typewriter as you type.")
+(license #f)))
 :end:
 
 ****** emacs-atomic-chrome
@@ -1424,6 +1430,88 @@ Internals Neatly Generated.")
    (license license:gpl3+)))
 #+end_src
 
+
+****** emacs-org-noter
+:PROPERTIES:
+:CREATED:  [2024-07-15 Mon 15:24]
+:UPDATED:  [2024-07-15 Mon 16:06]
+:ID:       366f658b-9151-43cb-b046-51cd0b58c39b
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src shell :wrap "src scheme"
+echo -e "$(guix import elpa -a melpa org-noter)"
+#+end_src
+
+#+RESULTS:
+#+begin_src scheme
+(define-public emacs-org-noter
+  (package
+   (name "emacs-org-noter")
+   (version "20240509.1756")
+   (source
+    (origin
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/org-noter/org-noter.git")
+           (commit "68646b685a0d8c02419234922a9e2d885d6419df")))
+     (file-name (git-file-name name version))
+     (sha256
+      (base32 "17kgy2b89cc0v3q49pgrp6x46f2908v6vscxg4pczf6zc83rmwzp"))))
+   (build-system emacs-build-system)
+   (propagated-inputs (list emacs-org emacs-org-roam))
+   (arguments
+    '(#:include '("^[^/]+.el$" "modules")
+      #:exclude '("^[^/]+-test-utils.el$" "^[^/]+-devel.el$")))
+   (home-page "https://github.com/org-noter/org-noter")
+   (synopsis "A synchronized, Org-mode, document annotator")
+   (description
+    "The idea is to let you create notes that are kept in sync when you scroll
+through the document, but that are external to it - the notes themselves live in
+an Org-mode file.  As such, this leverages the power of Org-mode (the notes may
+have outlines, latex fragments, babel, etc...) while acting like notes that are
+made /in/ the document.  Also, I must thank Sebastian for the original idea and
+inspiration! Link to the original Interleave package:
+https://github.com/rudolfochrist/interleave.")
+   (license #f)))
+#+end_src
+
+****** emacs-org-remark
+:PROPERTIES:
+:CREATED:  [2024-07-15 Mon 15:29]
+:UPDATED:  [2024-07-15 Mon 15:30]
+:ID:       af8d5cfa-581c-4981-b3ba-383c5a70b707
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src shell :wrap "src scheme"
+echo -e "$(guix import elpa org-remark)"
+#+end_src
+
+#+RESULTS:
+#+begin_src scheme
+(define-public emacs-org-remark
+  (package
+   (name "emacs-org-remark")
+   (version "1.2.2")
+   (source
+    (origin
+     (method url-fetch)
+     (uri (string-append "https://elpa.gnu.org/packages/org-remark-" version
+                         ".tar"))
+     (sha256
+      (base32 "01iprzgbyvbfpxp6fls4lfx2lxx7xkff80m35s9kc0ih5jlxc5qs"))))
+   (build-system emacs-build-system)
+   (propagated-inputs (list emacs-org))
+   (home-page "https://github.com/nobiot/org-remark")
+   (synopsis "Highlight & annotate text, Info, EPUB, EWW")
+   (description
+    "Org-remark lets you highlight and annotate text files, websites,
+EPUB books and Info documentation using Org mode.")
+   (license license:gpl3+)))
+#+end_src
+
+
 ***** python
 :PROPERTIES:
 :CREATED:  [2023-09-24 Sun 15:48]
@@ -1502,22 +1590,22 @@ Internals Neatly Generated.")
 
 (define-public python-keyring-pass
   (package
-    (name "python-keyring-pass")
-    (version "0.7.0")
-    (source
-      (origin
-        (method url-fetch)
-        (uri (pypi-uri "keyring_pass" version))
-        (sha256
-          (base32 "0rqrsm0gxxvv6vkqyg3snf29m8q44ljsz63f3j2rkizry9csd1fl"))))
-    (build-system python-build-system)
-    (propagated-inputs (list python-keyring))
-    (home-page "https://github.com/nazarewk/keyring_pass")
-    (synopsis
-      "https://www.passwordstore.org/ backend for https://pypi.org/project/keyring/")
-    (description
-      "https://www.passwordstore.org/ backend for https://pypi.org/project/keyring/")
-    (license license:expat)))
+   (name "python-keyring-pass")
+   (version "0.7.0")
+   (source
+    (origin
+     (method url-fetch)
+     (uri (pypi-uri "keyring_pass" version))
+     (sha256
+      (base32 "0rqrsm0gxxvv6vkqyg3snf29m8q44ljsz63f3j2rkizry9csd1fl"))))
+   (build-system python-build-system)
+   (propagated-inputs (list python-keyring))
+   (home-page "https://github.com/nazarewk/keyring_pass")
+   (synopsis
+    "https://www.passwordstore.org/ backend for https://pypi.org/project/keyring/")
+   (description
+    "https://www.passwordstore.org/ backend for https://pypi.org/project/keyring/")
+   (license license:expat)))
 
 ;; TODO upgrade to 0.8.0 (needs jaraco-classes==4.0.0)
 ;; (define-public python-keyring-pass
@@ -1560,64 +1648,64 @@ Internals Neatly Generated.")
 
 (define-public perl-image-info
   (package
-    (name "perl-image-info")
-    (version "1.43")
-    (source (origin
-              (method url-fetch)
-              (uri (string-append
-                    "mirror://cpan/authors/id/S/SR/SREZIC/Image-Info-" version
-                    ".tar.gz"))
-              (sha256
-               (base32
-                "1ybibpdhz420c7n09vp7cjxq9g8d46qsgbp3fqcskvwmjf41gi2b"))))
-    (build-system perl-build-system)
-    (propagated-inputs `(("perl-image-info" ,perl-image-info)))
-    (home-page "https://metacpan.org/release/Image-Info")
-    (synopsis "Extract meta information from image files")
-    (description "Extract meta information from image files")
-    (license license:perl-license)))
+   (name "perl-image-info")
+   (version "1.43")
+   (source (origin
+            (method url-fetch)
+            (uri (string-append
+                  "mirror://cpan/authors/id/S/SR/SREZIC/Image-Info-" version
+                  ".tar.gz"))
+            (sha256
+             (base32
+              "1ybibpdhz420c7n09vp7cjxq9g8d46qsgbp3fqcskvwmjf41gi2b"))))
+   (build-system perl-build-system)
+   (propagated-inputs `(("perl-image-info" ,perl-image-info)))
+   (home-page "https://metacpan.org/release/Image-Info")
+   (synopsis "Extract meta information from image files")
+   (description "Extract meta information from image files")
+   (license license:perl-license)))
 
 (define-public perl-graph-easy-as-svg
   (package
-    (name "perl-graph-easy-as-svg")
-    (version "0.28")
-    (source (origin
-              (method url-fetch)
-              (uri (string-append
-                    "mirror://cpan/authors/id/S/SH/SHLOMIF/Graph-Easy-As_svg-"
-                    version ".tar.gz"))
-              (sha256
-               (base32
-                "0y177sznq4a1h74hcq1477jh8h3i5xnfi0ch6yrk8bs48jn5z6nd"))))
-    (build-system perl-build-system)
-    (native-inputs `(("perl-module-build" ,perl-module-build)))
-    (propagated-inputs `(
-                         ;;("perl-graph-easy" ,perl-graph-easy)
-                         ("perl-image-info" ,perl-image-info)))
-    (home-page "https://metacpan.org/release/Graph-Easy-As_svg")
-    (synopsis "Output a Graph::Easy as Scalable Vector Graphics (SVG)")
-    (description "Output a Graph::Easy as Scalable Vector Graphics (SVG)")
-    (license license:gpl2)))
+   (name "perl-graph-easy-as-svg")
+   (version "0.28")
+   (source (origin
+            (method url-fetch)
+            (uri (string-append
+                  "mirror://cpan/authors/id/S/SH/SHLOMIF/Graph-Easy-As_svg-"
+                  version ".tar.gz"))
+            (sha256
+             (base32
+              "0y177sznq4a1h74hcq1477jh8h3i5xnfi0ch6yrk8bs48jn5z6nd"))))
+   (build-system perl-build-system)
+   (native-inputs `(("perl-module-build" ,perl-module-build)))
+   (propagated-inputs `(
+                        ;;("perl-graph-easy" ,perl-graph-easy)
+                        ("perl-image-info" ,perl-image-info)))
+   (home-page "https://metacpan.org/release/Graph-Easy-As_svg")
+   (synopsis "Output a Graph::Easy as Scalable Vector Graphics (SVG)")
+   (description "Output a Graph::Easy as Scalable Vector Graphics (SVG)")
+   (license license:gpl2)))
 
 (define-public perl-graph-easy
   (package
-    (name "perl-graph-easy")
-    (version "0.76")
-    (source (origin
-              (method url-fetch)
-              (uri (string-append
-                    "mirror://cpan/authors/id/S/SH/SHLOMIF/Graph-Easy-" version
-                    ".tar.gz"))
-              (sha256
-               (base32
-                "1yni1181bqfvqcr155mvzgqsqlmpwfiklzx3ircknrpgxc5c38nl"))))
-    (build-system perl-build-system)
-    (native-inputs `(("perl-module-build" ,perl-module-build)))
-    (propagated-inputs `(("perl-graph-easy-as_svg" ,perl-graph-easy-as-svg)))
-    (home-page "https://metacpan.org/release/Graph-Easy")
-    (synopsis "Convert or render graphs (as ASCII, HTML, SVG or via Graphviz)")
-    (description "Convert or render graphs (as ASCII, HTML, SVG or via Graphviz)")
-    (license license:gpl1)))
+   (name "perl-graph-easy")
+   (version "0.76")
+   (source (origin
+            (method url-fetch)
+            (uri (string-append
+                  "mirror://cpan/authors/id/S/SH/SHLOMIF/Graph-Easy-" version
+                  ".tar.gz"))
+            (sha256
+             (base32
+              "1yni1181bqfvqcr155mvzgqsqlmpwfiklzx3ircknrpgxc5c38nl"))))
+   (build-system perl-build-system)
+   (native-inputs `(("perl-module-build" ,perl-module-build)))
+   (propagated-inputs `(("perl-graph-easy-as_svg" ,perl-graph-easy-as-svg)))
+   (home-page "https://metacpan.org/release/Graph-Easy")
+   (synopsis "Convert or render graphs (as ASCII, HTML, SVG or via Graphviz)")
+   (description "Convert or render graphs (as ASCII, HTML, SVG or via Graphviz)")
+   (license license:gpl1)))
 #+end_src
 
 ******* guix import
@@ -1646,65 +1734,65 @@ done
 
 (define-public image-info
 (package
-  (name "perl-image-info")
-  (version "1.43")
-  (source (origin
-            (method url-fetch)
-            (uri (string-append
-                  "mirror://cpan/authors/id/S/SR/SREZIC/Image-Info-" version
-                  ".tar.gz"))
-            (sha256
-             (base32
-              "1ybibpdhz420c7n09vp7cjxq9g8d46qsgbp3fqcskvwmjf41gi2b"))))
-  (build-system perl-build-system)
-  (propagated-inputs `(("perl-image-info" ,perl-image-info)))
-  (home-page "https://metacpan.org/release/Image-Info")
-  (synopsis "Extract meta information from image files")
-  (description fill-in-yourself!)
-  (license perl-license)))
+(name "perl-image-info")
+(version "1.43")
+(source (origin
+(method url-fetch)
+(uri (string-append
+"mirror://cpan/authors/id/S/SR/SREZIC/Image-Info-" version
+".tar.gz"))
+(sha256
+(base32
+"1ybibpdhz420c7n09vp7cjxq9g8d46qsgbp3fqcskvwmjf41gi2b"))))
+(build-system perl-build-system)
+(propagated-inputs `(("perl-image-info" ,perl-image-info)))
+(home-page "https://metacpan.org/release/Image-Info")
+(synopsis "Extract meta information from image files")
+(description fill-in-yourself!)
+(license perl-license)))
 
 
 (define-public graph-easy-as-svg
 (package
-  (name "perl-graph-easy-as_svg")
-  (version "0.28")
-  (source (origin
-            (method url-fetch)
-            (uri (string-append
-                  "mirror://cpan/authors/id/S/SH/SHLOMIF/Graph-Easy-As_svg-"
-                  version ".tar.gz"))
-            (sha256
-             (base32
-              "0y177sznq4a1h74hcq1477jh8h3i5xnfi0ch6yrk8bs48jn5z6nd"))))
-  (build-system perl-build-system)
-  (native-inputs `(("perl-module-build" ,perl-module-build)))
-  (propagated-inputs `(("perl-graph-easy" ,perl-graph-easy)
-                       ("perl-image-info" ,perl-image-info)))
-  (home-page "https://metacpan.org/release/Graph-Easy-As_svg")
-  (synopsis "Output a Graph::Easy as Scalable Vector Graphics (SVG)")
-  (description fill-in-yourself!)
-  (license gpl2)))
+(name "perl-graph-easy-as_svg")
+(version "0.28")
+(source (origin
+(method url-fetch)
+(uri (string-append
+"mirror://cpan/authors/id/S/SH/SHLOMIF/Graph-Easy-As_svg-"
+version ".tar.gz"))
+(sha256
+(base32
+"0y177sznq4a1h74hcq1477jh8h3i5xnfi0ch6yrk8bs48jn5z6nd"))))
+(build-system perl-build-system)
+(native-inputs `(("perl-module-build" ,perl-module-build)))
+(propagated-inputs `(("perl-graph-easy" ,perl-graph-easy)
+("perl-image-info" ,perl-image-info)))
+(home-page "https://metacpan.org/release/Graph-Easy-As_svg")
+(synopsis "Output a Graph::Easy as Scalable Vector Graphics (SVG)")
+(description fill-in-yourself!)
+(license gpl2)))
 
 
 (define-public graph-easy
 (package
-  (name "perl-graph-easy")
-  (version "0.76")
-  (source (origin
-            (method url-fetch)
-            (uri (string-append
-                  "mirror://cpan/authors/id/S/SH/SHLOMIF/Graph-Easy-" version
-                  ".tar.gz"))
-            (sha256
-             (base32
-              "1yni1181bqfvqcr155mvzgqsqlmpwfiklzx3ircknrpgxc5c38nl"))))
-  (build-system perl-build-system)
-  (native-inputs `(("perl-module-build" ,perl-module-build)))
-  (propagated-inputs `(("perl-graph-easy-as_svg" ,perl-graph-easy-as_svg)))
-  (home-page "https://metacpan.org/release/Graph-Easy")
-  (synopsis "Convert or render graphs (as ASCII, HTML, SVG or via Graphviz)")
-  (description fill-in-yourself!)
-  (license gpl1)))
+(name "perl-graph-easy")
+(version "0.76")
+(source (origin
+(method url-fetch)
+(uri (string-append
+"mirror://cpan/authors/id/S/SH/SHLOMIF/Graph-Easy-" version
+".tar.gz"))
+(sha256
+(base32
+"1yni1181bqfvqcr155mvzgqsqlmpwfiklzx3ircknrpgxc5c38nl"))))
+(build-system perl-build-system)
+(native-inputs `(("perl-module-build" ,perl-module-build)))
+(propagated-inputs `(("perl-graph-easy-as_svg" ,perl-graph-easy-as_svg)))
+(home-page "https://metacpan.org/release/Graph-Easy")
+(synopsis "Convert or render graphs (as ASCII, HTML, SVG or via Graphviz)")
+(description fill-in-yourself!)
+(license gpl1)))
 
 
 :end:
@@ -1726,10 +1814,10 @@ done
 :END:
 #+begin_src lisp
 (define-public mpv
-  (package
-    (name "mpv")
-    (version "0.37.0")
-    (source (origin
+    (package
+     (name "mpv")
+     (version "0.37.0")
+     (source (origin
               (method git-fetch)
               (uri (git-reference
                     (url "https://github.com/mpv-player/mpv")
@@ -1737,86 +1825,86 @@ done
               (file-name (git-file-name name version))
               (sha256
                (base32 "1xcyfpd543lbmg587wi0mahrz8vhyrlr4432054vp6wsi3s36c4b"))))
-    (build-system meson-build-system)
-    (arguments
-     (list
-      #:phases
-      #~(modify-phases %standard-phases
-          (add-after 'unpack 'patch-file-names
-            (lambda* (#:key inputs #:allow-other-keys)
-              (substitute* "player/lua/ytdl_hook.lua"
-                (("\"yt-dlp\",")
-                 (string-append
-                  "\"" (search-input-file inputs "bin/yt-dlp") "\",")))))
-          (add-before 'configure 'build-reproducibly
-            (lambda _
-              ;; Somewhere in the build system library dependencies are enumerated
-              ;; and passed as linker flags, but the order in which they are added
-              ;; varies.  See <https://github.com/mpv-player/mpv/issues/7855>.
-              ;; Set PYTHONHASHSEED as a workaround for deterministic results.
-              (setenv "PYTHONHASHSEED" "1"))))
-      #:configure-flags
-      #~(list "-Dlibmpv=true"
-              "-Dcdda=enabled"
-              "-Ddvdnav=enabled"
-              "-Dbuild-date=false")))
-    (native-inputs
-     (list perl                         ;for zsh completion file
-           pkg-config
-           python-docutils
-           python-wrapper))
-    ;; Missing features: libguess, V4L2.
-    (inputs
-     (list enca
-           ladspa
-           lcms
-           libbs2b
-           mpg123
-           rsound
-           vulkan-headers
-           vulkan-loader
-           yt-dlp))
-    ;; XXX: These are propagated for the mpv pkg-config package, as they are
-    ;; listed in Requires.private and would break 'pkg-config --exists mpv' if
-    ;; unavailable.
-    (propagated-inputs
-     (list alsa-lib
-           ffmpeg
-           jack-1
-           libass
-           libbluray
-           libcaca
-           libcdio-paranoia
-           libdrm
-           libdvdnav
-           libdvdread
-           libjpeg-turbo
-           libplacebo
-           libva
-           libvdpau
-           libx11
-           libxext
-           libxinerama
-           libxkbcommon
-           libxpresent
-           libxrandr
-           libxscrnsaver
-           libxv
-           ;; XXX: lua > 5.2 is not currently supported; see meson.build
-           lua-5.2
-           mesa
-           pulseaudio
-           shaderc
-           wayland
-           wayland-protocols
-           zimg
-           zlib))
-    (home-page "https://mpv.io/")
-    (synopsis "Audio and video player")
-    (description "mpv is a general-purpose audio and video player.  It is a
+     (build-system meson-build-system)
+     (arguments
+      (list
+       #:phases
+       #~(modify-phases %standard-phases
+                        (add-after 'unpack 'patch-file-names
+                                   (lambda* (#:key inputs #:allow-other-keys)
+                                            (substitute* "player/lua/ytdl_hook.lua"
+                                                         (("\"yt-dlp\",")
+                                                          (string-append
+                                                           "\"" (search-input-file inputs "bin/yt-dlp") "\",")))))
+                        (add-before 'configure 'build-reproducibly
+                                    (lambda _
+                                      ;; Somewhere in the build system library dependencies are enumerated
+                                      ;; and passed as linker flags, but the order in which they are added
+                                      ;; varies.  See <https://github.com/mpv-player/mpv/issues/7855>.
+                                      ;; Set PYTHONHASHSEED as a workaround for deterministic results.
+                                      (setenv "PYTHONHASHSEED" "1"))))
+       #:configure-flags
+       #~(list "-Dlibmpv=true"
+               "-Dcdda=enabled"
+               "-Ddvdnav=enabled"
+               "-Dbuild-date=false")))
+     (native-inputs
+      (list perl                         ;for zsh completion file
+            pkg-config
+            python-docutils
+            python-wrapper))
+     ;; Missing features: libguess, V4L2.
+     (inputs
+      (list enca
+            ladspa
+            lcms
+            libbs2b
+            mpg123
+            rsound
+            vulkan-headers
+            vulkan-loader
+            yt-dlp))
+     ;; XXX: These are propagated for the mpv pkg-config package, as they are
+     ;; listed in Requires.private and would break 'pkg-config --exists mpv' if
+     ;; unavailable.
+     (propagated-inputs
+      (list alsa-lib
+            ffmpeg
+            jack-1
+            libass
+            libbluray
+            libcaca
+            libcdio-paranoia
+            libdrm
+            libdvdnav
+            libdvdread
+            libjpeg-turbo
+            libplacebo
+            libva
+            libvdpau
+            libx11
+            libxext
+            libxinerama
+            libxkbcommon
+            libxpresent
+            libxrandr
+            libxscrnsaver
+            libxv
+            ;; XXX: lua > 5.2 is not currently supported; see meson.build
+            lua-5.2
+            mesa
+            pulseaudio
+            shaderc
+            wayland
+            wayland-protocols
+            zimg
+            zlib))
+     (home-page "https://mpv.io/")
+     (synopsis "Audio and video player")
+     (description "mpv is a general-purpose audio and video player.  It is a
 fork of mplayer2 and MPlayer.  It shares some features with the former
 projects while introducing many more.")
-    (license license:gpl2+)))
+     (license license:gpl2+)))
 #+end_src
 
 ******* src
@@ -1830,28 +1918,28 @@ projects while introducing many more.")
 #+begin_src scheme
 (define-public mpvpaper
   (package
-    (name "mpvpaper")
-    (version "1.6")
-    (source (origin
-              (method git-fetch)
-              (uri (git-reference
-                    (url "https://github.com/GhostNaN/mpvpaper")
-                    (commit "d8164bb6bd2960d2f7f6a9573e086d07d440f037" ;;(string-append "v" version)
-                            )))
-              (file-name (git-file-name name version))
-              (sha256
-               (base32 "0iid3ml36kc4mzcfqkylml5wv2k3ysn7kkyx713fagz07vlq43gw"))))
-    (build-system meson-build-system)
-    (inputs (list cmake pkg-config))
-    ;;(propated-inputs (list ))
-    (native-inputs
-     (list mpv
-           wayland
-           wayland-protocols))
-    (home-page "https://github.com/GhostNaN/mpvpaper")
-    (synopsis "Audio and video player")
-    (description "A video wallpaper program for wlroots based wayland compositors. ")
-    (license license:gpl3+)))
+   (name "mpvpaper")
+   (version "1.6")
+   (source (origin
+            (method git-fetch)
+            (uri (git-reference
+                  (url "https://github.com/GhostNaN/mpvpaper")
+                  (commit "d8164bb6bd2960d2f7f6a9573e086d07d440f037" ;;(string-append "v" version)
+                          )))
+            (file-name (git-file-name name version))
+            (sha256
+             (base32 "0iid3ml36kc4mzcfqkylml5wv2k3ysn7kkyx713fagz07vlq43gw"))))
+   (build-system meson-build-system)
+   (inputs (list cmake pkg-config))
+   ;;(propated-inputs (list ))
+   (native-inputs
+    (list mpv
+          wayland
+          wayland-protocols))
+   (home-page "https://github.com/GhostNaN/mpvpaper")
+   (synopsis "Audio and video player")
+   (description "A video wallpaper program for wlroots based wayland compositors. ")
+   (license license:gpl3+)))
 #+end_src
 
 ***** collectors
@@ -1895,7 +1983,7 @@ mpvpaper
 :ROAM_EXCLUDE: t
 :END:
 
-**** my
+**** custom
 :PROPERTIES:
 :ID:       b290c986-542c-46ef-9729-defbd20da2ea
 :CREATED:  [2022-08-29 Mon 17:10]
