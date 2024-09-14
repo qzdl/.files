@@ -4837,7 +4837,8 @@ notmuch-saved-searches
 
    "figlet" ;; TODO: Move to emacs-artist-mode
    ;;"calibre"
-   "utox" "qtox" "jami"
+   "utox" "qtox"
+   ;; "jami"
 
    "vim"
 
