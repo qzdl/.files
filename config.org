@@ -3344,29 +3344,29 @@ sudo rsync \
 ******** postgresql (v10)
 :PROPERTIES:
 :ID:       f3e1e339-0500-410e-87b2-ed61fc47f9a0
-:UPDATED:  [2024-01-25 Thu 15:56]
+:UPDATED:  [2024-05-20 Mon 18:41]
 :CREATED:  [2022-09-28 Wed 15:53]
 :ROAM_EXCLUDE: t
 :END:
 
-#+begin_src scheme :noweb-ref services-sys
-(unless #t ;;gaming?
-  (service postgresql-service-type
-           (postgresql-configuration
-            (config-file
-             (postgresql-config-file
-              (hba-file
-               (plain-file "pg_hba.conf"
-                           "
+#+begin_src scheme :noweb-ref null
+;; :noweb-ref services-sys
+(service (@ (gnu services databases) postgresql-service-type)
+         ((@ (gnu services databases) postgresql-configuration)
+          (config-file
+           ((@ (gnu services databases) postgresql-config-file)
+            (hba-file
+             (plain-file "pg_hba.conf"
+                         "
 local	all	all			trust
 host	all	all	127.0.0.1/32    md5
 host	all	all	0.0.0.0/0       md5
 "
-                           ))))
-            (postgresql (@ (gnu packages databases) postgresql-10)))))
+                         ))))
+          (postgresql (@ (gnu packages databases) postgresql))))
 #+end_src
 
-******** postgresql: timescaledb                                           :inactive:
+******** postgresql: timescaledb                                    :inactive:
 :PROPERTIES:
 :ID:       54345225-6b45-4465-9646-6bdc81ac41a1
 :CREATED:  [2022-09-28 Wed 15:54]
