@@ -315,7 +315,7 @@ Not convinced about this means of hoisting global state.
   #:use-module (srfi srfi-1))
 #+end_src
 
-***** helpers
+**** helpers
 :PROPERTIES:
 :ID:       b76849d3-0686-46d0-b40d-f590c7f15ed0
 :CREATED:  [2022-08-08 Mon 11:38]
@@ -323,7 +323,7 @@ Not convinced about this means of hoisting global state.
 :ROAM_EXCLUDE: t
 :END:
 
-****** mailing list
+***** mailing list
 :PROPERTIES:
 :ID:       74689f33-9e2f-4cf1-bbdf-317a29e66572
 :CREATED:  [2022-07-29 Fri 17:48]
