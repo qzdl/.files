@@ -3438,7 +3438,13 @@ host	all	all	0.0.0.0/0       md5
           ;;    ))
           ))
 #+end_src
-
+******* network filesystem
+:PROPERTIES:
+:CREATED:  [2024-04-23 Tue 20:20]
+:UPDATED:  [2024-04-23 Tue 20:26]
+:ID:       9ef8dfa6-b484-49f4-884b-a2be9cef3ade
+:ROAM_EXCLUDE: t
+:END:
 ******** nfs
 :PROPERTIES:
 :ID:       8b00d302-567c-4773-a98f-0d4682d3b368
