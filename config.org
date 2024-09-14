@@ -3819,9 +3819,6 @@ host	all	all	0.0.0.0/0       md5
      (for_window "[app_id=\"pinentry-qt\"]" floating enable, border pixel)
 
      (for_window "[title=\"Nightly - Sharing Indicator\"]" floating enable, border pixel)
-     ;; (for_window "[title=\"Emacs (Client) [pass]\"]" floating enable, border pixel)
-     ;; (for_window "[title=\"Application Launcher - Emacs Client\"]" floating enable, border pixel)
-     ;; (for_window "[title=\"pass - Emacs Client\"]" floating enable, border pixel)
 
      (bindsym $mod+Ctrl+o opacity set 1)
      (bindsym $mod+Ctrl+p opacity minus 0.05)
