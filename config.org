@@ -2745,7 +2745,7 @@ wc /tmp/id-locations-files
 ******* TODO xdg-desktop-portal-wlr
 :PROPERTIES:
 :CREATED:  [2023-09-24 Sun 15:48]
-:UPDATED:  [2023-09-24 Sun 15:48]
+:UPDATED:  [2024-05-30 Thu 14:50]
 :ID:       d91cb34e-6eb2-43f3-8d53-1710b7dc225f
 :ROAM_EXCLUDE: t
 :END:
@@ -2761,27 +2761,27 @@ wc /tmp/id-locations-files
 ;;; current
 (simple-service
  'xdg-desktop-portal-wlr-configuration--slurpy
-        home-xdg-configuration-files-service-type
-        `(("xdg-desktop-portal-wlr/config"
-           ,(mixed-text-file
-             "xdg-desktop-portal-wlr-config"
-             #~(format #f "[screencast]
+ home-xdg-configuration-files-service-type
+ `(("xdg-desktop-portal-wlr/config"
+    ,(mixed-text-file
+      "xdg-desktop-portal-wlr-config"
+      #~(format #f "[screencast]
 output_name=
 max_fps=30
 chooser_cmd=~a -f %o -or -c ff0000
 chooser_type=simple"
-#$(file-append (get-value 'slurp config slurp) "/bin/slurp"))))))
+                #$(file-append (get-value 'slurp config slurp) "/bin/slurp"))))))
 
 ;; TODO can this fit? ^^ returns "DP-2", but __ returns x,y, etc
 (define-public subject-window-or-selection
-      #~(format #f "~a -t get_tree | ~a -r '.. | select(.pid? and .visible?) \
+  #~(format #f "~a -t get_tree | ~a -r '.. | select(.pid? and .visible?) \
 | .rect | \"\\(.x),\\(.y) \\(.width)x\\(.height)\"' | ~a -b ~a -B ~a"
-                #$(file-append (get-value 'sway config) "/bin/swaymsg")
-                #$(file-append jq "/bin/jq")
-                ;; TODO: Move to slurp-cmd
-                #$(file-append slurp "/bin/slurp")
-                "303030AA"
-                "303030AA"))
+            #$(file-append (get-value 'sway config) "/bin/swaymsg")
+            #$(file-append jq "/bin/jq")
+            ;; TODO: Move to slurp-cmd
+            #$(file-append slurp "/bin/slurp")
+            "303030AA"
+            "303030AA"))
 #+end_src
 
 
@@ -2789,54 +2789,58 @@ chooser_type=simple"
 :PROPERTIES:
 :ID:       2967a801-0b2e-4d50-8c7f-7c45c4c38644
 :ROAM_EXCLUDE: t
+:CREATED:  [2024-08-24 Sat 18:31]
 :END:
 
 ******** native-comp / rebuild
 :PROPERTIES:
 :ID:       4858ca5d-6b6d-4c98-aaff-3313ab9ec01d
 :ROAM_EXCLUDE: t
+:CREATED:  [2024-08-24 Sat 18:31]
 :END:
 #+begin_src scheme :noweb-ref services
 
-  ;; (simple-service 'emacs-my-package-rebuild
-  ;;                 home-emacs-service-type
-  ;;                 (home-emacs-extension
-  ;;                  (rebuild-elisp-packages? #t)))
+;; (simple-service 'emacs-my-package-rebuild
+;;                 home-emacs-service-type
+;;                 (home-emacs-extension
+;;                  (rebuild-elisp-packages? #t)))
 #+end_src
 
 ******** init-el
 :PROPERTIES:
 :ID:       92f8f022-2c73-493e-950a-5780b2b8bf21
 :ROAM_EXCLUDE: t
+:CREATED:  [2024-08-24 Sat 18:31]
 :END:
 #+begin_src scheme :noweb-ref services
-  (simple-service 'emacs-my-init-el
-                  home-emacs-service-type
-                  (home-emacs-extension
-                   (init-el
-                    (append
-                     (list #~"(define-key key-translation-map [?\\C-x] [?\\C-u])\n"
-                           #~"(define-key key-translation-map [?\\C-u] [?\\C-x])\n")
-                     (list init-el)))))
+(simple-service 'emacs-my-init-el
+                home-emacs-service-type
+                (home-emacs-extension
+                 (init-el
+                  (append
+                   (list #~"(define-key key-translation-map [?\\C-x] [?\\C-u])\n"
+                         #~"(define-key key-translation-map [?\\C-u] [?\\C-x])\n")
+                   (list init-el)))))
 #+end_src
 
 ******** pkg (collect <<emacs-pkg-my>> <<emacs-pkg>>)
 :PROPERTIES:
 :ID:       d1a37a16-c6fc-4c98-a8e2-019ad034ddca
 :ROAM_EXCLUDE: t
+:CREATED:  [2024-08-24 Sat 18:31]
 :END:
 #+begin_src scheme :noweb-ref services
-  (simple-service 'emacs-my-package-list
-                  home-emacs-service-type
-                  (home-emacs-extension
-                   (elisp-packages
-                    (append
-                      (list
-                       <<emacs-pkg-my>>
-                       )
-                      (pkgs
-                       <<emacs-pkg>>
-                       )))))
+(simple-service 'emacs-my-package-list
+                home-emacs-service-type
+                (home-emacs-extension
+                 (elisp-packages
+                  (append
+                   (list
+                    <<emacs-pkg-my>>
+                    )
+                   (pkgs
+                    <<emacs-pkg>>
+                    )))))
 #+end_src
 ****** <<services-sys>>
 :PROPERTIES:
@@ -2844,9 +2848,116 @@ chooser_type=simple"
 :CREATED:  [2022-09-28 Wed 15:47]
 :UPDATED:  [2023-08-31 Thu 10:12]
 :ROAM_EXCLUDE: t
+:header-args:scheme: :noweb-ref services-sys
+:END:
+******* monitoring
+:PROPERTIES:
+:CREATED:  [2024-05-20 Mon 16:50]
+:UPDATED:  [2024-05-20 Mon 16:50]
+:ID:       d385868b-d02a-42b9-b782-937d19f568b7
+:ROAM_EXCLUDE: t
 :END:
 
-******* prometheus-node-exporter                                            :metrics:
+See [[info:guix#Monitoring Services][guix#Monitoring Services]].
+
+******** zabbix
+:PROPERTIES:
+:CREATED:  [2024-05-20 Mon 16:50]
+:UPDATED:  [2024-05-20 Mon 16:50]
+:ID:       1ba78b7b-d51a-4fe4-831c-f170c92a73a1
+:ROAM_EXCLUDE: t
+:END:
+
+zabbix
+
+- https://www.zabbix.com/manuals
+
+
+********* server
+:PROPERTIES:
+:CREATED:  [2024-05-20 Mon 16:50]
+:UPDATED:  [2024-05-20 Mon 18:26]
+:ID:       ad7fa34e-761e-4544-a578-738162dbeacf
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme :noweb-ref null
+(service
+ (@ (gnu services monitoring) zabbix-server-service-type)
+ ((@ (gnu services monitoring) zabbix-server-configuration)
+  (log-type "file")
+  ;; (extra-options '()))
+  (db-password "test")
+  ;; (include-files '("zabbix-server-dbpassword"))
+  ))
+#+end_src
+********** TODO db host/user/name/pw
+:PROPERTIES:
+:CREATED:  [2024-05-20 Mon 16:53]
+:UPDATED:  [2024-05-20 Mon 16:53]
+:ID:       86cf26f3-87ba-4488-8fc7-612357aadde2
+:ROAM_EXCLUDE: t
+:END:
+********** TODO log-type
+:PROPERTIES:
+:CREATED:  [2024-05-20 Mon 16:53]
+:UPDATED:  [2024-05-20 Mon 16:53]
+:ID:       7e407fc7-d878-41df-b823-b75fca838a38
+:ROAM_EXCLUDE: t
+:END:
+********** TODO extra-options
+:PROPERTIES:
+:CREATED:  [2024-05-20 Mon 16:53]
+:UPDATED:  [2024-05-20 Mon 16:59]
+:ID:       1ede320e-cd7c-4b10-add4-86c3a17f705a
+:ROAM_EXCLUDE: t
+:END:
+********* agent
+:PROPERTIES:
+:CREATED:  [2024-05-20 Mon 16:50]
+:UPDATED:  [2024-05-20 Mon 17:07]
+:ID:       fd27e843-fa06-4f9c-892b-e082e3e35260
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme :noweb-ref null
+;;; zabbix-ixy
+(service
+ (@ (gnu services monitoring) zabbix-agent-service-type)
+ ((@ (gnu services monitoring) zabbix-agent-configuration)
+  (hostname "ixy")
+  (server '("127.0.0.1"))
+  (server-active '("127.0.0.1"))
+  (log-type "file")
+  ;; (extra-options '())
+  ))
+#+end_src
+
+********* front-end
+:PROPERTIES:
+:CREATED:  [2024-05-20 Mon 16:50]
+:UPDATED:  [2024-05-20 Mon 18:07]
+:ID:       86755b30-0d69-45c2-b741-56c21da33a40
+:ROAM_EXCLUDE: t
+:END:
+
+
+#+begin_src scheme :noweb-ref null
+;;; PHP server
+;; see PHP-FHM & NGINX services [[info:guix#Web Services]]
+(service
+ (@ (gnu services monitoring) zabbix-front-end-service-type)
+ ((@ (gnu services monitoring) zabbix-front-end-configuration)
+  ;; (nginx '())
+  (zabbix-host "localhost")
+  (zabbix-port 10051)
+  ;; TODO db-host db-port db-name db-user db-secret-file
+  (db-secret-file "zabbix-password")
+  ;; (extra-options '())))
+  ))
+#+end_src
+
+******** prometheus-node-exporter                                    :metrics:
 :PROPERTIES:
 :ID:       e14e8d70-c704-415d-88ac-62f72ee03df9
 :CREATED:  [2022-09-28 Wed 15:47]
