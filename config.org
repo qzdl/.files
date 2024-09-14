@@ -226,20 +226,24 @@ Not convinced about this means of hoisting global state.
   #:use-module (gnu bootloader grub)
 
   #:use-module (gnu home services) ; nope
-  #:use-module (gnu home-services shells)
+  ;; #:use-module (gnu home-services shells) ;; error [2024-04-23 Tue 12:26] -> (rde home services shells)
   #:use-module (gnu home-services ssh)
 
   #:use-module (gnu packages cmake)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages fonts)
   #:use-module (gnu packages freedesktop)
+  #:use-module (gnu packages linux)
   #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages video)
   #:use-module (gnu packages wm)
+
   #:use-module (gnu packages)
 
+  #:use-module (gnu services)
   #:use-module (gnu services admin)
   #:use-module (gnu services base)
+  #:use-module (gnu services cups)
   #:use-module (gnu services desktop)
   #:use-module (gnu services nfs)
   #:use-module (gnu services samba)
@@ -264,6 +268,7 @@ Not convinced about this means of hoisting global state.
   #:use-module (rde features bittorrent)
   #:use-module (rde features bluetooth)
   #:use-module (rde features clojure)
+  #:use-module (rde features containers)
   #:use-module (rde features docker)
   #:use-module (rde features emacs)
   #:use-module (rde features emacs-xyz)
@@ -298,6 +303,7 @@ Not convinced about this means of hoisting global state.
 
   #:use-module (rde home services i2p)
   #:use-module (rde home services emacs)
+  #:use-module (rde home services shells)
 
   #:use-module (rde packages emacs)
   #:use-module (rde packages emacs-xyz)
@@ -307,10 +313,10 @@ Not convinced about this means of hoisting global state.
 
   ;;#:use-module (gnu home-services shellutils)
 
-  #:use-module (nongnu packages nvidia)
-  #:use-module (nongnu services nvidia)
-
-  ;;#:use-module (rde features bluetooth) ;; TODO qzdl
+  #:use-module ((nongnu packages linux) #:prefix nongnu-pkg-linux:)
+  #:use-module ((nongnu packages linux) #:prefix nongnu-pkg-nvidia:)
+  #:use-module ((nongnu services nvidia) #:prefix nongnu-nvidia-svc:)
+  #:use-module ((nongnu system linux-initrd) #:prefix nongnu-sys:)
 
   #:use-module (srfi srfi-1))
 #+end_src
