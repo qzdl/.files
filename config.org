@@ -2973,6 +2973,25 @@ zabbix
 #+end_src
 
 ******* mcron                                                                  :jobs:
+******* TODO log rotation
+:PROPERTIES:
+:ID:       49a93fab-cba5-4cad-896b-8d1f2fd89adb
+:ROAM_EXCLUDE: t
+:UPDATED:  [2024-05-20 Mon 18:16]
+:CREATED:  [2024-08-24 Sat 18:31]
+:END:
+
+- :: [[info:guix#Log Rotation][guix#Log Rotation]]
+- =rottlog-service-type=
+
+#+begin_src scheme
+(simple-service
+ 'my-rottlog
+ rottlog-service-type
+ (list (log-rotation
+        (frequency 'daily)
+        (files '("/var/log/*.log")))))
+#+end_src
 :PROPERTIES:
 :ID:       b83cdd83-78d4-464f-bb8f-74a481713984
 :CREATED:  [2022-09-28 Wed 15:47]
