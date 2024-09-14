@@ -45,6 +45,7 @@ Not convinced about this means of hoisting global state.
 (rde features mail)
 (rde features base)
 (rde features gnupg)
+(gnu system file-systems)
 #+end_src
 
 *** defmod header
