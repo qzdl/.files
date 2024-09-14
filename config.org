@@ -5110,7 +5110,7 @@ emacs-spacious-padding
 :ROAM_EXCLUDE: t
 :END:
 
-**** channels.scm
+**** guix.scm
 :PROPERTIES:
 :ID:       21ce54e0-18e0-460f-82c7-2b43e243ad45
 :CREATED:  [2022-08-29 Mon 16:40]
@@ -5118,7 +5118,7 @@ emacs-spacious-padding
 :ROAM_EXCLUDE: t
 :END:
 
-#+begin_src scheme :tangle channels/channels.scm :noweb-ref 2chan
+#+begin_src scheme :tangle channels/guix.scm :noweb-ref 2chan
 ;; -*- mode: scheme -*-
 (use-modules (guix ci)
              (guix channels))
@@ -5167,7 +5167,7 @@ emacs-spacious-padding
  )
 #+end_src
 
-**** local.scm                                                     :untangle:
+**** guix-local.scm                                                :untangle:
 :PROPERTIES:
 :ID:       334b6dee-e142-4020-9417-23b3ff933cb9
 :CREATED:  [2023-07-12 Wed 19:20]
@@ -5180,7 +5180,7 @@ emacs-spacious-padding
 - path formatting inspired by :: https://github.com/migalmoreno/guix-config/blob/master/rde/channels-local.scm
 
 
-#+begin_src scheme :tangle channels/local.scm :noweb-ref 2chan
+#+begin_src scheme :tangle channels/guix-local.scm :noweb-ref 2chan
 ;; -*- mode: scheme -*-
 (use-modules (guix ci)
              (guix channels))
