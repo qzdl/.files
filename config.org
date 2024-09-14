@@ -2315,6 +2315,7 @@ removing default rotation jobs from RDE
 :CREATED:  [2022-09-28 Wed 15:48]
 :UPDATED:  [2023-04-18 Tue 14:07]
 :ROAM_EXCLUDE: t
+:header-args:scheme: :noweb-ref services
 :END:
 
 ******* envars
