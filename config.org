@@ -10,6 +10,7 @@
 :header-args:emacs-lisp: :noweb-ref conf-emacs
 :END:
 #+title: GNU Guix (RDE) & Emacs
+-----
 
 * header
 :PROPERTIES:
