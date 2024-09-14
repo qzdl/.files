@@ -3807,9 +3807,9 @@ host	all	all	0.0.0.0/0       md5
      (bindsym $mod+v gaps inner current set 10)
 
      (,#~"output * bg ~/.cache/wallpaper.png fill")
-     ;;(,#~"output eDP-1 bg ~/.cache/wallpaper.png fill")
-     (,#~"output DP-2 res 3840x1080")
-     (,#~"output DP-1 res 3840x1080")
+
+     (,#~"output DP-2 res 5120x1440")
+     (,#~"output DP-1 res 5120x1440")
 
      ;; TODO sway: wacom input rotation matrix
      (,#~"input \"*\" tool_mode \"*\" relative calibration_matrix 0.0 -1.0 1.0 1.0 0.0 0.0")
