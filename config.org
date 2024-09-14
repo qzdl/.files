@@ -4663,16 +4663,118 @@ emacs-spacious-padding
 #+end_src
 
 
+****** emacs-dashboard
+:PROPERTIES:
+:CREATED:  [2024-07-09 Tue 16:41]
+:UPDATED:  [2024-07-09 Tue 16:41]
+:ID:       1704ebb6-1630-4c96-aec0-b13598394cd6
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme :noweb-ref main
+(feature-emacs-dashboard
+ #:show-on-startup? #f)
+;; (feature-emacs-ednc) ;; TODO [2024-04-23 Tue 12:53] no libnotify to config?
+#+end_src
+
+****** emacs-pulseaudio-control
+:PROPERTIES:
+:CREATED:  [2024-07-09 Tue 16:41]
+:UPDATED:  [2024-07-09 Tue 16:41]
+:ID:       63668431-1972-431e-8061-be7c85defd01
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme :noweb-ref main
+(feature-emacs-pulseaudio-control)
+#+end_src
+
+****** emacs-geiser
+:PROPERTIES:
+:CREATED:  [2024-07-09 Tue 16:37]
+:UPDATED:  [2024-07-09 Tue 16:37]
+:ID:       e6c69183-0a76-428c-9ffb-3feac50073b3
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme :noweb-ref main
+(feature-emacs-geiser)
+#+end_src
+
+****** emacs-guix
+:PROPERTIES:
+:CREATED:  [2024-07-09 Tue 16:37]
+:UPDATED:  [2024-07-09 Tue 16:37]
+:ID:       4f2a5f15-5d64-4038-aa4f-e35743f090b5
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme :noweb-ref main
+(feature-emacs-guix)
+#+end_src
+
+****** emacs-elisp
+:PROPERTIES:
+:CREATED:  [2024-07-09 Tue 16:37]
+:UPDATED:  [2024-07-09 Tue 16:37]
+:ID:       0260507f-387f-4651-98c7-d715cf1c2b66
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme :noweb-ref main
+(feature-emacs-elisp)
+#+end_src
+
+****** emacs-emms                                                        :music:
+:PROPERTIES:
+:CREATED:  [2024-07-09 Tue 16:37]
+:UPDATED:  [2024-07-09 Tue 16:37]
+:ID:       bcc32c41-cee5-46c0-a290-a28679013bd7
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme :noweb-ref main
+(feature-emacs-emms)
+#+end_src
+
+****** emacs-flymake
+:PROPERTIES:
+:CREATED:  [2024-07-09 Tue 16:37]
+:UPDATED:  [2024-07-09 Tue 16:37]
+:ID:       b2f46156-9088-4291-a98e-b98520911ff6
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme :noweb-ref main
+(feature-emacs-flymake)
+#+end_src
+
+****** emacs-org-protocol
+:PROPERTIES:
+:CREATED:  [2024-07-09 Tue 16:37]
+:UPDATED:  [2024-07-09 Tue 16:37]
+:ID:       80ae3331-a6b3-47b5-82be-e9360a1a2b71
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme :noweb-ref main
+(feature-emacs-org-protocol)
+#+end_src
+
+****** emacs-spelling
+:PROPERTIES:
+:CREATED:  [2024-07-09 Tue 16:37]
+:UPDATED:  [2024-07-09 Tue 16:37]
+:ID:       2b4792b0-dc28-415e-9653-1129465da234
+:ROAM_EXCLUDE: t
+:END:
+#+begin_src scheme :noweb-ref main
+(feature-emacs-spelling)
+#+end_src
+
+
 ***** mpv
 :PROPERTIES:
 :ID:       dc8200af-d1cd-4911-8c42-0b01e9361da2
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2024-04-01 Mon 00:21]
+:UPDATED:  [2024-04-22 Mon 11:39]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme :noweb-ref main
-;; (feature-mpv)
+(feature-mpv)
 #+end_src
 
 ***** mail
