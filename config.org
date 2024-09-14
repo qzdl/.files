@@ -3453,16 +3453,61 @@ host	all	all	0.0.0.0/0       md5
 :ROAM_EXCLUDE: t
 :END:
 
-#+begin_src scheme :noweb-ref services-sys
+#+begin_src scheme :noweb-ref null
+;; :noweb-ref services-sys
 ;; (gnu services nfs)
 (service nfs-service-type
          (nfs-configuration
-                (exports
-                 '(("/export"
-                    "*(ro,insecure,no_subtree_check,crossmnt,fsid=0)")))))
+          (exports
+           '(("/export"
+              "*(ro,insecure,no_subtree_check,crossmnt,fsid=0)")))))
 #+end_src
 
-******* base-services
+******** samba
+:PROPERTIES:
+:ID:       15b7b64b-8cde-4479-8e65-d1ce8b1bbddc
+:ROAM_EXCLUDE: t
+:CREATED:  [2024-08-24 Sat 18:31]
+:END:
+
+#+begin_src scheme :noweb-ref null
+;; :noweb-ref services-sys
+(service samba-service-type (samba-configuration
+                             (enable-smbd? #t)
+                             (config-file (plain-file "smb.conf" "\
+          [global]
+          map to guest = Bad User
+          logging = syslog@1
+
+          [public]
+          browsable = yes
+          path = /public
+          read only = yes
+          guest ok = yes
+          guest only = yes\n"))))
+#+end_src
+
+******** TODO multi-service start-stop for nfs, samba
+:PROPERTIES:
+:ID:       0109b1d0-62aa-4553-89f1-ded16faf6305
+:ROAM_EXCLUDE: t
+:CREATED:  [2024-08-24 Sat 18:31]
+:END:
+******* printing
+:PROPERTIES:
+:CREATED:  [2024-07-22 Mon 15:30]
+:UPDATED:  [2024-07-22 Mon 15:38]
+:ID:       390d9c2c-2fca-4ba8-823c-3eaf91be43f4
+:ROAM_EXCLUDE: t
+:END:
+
+#+begin_src scheme :noweb-ref services-sys
+(service cups-service-type
+         (cups-configuration
+          (web-interface? #t)))
+#+end_src
+
+****** feature-base-services
 :PROPERTIES:
 :ID:       8f7a4a2a-c195-4d06-8d76-25a5671ad941
 :CREATED:  [2022-08-01 Mon 10:52]
@@ -3470,7 +3515,7 @@ host	all	all	0.0.0.0/0       md5
 :ROAM_EXCLUDE: t
 :END:
 
-******** guix substitutes, keys
+******* guix substitutes, keys
 :PROPERTIES:
 :CREATED:  [2023-09-24 Sun 15:55]
 :UPDATED:  [2023-09-24 Sun 15:55]
