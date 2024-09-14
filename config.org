@@ -5405,7 +5405,7 @@ guix package --export-manifest
     #:mapped-devices ixy-mapped-devices
     #:file-systems ixy-file-systems)
    ;;(feature-hidpi)
-   (feature-networking)))
+   (feature-networking #:mdns? #t)))
 
 (pretty-print "post-%ixy-features")
 #+end_src
