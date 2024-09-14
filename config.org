@@ -2972,7 +2972,40 @@ zabbix
 
 #+end_src
 
-******* mcron                                                                  :jobs:
+********* TODO shipping / capturing
+:PROPERTIES:
+:ID:       0227c252-afd6-471a-857e-ec6e803517ff
+:ROAM_EXCLUDE: t
+:CREATED:  [2024-08-24 Sat 18:31]
+:END:
+******* TODO whoogle
+:PROPERTIES:
+:CREATED:  [2024-05-20 Mon 17:05]
+:UPDATED:  [2024-05-20 Mon 17:05]
+:ID:       4e8cd487-0093-4359-9b28-2ca2684db936
+:ROAM_EXCLUDE: t
+:END:
+******** environment vars
+:PROPERTIES:
+:CREATED:  [2024-05-20 Mon 17:05]
+:UPDATED:  [2024-05-20 Mon 17:05]
+:ID:       3c1680f7-2dfa-4110-95ec-cbbd9950dbf4
+:ROAM_EXCLUDE: t
+:END:
+
+- :: https://github.com/benbusby/whoogle-search?tab=readme-ov-file#environment-variables
+
+WHOOGLE_PROXY_TYPE
+
+
+
+******** WHOOGLE and TOR
+:PROPERTIES:
+:CREATED:  [2024-05-20 Mon 17:05]
+:UPDATED:  [2024-05-20 Mon 17:05]
+:ID:       d9bdb369-dd9c-4c48-8eb2-182518815322
+:ROAM_EXCLUDE: t
+:END:
 ******* TODO log rotation
 :PROPERTIES:
 :ID:       49a93fab-cba5-4cad-896b-8d1f2fd89adb
@@ -2992,6 +3025,7 @@ zabbix
         (frequency 'daily)
         (files '("/var/log/*.log")))))
 #+end_src
+******* mcron                                                            :jobs:
 :PROPERTIES:
 :ID:       b83cdd83-78d4-464f-bb8f-74a481713984
 :CREATED:  [2022-09-28 Wed 15:47]
