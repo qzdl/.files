@@ -4526,12 +4526,12 @@ emacs-spacious-padding
 :PROPERTIES:
 :ID:       c1f0a657-91fc-4a27-b33b-df85bfaa9ff1
 :CREATED:  [2022-08-01 Mon 10:52]
-:UPDATED:  [2024-04-01 Mon 02:20]
+:UPDATED:  [2024-05-20 Mon 14:08]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src scheme :noweb-ref main
-;; (feature-emacs-pdf-tools) ;; TODO broken [2024-04-01 Mon 02:19] portable emacs
+(feature-emacs-pdf-tools)
 #+end_src
 
 ****** emacs-nov-el
@@ -4543,7 +4543,7 @@ emacs-spacious-padding
 :END:
 
 #+begin_src scheme :noweb-ref main
-;; (feature-emacs-nov-el) ;; TODO broken [2024-04-01 Mon 02:19] portable emacs
+(feature-emacs-nov-el)
 #+end_src
 
 ****** emacs-git
