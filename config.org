@@ -3681,11 +3681,11 @@ host	all	all	0.0.0.0/0       md5
                      (port . 2222)
                      (identity-file . "~/.ssh/ko"))))
          (ssh-host
-          (host "yoho")
-          (options '((user . "yoho")
-                     (hostname . "192.168.0.12")
+          (host "pi")
+          (options '((user . "tiny")
+                     (hostname . "pi.local")
                      (port . 22)
-                     (identity-file . "~/.ssh/yoho"))))
+                     (identity-file . "~/.ssh/ixy-debpi"))))
          (ssh-host
           (host "boggartonius")
           (options '((user . "chopi")
