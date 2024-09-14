@@ -7,71 +7,6 @@
    '(
 
      ;; NOWEB GENERAL START
-     (defmacro qz/advice- (target-fn state advice-fn)
-       "Helper to manage advice functions.
-     
-     Creates commands for on/off which state the name of the target and advised functions."
-       (let* ((s-advice (lambda (e)
-                          (intern (format "qz/advice-%s--%s--%s"
-                                          e target-fn advice-fn))))
-              (enable (funcall s-advice 'enable))
-              (disable (funcall s-advice 'disable)))
-         `(progn
-            (defun ,enable ()
-              (interactive)
-              (advice-add ',target-fn ,state ',advice-fn))
-     
-            (defun ,(funcall s-advice 'disable) ()
-              (interactive)
-              (advice-remove ',target-fn ',advice-fn))
-     
-            (,enable)
-            (list ',enable ',disable))))
-     (defun cons->table (body &optional &key cols tail-fn)
-       "a transformation helper for org-babel, which has defaults
-     to parse robustly the proper-list[1] over the simple cons[2]
-     
-     body      *values you wish to transform*: a list; cons, proper,
-               a-, etc.
-     :cols     *column headers for the results*: wrap the result in
-               ((co1 col2) . (hline . (..res..)); as such, they will
-               be made in addition to any headers and/or `hlines'
-               applied by `org-babel' (esp. those from `:colnames').
-     :tail-fn  *control the parsing of each entry of `body'*:
-               by default, `cdr' because for a simple `cons' '(a . b),
-               cdr will yield 'b -> (cdr '(a . b)).  If operating on
-               some `list' '(a b), then the analog for `'b' is `cadr'
-               -> (cadr '(a b)) -> `'b'
-     
-     [1] proper-list: '(a b)   ; '(a . (b . nil))
-     [2] simple-cons: '(a . b) ; '(a . b)"
-       (let ((res (mapcar (lambda (c)
-                            (list (car c)
-                                  (funcall (or tail-fn 'cdr) c)))
-                          body)))
-         (if cols
-             (cons cols (cons 'hline res))
-           res)))
-     
-     ;;; e.g  {C-n C-SPC M-e C-p C-x C-;}
-     ;; (cons->table
-     ;;  '((56 . "/home/samuel/life/roam/20210420T114708Z-newstore.org")
-     ;;    (11 . "/home/samuel/life/roam/20210813T161035Z-kubernetes.org")
-     ;;    (10 . "/home/samuel/life/roam/20200515T151822Z-postgresql.org"))
-     ;;  :cols '(count file))
-     (defun qz/ensure-list (s)
-       (if (listp s)
-           s
-         (list s)))
-     (defun qz/save-no-hooks ()
-       (interactive)
-       (let ((before-save-hook nil))
-         (save-buffer)))
-     (defun qz/mode-is-or-derives (mode &rest modes)
-       (or (eq major-mode mode)
-           (apply 'derived-mode-p mode modes)))
-     
-     ;;  (trace-function 'qz/mode-is-or-derives)
      (defvar qz/debug 0 "debugging assists")
      
      (defmacro qz/debug- (&rest body)
@@ -79,6 +14,15 @@
          `(progn ,@body)))
      
      (qz/debug- (message "yo"))
+     (defun qz/ensure-list (s)
+       (if (listp s)
+           s
+         (list s)))
+     (defun qz/mode-is-or-derives (mode &rest modes)
+       (or (eq major-mode mode)
+           (apply 'derived-mode-p mode modes)))
+     
+     ;;  (trace-function 'qz/mode-is-or-derives)
      (require 's)
      
      (setq qz/newstore-envs '(sandbox staging production)
@@ -124,12 +68,68 @@
      ;;   (qz/newstore-choose-tenant)
      ;;   (qz/newstore-choose-env)
      ;;   (org-sbe "newstore-token"))
-     (defun qz/shell-command-to-list-of-strings (command)
-       (remove "" (s-split "\n" (shell-command-to-string command))))
+     (defun cons->table (body &optional &key cols tail-fn)
+       "a transformation helper for org-babel, which has defaults
+     to parse robustly the proper-list[1] over the simple cons[2]
+     
+     body      *values you wish to transform*: a list; cons, proper,
+               a-, etc.
+     :cols     *column headers for the results*: wrap the result in
+               ((co1 col2) . (hline . (..res..)); as such, they will
+               be made in addition to any headers and/or `hlines'
+               applied by `org-babel' (esp. those from `:colnames').
+     :tail-fn  *control the parsing of each entry of `body'*:
+               by default, `cdr' because for a simple `cons' '(a . b),
+               cdr will yield 'b -> (cdr '(a . b)).  If operating on
+               some `list' '(a b), then the analog for `'b' is `cadr'
+               -> (cadr '(a b)) -> `'b'
+     
+     [1] proper-list: '(a b)   ; '(a . (b . nil))
+     [2] simple-cons: '(a . b) ; '(a . b)"
+       (let ((res (mapcar (lambda (c)
+                            (list (car c)
+                                  (funcall (or tail-fn 'cdr) c)))
+                          body)))
+         (if cols
+             (cons cols (cons 'hline res))
+           res)))
+     
+     ;;; e.g  {C-n C-SPC M-e C-p C-x C-;}
+     ;; (cons->table
+     ;;  '((56 . "/home/samuel/life/roam/20210420T114708Z-newstore.org")
+     ;;    (11 . "/home/samuel/life/roam/20210813T161035Z-kubernetes.org")
+     ;;    (10 . "/home/samuel/life/roam/20200515T151822Z-postgresql.org"))
+     ;;  :cols '(count file))
+     (defmacro qz/advice- (target-fn state advice-fn)
+       "Helper to manage advice functions.
+     
+     Creates commands for on/off which state the name of the target and advised functions."
+       (let* ((s-advice (lambda (e)
+                          (intern (format "qz/advice-%s--%s--%s"
+                                          e target-fn advice-fn))))
+              (enable (funcall s-advice 'enable))
+              (disable (funcall s-advice 'disable)))
+         `(progn
+            (defun ,enable ()
+              (interactive)
+              (advice-add ',target-fn ,state ',advice-fn))
+     
+            (defun ,(funcall s-advice 'disable) ()
+              (interactive)
+              (advice-remove ',target-fn ',advice-fn))
+     
+            (,enable)
+            (list ',enable ',disable))))
      (defun qz/revert-buffer-no-confirm ()
        "Revert buffer without confirmation."
        (interactive)
        (revert-buffer :ignore-auto :noconfirm))
+     (defun qz/save-no-hooks ()
+       (interactive)
+       (let ((before-save-hook nil))
+         (save-buffer)))
+     (defun qz/shell-command-to-list-of-strings (command)
+       (remove "" (s-split "\n" (shell-command-to-string command))))
      ;; NOWEB GENERAL END
 
      ;; NOWEB CONF START
@@ -181,155 +181,14 @@
            (when (called-interactively-p 'interactive)
              (message "Dogears: Couldn't dogear this place"))
            )))
-     (define-key global-map (kbd "C-s-k") 'kill-this-buffer)
+     notmuch-saved-searches
+     (defun qz/recenter ()
+       (interactive)
+       (recenter qz/recenter-line))
+     
+     (define-key global-map (kbd "C-M-=") 'qz/recenter)
      (define-key global-map (kbd "C-M-s-k") 'kill-buffer-and-window)
-     ;; NOWEB KBD START
-     (define-key global-map (kbd "C-c C-x C-j") 'org-clock-goto)
-     (define-key global-map (kbd "C-c !") 'org-time-stamp-inactive)
-     (define-key global-map (kbd "C-s-j") 'org-roam-dailies-goto-today)
-     (define-key global-map (kbd "C-M-j") 'delete-indentation)
-     (define-key global-map (kbd "C-M-y") 'consult-yank-from-kill-ring)
-     (define-key global-map (kbd "C-x C-M-f") 'consult-recent-file)
-     ;;(custom-set-variables
-     ;; '(org-disputed-keys '([(shift o)] . [(meta shift o)])))
-     
-     (defun qz/newline-above ()
-       (interactive)
-       (save-excursion
-         (beginning-of-line)
-         (newline))
-       (indent-according-to-mode))
-     
-     (define-key global-map (kbd "C-z") 'qz/newline-above)
-     ;;(define-key global-map (kbd "C-o") 'open-line)
-     ;;
-     ;;(org-remap org-mode-map
-     ;;           'open-line 'org-open-line)
-     
-     (define-key global-map (kbd "M-s-h") 'windmove-swap-states-left)
-     (define-key global-map (kbd "M-s-j") 'windmove-swap-states-down)
-     (define-key global-map (kbd "M-s-k") 'windmove-swap-states-up)
-     (define-key global-map (kbd "M-s-l") 'windmove-swap-states-right)
-     (define-key global-map (kbd "H-M-s-h") 'windmove-swap-states-left)
-     (define-key global-map (kbd "H-M-s-j") 'windmove-swap-states-down)
-     (define-key global-map (kbd "H-M-s-k") 'windmove-swap-states-up)
-     (define-key global-map (kbd "H-M-s-l") 'windmove-swap-states-right)
-     (define-key global-map (kbd "H-s-h") 'windmove-left)
-     (define-key global-map (kbd "s-h")   'windmove-left)
-     (define-key global-map (kbd "H-s-j") 'windmove-down)
-     (define-key global-map (kbd "s-j")   'windmove-down)
-     (define-key global-map (kbd "H-s-k") 'windmove-up)
-     (define-key global-map (kbd "s-k")   'windmove-up)
-     (define-key global-map (kbd "H-s-l") 'windmove-right)
-     (define-key global-map (kbd "s-l")   'windmove-right)
-     ;; Activate occur easily inside isearch
-     
-     (define-key isearch-mode-map (kbd "C-o")
-                 (lambda () (interactive)
-                   (let ((case-fold-search isearch-case-fold-search))
-                     (occur (if isearch-regexp
-                                isearch-string
-                              (regexp-quote isearch-string))))))
-     (define-key isearch-mode-map (kbd "M-o")
-                 (lambda () (interactive)
-                   (let ((case-fold-search isearch-case-fold-search))
-                     (consult-line (if isearch-regexp
-                                       isearch-string
-                                     (regexp-quote isearch-string))))))
-     (global-set-key (kbd "C-s") 'isearch-forward-regexp)
-     (global-set-key (kbd "C-r") 'isearch-backward-regexp)
-     (global-set-key (kbd "C-M-s") 'isearch-forward)
-     (global-set-key (kbd "C-M-r") 'isearch-backward)
-     (define-key global-map (kbd "s-\\") 'org-store-link)
-     (defun qz/dwim-indent ()
-       "format / indent something.
-     
-     org-mode: indent the block at point
-     prog-mode: indent the whole buffer
-     
-     for the rest: remember that indent-region still exists.
-     
-     good-boy mode: cleans up whitespace too
-     
-     dwim by mode is important
-     
-     as until now, I've been dodging
-     org-errors about caching from my dodgy code"
-       (interactive)
-       (save-mark-and-excursion
-         (when (symbolp 'whitespace-cleanup)
-           (whitespace-cleanup))
-         (when-let ((f (cond
-                        ((and (derived-mode-p 'org-mode)
-                              (and (call-interactively 'org-babel-mark-block)
-                                   (not (seq-contains-p
-                                         qz/org-babel-indent-exclude-lang
-                                         (car (org-babel-get-src-block-info))))))
-                         (when (equal "python" (car (org-babel-get-src-block-info)))
-                           (mapc 'call-interactively '(python-black-region
-                                                       py-isort-region)))
-                         'indent-region)
-                        ((derived-mode-p 'python-mode)
-                         (python-black-buffer)
-                         (py-isort-buffer))
-                        ((and (derived-mode-p 'prog-mode)
-                              (mark-whole-buffer))
-                         'indent-region)
-                        (t nil))))
-           (call-interactively f))))
-     (define-key rde-toggle-map (kbd "d")   'toggle-debug-on-error)
-     
-     (define-key rde-toggle-map (kbd "h c") 'highlight-changes-mode)
-     (define-key rde-toggle-map (kbd "h C") 'global-highlight-changes-mode)
-     
-     (define-key rde-toggle-map (kbd "h i") 'highlight-indent-guides-mode)
-     
-     ;; a bit sus, but maybe equivalent to toggling off hi-lock-mode
-     (define-key rde-toggle-map (kbd "h p") 'unhighlight-regexp)
-     (define-key rde-toggle-map (kbd "h P") 'global-hi-lock-mode)
-     
-     ;; for the incessant observers demanding more than {M-g M-g}
-     (define-key rde-toggle-map (kbd "l")   'linum-mode)
-     (define-key rde-toggle-map (kbd "L")   'global-linum-mode)
-     (define-key global-map (kbd "M-s L") 'consult-line-multi)
-     (define-key global-map (kbd "C-c C-j") 'consult-imenu)
-     (define-key global-map (kbd "C-c n j") 'org-roam-dailies-capture-today)
-     (define-key global-map (kbd "C-c n J") 'org-roam-dailies-goto-today)
-     
-     (define-key global-map (kbd "C-c n C-r") 'org-roam-refile)
-     (define-key global-map (kbd "C-c n r") 'org-roam-node-random)
-     
-     (define-key global-map (kbd "C-c n a r") 'org-roam-ref-add)
-     (define-key global-map (kbd "C-c n a t") 'org-roam-tag-add)
-     (define-key global-map (kbd "C-c n a a") 'org-roam-alias-add)
-     
-     (defun qz/consult-notes ()
-       (interactive)
-       (let ((default-directory org-roam-directory))
-         (call-interactively 'consult-ripgrep)))
-     
-     (define-key global-map (kbd "C-c n s") 'qz/consult-notes)
-     ;; NOWEB KBD END
-     (defun qz/dwim-fold ()
-       (interactive)
-       (let ((fold-fn
-              (cond ((qz/mode-is-or-derives 'org-mode)   'qz/org-fold)
-                    ((qz/mode-is-or-derives 'magit-mode) 'magit-section-cycle)
-                    ((qz/mode-is-or-derives 'outline-mode
-                                            ;; .. i.e. elisp
-                                            'lisp-data-mode
-                                            ;; .. i.e. markdown
-                                            'text-mode
-                                            )
-                     'outline-cycle)
-                    (t (message "no dwim path configured, honey")))))
-         (when (symbolp fold-fn)
-           (qz/debug- (message "dn: %s" fold-fn))
-           (call-interactively fold-fn))
-         (recenter qz/recenter-line)))
-     
-     (defvar qz/recenter-line 4)
-     (define-key global-map (kbd "s-TAB") 'qz/dwim-fold)
+     (define-key global-map (kbd "C-s-k") 'kill-this-buffer)
      (defun qz/dwim-unfold ()
        (interactive)
        (let ((fold-fn
@@ -385,45 +244,226 @@
          ;; FIXME this is pretty slow -- maybe save-narrow?
          ;;  (scope 'visible' indent to current subtree)
          (org-indent-indent-buffer)))
+     ;; NOWEB KBD START
+     (define-key global-map (kbd "C-c C-x C-j") 'org-clock-goto)
+     (define-key global-map (kbd "C-c !") 'org-time-stamp-inactive)
+     (setq qz/indent
+           '((python-mode    . (python-black-buffer py-isort-buffer))
+             (terraform-mode . (terraform-format-buffer))
+             (prog-mode      . ((lambda () (mark-whole-buffer) (indent-region))))))
+     
+     (defun qz/dwim-indent ()
+       "format / indent something.
+     
+     org-mode: indent the block at point
+     prog-mode: indent the whole buffer
+     
+     for the rest: remember that indent-region still exists.
+     
+     good-boy mode: cleans up whitespace too
+     
+     dwim by mode is important
+     
+     as until now, I've been dodging
+     org-errors about caching from my dodgy code"
+       (interactive)
+       (progn ;save-mark-and-excursion
+         (when (symbolp 'whitespace-cleanup)
+           (call-interactively 'whitespace-cleanup))
+         (when-let* ((check (lambda (m) (derived-mode-p d)))
+                     (f (cond
+                         ((derived-mode-p 'org-mode)
+                          (when-let* ((src (org-babel-get-src-block-info))
+                                      (lang (car src))
+                                      (_ (not (seq-contains-p
+                                               qz/org-babel-indent-exclude-lang lang))))
+                            (cl-case (intern lang)
+                              ;; (python '(python-belack-region py-isort-region))
+                              (t '(indent-region)))))
+                         ((derived-mode-p 'python-mode)
+                          '(python-black-buffer py-isort-buffer))
+                         ((derived-mode-p 'terraform-mode)
+                          '(terraform-format-buffer))
+                         ((derived-mode-p 'prog-mode)
+                          (list (lambda () (interactive)
+                                  (mark-whole-buffer) (call-interactively 'indent-region)))))))
+           (qz/debug- (message "%s" f))
+           (mapc 'call-interactively f))))
+     
+     ;; (qz/dwim-indent)
+     (cl-case (intern "a")
+       ('a "c"))
+     (define-key global-map (kbd "C-M-j") 'delete-indentation)
+     (define-key global-map (kbd "C-M-y") 'consult-yank-from-kill-ring)
+     (define-key global-map (kbd "C-s-j") 'org-roam-dailies-goto-today)
+     (define-key global-map (kbd "C-x C-M-f") 'consult-recent-file)
+     ;;(custom-set-variables
+     ;; '(org-disputed-keys '([(shift o)] . [(meta shift o)])))
+     
+     (defun qz/newline-above ()
+       (interactive)
+       (save-excursion
+         (beginning-of-line)
+         (newline))
+       (indent-according-to-mode))
+     
+     (define-key global-map (kbd "C-z") 'qz/newline-above)
+     ;;(define-key global-map (kbd "C-o") 'open-line)
+     ;;
+     ;;(org-remap org-mode-map
+     ;;           'open-line 'org-open-line)
+     
+     (define-key global-map (kbd "M-s-h") 'windmove-swap-states-left)
+     (define-key global-map (kbd "M-s-j") 'windmove-swap-states-down)
+     (define-key global-map (kbd "M-s-k") 'windmove-swap-states-up)
+     (define-key global-map (kbd "M-s-l") 'windmove-swap-states-right)
+     (define-key global-map (kbd "H-M-s-h") 'windmove-swap-states-left)
+     (define-key global-map (kbd "H-M-s-j") 'windmove-swap-states-down)
+     (define-key global-map (kbd "H-M-s-k") 'windmove-swap-states-up)
+     (define-key global-map (kbd "H-M-s-l") 'windmove-swap-states-right)
+     (define-key global-map (kbd "H-s-h") 'windmove-left)
+     (define-key global-map (kbd "s-h")   'windmove-left)
+     (define-key global-map (kbd "H-s-j") 'windmove-down)
+     (define-key global-map (kbd "s-j")   'windmove-down)
+     (define-key global-map (kbd "H-s-k") 'windmove-up)
+     (define-key global-map (kbd "s-k")   'windmove-up)
+     (define-key global-map (kbd "H-s-l") 'windmove-right)
+     (define-key global-map (kbd "s-l")   'windmove-right)
+     ;; Activate occur easily inside isearch
+     
+     (define-key isearch-mode-map (kbd "C-o")
+                 (lambda () (interactive)
+                   (let ((case-fold-search isearch-case-fold-search))
+                     (occur (if isearch-regexp
+                                isearch-string
+                              (regexp-quote isearch-string))))))
+     (define-key isearch-mode-map (kbd "M-o")
+                 (lambda () (interactive)
+                   (let ((case-fold-search isearch-case-fold-search))
+                     (consult-line (if isearch-regexp
+                                       isearch-string
+                                     (regexp-quote isearch-string))))))
+     (global-set-key (kbd "C-s") 'isearch-forward-regexp)
+     (global-set-key (kbd "C-r") 'isearch-backward-regexp)
+     (global-set-key (kbd "C-M-s") 'isearch-forward)
+     (global-set-key (kbd "C-M-r") 'isearch-backward)
+     (define-key global-map (kbd "s-\\") 'org-store-link)
+     ;;; the goat
+     (define-key rde-toggle-map (kbd "d")   'toggle-debug-on-error)
+     (define-key rde-toggle-map (kbd "D")   'dimmer-mode)
+     (define-key rde-toggle-map (kbd "h c") 'highlight-changes-mode)
+     (define-key rde-toggle-map (kbd "h C") 'global-highlight-changes-mode)
+     (define-key rde-toggle-map (kbd "h i") 'highlight-indent-guides-mode)
+     ;;; a bit sus, but maybe equivalent to toggling off hi-lock-mode
+     (define-key rde-toggle-map (kbd "h p") 'unhighlight-regexp)
+     (define-key rde-toggle-map (kbd "h P") 'global-hi-lock-mode)
+     ;;; for the incessant observers demanding more than {M-g M-g}
+     ;; (define-key rde-toggle-map (kbd "l")   'linum-mode)
+     ;; (define-key rde-toggle-map (kbd "L")   'global-linum-mode)
+     (define-key global-map (kbd "M-s L") 'consult-line-multi)
+     (define-key global-map (kbd "C-c C-j") 'consult-imenu)
+     (define-key global-map (kbd "C-c n j") 'org-roam-dailies-capture-today)
+     (define-key global-map (kbd "C-c n J") 'org-roam-dailies-goto-today)
+     
+     (define-key global-map (kbd "C-c n C-r") 'org-roam-refile)
+     (define-key global-map (kbd "C-c n r") 'org-roam-node-random)
+     
+     (define-key global-map (kbd "C-c n a r") 'org-roam-ref-add)
+     (define-key global-map (kbd "C-c n a t") 'org-roam-tag-add)
+     (define-key global-map (kbd "C-c n a a") 'org-roam-alias-add)
+     
+     (defun qz/consult-notes ()
+       (interactive)
+       (let ((default-directory org-roam-directory))
+         (call-interactively 'consult-ripgrep)))
+     
+     (define-key global-map (kbd "C-c n s") 'qz/consult-notes)
+     ;; NOWEB KBD END
      (define-key global-map (kbd "C-s-=") 'org-roam-node-insert)
      (define-key global-map (kbd "C-s-+") 'org-roam-node-find)
      
      (define-key global-map (kbd "C-s-f") 'org-roam-node-find)
      (define-key global-map (kbd "C-s-b") 'org-roam-node-insert)
-     (defun qz/recenter ()
+     (defun qz/dwim-fold ()
        (interactive)
-       (recenter qz/recenter-line))
+       (let ((fold-fn
+              (cond ((qz/mode-is-or-derives 'org-mode)   'qz/org-fold)
+                    ((qz/mode-is-or-derives 'magit-mode) 'magit-section-cycle)
+                    ((qz/mode-is-or-derives 'outline-mode
+                                            ;; .. i.e. elisp
+                                            'lisp-data-mode
+                                            ;; .. i.e. markdown
+                                            'text-mode
+                                            )
+                     'outline-cycle)
+                    (t (message "no dwim path configured, honey")))))
+         (when (symbolp fold-fn)
+           (qz/debug- (message "dn: %s" fold-fn))
+           (call-interactively fold-fn))
+         (recenter qz/recenter-line)))
      
-     (define-key global-map (kbd "C-M-=") 'qz/recenter)
-     ;; NOWEB CUSTOM START
-     (custom-set-variables
-      '(org-imenu-depth 99))
-     ;; NOWEB CUSTOM END
-     (defun qz/sway-choose-window ()
+     (defvar qz/recenter-line 4)
+     (define-key global-map (kbd "s-TAB") 'qz/dwim-fold)
+     (defun eos/narrow-or-widen-dwim (p)
+       "Widen if buffer is narrowed, narrow-dwim otherwise.
+     Dwim means: region, org-src-block, org-subtree, or
+     defun, whichever applies first. Narrowing to
+     org-src-block actually calls `org-edit-src-code'.
+     
+     With prefix P, don't widen, just narrow even if buffer
+     is already narrowed."
+       (interactive "P")
+       (declare (interactive-only))
+       (cond ((and (buffer-narrowed-p) (not p)) (widen))
+             ((region-active-p)
+              (narrow-to-region (region-beginning)
+                                (region-end)))
+             ((derived-mode-p 'org-mode)
+              ;; `org-edit-src-code' is not a real narrowing
+              ;; command. Remove this first conditional if
+              ;; you don't want it.
+              (cond ((ignore-errors (org-edit-src-code) t)
+                     (delete-other-windows))
+                    ((ignore-errors (org-narrow-to-block) t))
+                    (t (org-narrow-to-subtree))))
+             ((derived-mode-p 'latex-mode)
+              (LaTeX-narrow-to-environment))
+             (t (narrow-to-defun))))
+     
+     (define-key global-map (kbd "C-x C-n") 'eos/narrow-or-widen-dwim)
+     (defun qz/insert-gpl ()
+       "Insert the short brief of GNU GPL v3."
        (interactive)
-       (let* ((cmd "swaymsg -t get_tree | jq -r '
-     .nodes | map(.
-     | .current_workspace as $ws
-     | .nodes
-      | map(.
-       | .nodes | map(.
-        | \"\\(.id)::\\($ws)::\\(.app_id):\\(.name)\"
-        ))) | add | add' | sed -e 's/\\[//g' -e 's/\\]//g' -e 's/,//g' -e 's/\"//g'")
-              (cmd-res (shell-command-to-string cmd))
-              (windows (s-split "\n" cmd-res))
-              ;; cleanup 'windows,
-              ;; - remove trailing/leading ws,
-              ;; - remove empty strings
-              (windows (remove "" (mapcar 's-trim windows)))
-              (window-choice (completing-read "choose a window: " windows))
-              ;; e.g "173::1::emacs:<2023-04-04>"
-              (con-id (car (s-split "::" window-choice)))
-              (focus-cmd (format "swaymsg '[con_id=%s] focus'" con-id)))
-         (message "stuff %s" (list windows con-id focus-cmd))
-         (list focus-cmd window-choice (shell-command-to-string focus-cmd))))
+       (save-mark-and-excursion
+         (push-mark)
+         (insert "
+     <one line to give the program's name and a brief idea of what it does.>
+     Copyright (C) <year>  <name of author>
      
-     (define-key global-map (kbd "M-<iso-lefttab>") 'qz/sway-choose-window)
-     (define-key global-map (kbd "s-x") 'qz/sway-choose-window)
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+     
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+     GNU General Public License for more details.
+     
+     You should have received a copy of the GNU General Public License
+     along with this program. If not, see <http://www.gnu.org/licenses/>.")
+         (comment-region (mark) (point))))
+     (defun qz/p (token)
+       (auth-source-pass-get 'secret token))
+     (defun qz/recover-this-file-and-diff-buffer-with-file ()
+       (interactive)
+       (call-interactively 'recover-this-file)
+       (call-interactively 'diff-buffer-with-file))
+     (defun qz/yq-interactively ()
+       "haha yaml loophole"
+       (interactive)
+       (let ((jq-interactive-command "yq"))
+         (call-interactively 'jq-interactively)))
      (defvar qz/aws-env nil
        "the aws login configuration, managed through saml2aws
      
@@ -467,6 +507,10 @@
      (add-to-list 'display-buffer-alist '("*kubectl*" display-buffer-no-window))
      
      (defalias 'qz/choose-kubernetes-context 'qz/choose-kubectl-context )
+     ;; NOWEB CUSTOM START
+     (custom-set-variables
+      '(org-imenu-depth 99))
+     ;; NOWEB CUSTOM END
      (defun qz/get-tabs ()
        (when-let* ((file (s-trim (shell-command-to-string "python3 $HOME/life/scratch/tabs.py")))
                    (file (and (not (string-empty-p file)) file)))
@@ -508,420 +552,61 @@
      ;; nigari tofu heat at DuckDuckGo :: https://duckduckgo.com/?t=ffab&q=nigari+tofu+heat+&ia=web
      ;; Decompression (GNU Emacs Lisp Reference Manual) :: https://www.gnu.org/software/emacs/manual/html_node/elisp/Decompression.html
      ;; (qz/tab)
-     (defun eos/narrow-or-widen-dwim (p)
-       "Widen if buffer is narrowed, narrow-dwim otherwise.
-     Dwim means: region, org-src-block, org-subtree, or
-     defun, whichever applies first. Narrowing to
-     org-src-block actually calls `org-edit-src-code'.
-     
-     With prefix P, don't widen, just narrow even if buffer
-     is already narrowed."
-       (interactive "P")
-       (declare (interactive-only))
-       (cond ((and (buffer-narrowed-p) (not p)) (widen))
-             ((region-active-p)
-              (narrow-to-region (region-beginning)
-                                (region-end)))
-             ((derived-mode-p 'org-mode)
-              ;; `org-edit-src-code' is not a real narrowing
-              ;; command. Remove this first conditional if
-              ;; you don't want it.
-              (cond ((ignore-errors (org-edit-src-code) t)
-                     (delete-other-windows))
-                    ((ignore-errors (org-narrow-to-block) t))
-                    (t (org-narrow-to-subtree))))
-             ((derived-mode-p 'latex-mode)
-              (LaTeX-narrow-to-environment))
-             (t (narrow-to-defun))))
-     
-     (define-key global-map (kbd "C-x C-n") 'eos/narrow-or-widen-dwim)
-     (defun qz/yq-interactively ()
-       "haha yaml loophole"
+     (defun qz/sway-choose-window ()
        (interactive)
-       (let ((jq-interactive-command "yq"))
-         (call-interactively 'jq-interactively)))
-     (defun qz/insert-gpl ()
-       "Insert the short brief of GNU GPL v3."
-       (interactive)
-       (save-mark-and-excursion
-         (push-mark)
-         (insert "
-     <one line to give the program's name and a brief idea of what it does.>
-     Copyright (C) <year>  <name of author>
+       (let* ((cmd "swaymsg -t get_tree | jq -r '
+     .nodes | map(.
+     | .current_workspace as $ws
+     | .nodes
+      | map(.
+       | .nodes | map(.
+        | \"\\(.id)::\\($ws)::\\(.app_id):\\(.name)\"
+        ))) | add | add' | sed -e 's/\\[//g' -e 's/\\]//g' -e 's/,//g' -e 's/\"//g'")
+              (cmd-res (shell-command-to-string cmd))
+              (windows (s-split "\n" cmd-res))
+              ;; cleanup 'windows,
+              ;; - remove trailing/leading ws,
+              ;; - remove empty strings
+              (windows (remove "" (mapcar 's-trim windows)))
+              (window-choice (completing-read "choose a window: " windows))
+              ;; e.g "173::1::emacs:<2023-04-04>"
+              (con-id (car (s-split "::" window-choice)))
+              (focus-cmd (format "swaymsg '[con_id=%s] focus'" con-id)))
+         (message "stuff %s" (list windows con-id focus-cmd))
+         (list focus-cmd window-choice (shell-command-to-string focus-cmd))))
      
-     This program is free software: you can redistribute it and/or modify
-     it under the terms of the GNU General Public License as published by
-     the Free Software Foundation, either version 3 of the License, or
-     (at your option) any later version.
+     (define-key global-map (kbd "M-<iso-lefttab>") 'qz/sway-choose-window)
+     (define-key global-map (kbd "s-x") 'qz/sway-choose-window)
+     (require 'atomic-chrome)
+     (atomic-chrome-start-server)
+     (setq atomic-chrome-port--firefox 4001
+           atomic-chrome-port--chrome 4002
+           atomic-chrome-port--gcp 4003)
      
-     This program is distributed in the hope that it will be useful,
-     but WITHOUT ANY WARRANTY; without even the implied warranty of
-     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-     GNU General Public License for more details.
-     
-     You should have received a copy of the GNU General Public License
-     along with this program. If not, see <http://www.gnu.org/licenses/>.")
-         (comment-region (mark) (point))))
-     (defun qz/recover-this-file-and-diff-buffer-with-file ()
-       (interactive)
-       (call-interactively 'recover-this-file)
-       (call-interactively 'diff-buffer-with-file))
-     (defun qz/p (token)
-       (auth-source-pass-get 'secret token))
-     
-     (custom-set-variables
-      '(sqlind-indentation-offsets-alist
-        '((syntax-error sqlind-report-sytax-error)
-          (in-string sqlind-report-runaway-string)
-     
-     
-          (comment-continuation sqlind-indent-comment-continuation)
-          (comment-start sqlind-indent-comment-start)
-          (toplevel 0)
-          (in-block +)
-          (in-begin-block +)
-          (block-start 0)
-          (block-end 0)
-          (declare-statement +)
-          (package ++)
-          (package-body 0)
-          (create-statement +)
-          (defun-start +)
-          (labeled-statement-start 0)
-          (statement-continuation +)
-          (nested-statement-open sqlind-use-anchor-indentation +)
-          (nested-statement-continuation sqlind-use-previous-line-indentation)
-          (nested-statement-close sqlind-use-anchor-indentation)
-          (with-clause sqlind-use-anchor-indentation)
-          (with-clause-cte +)
-          (with-clause-cte-cont ++)
-          (case-clause 0)
-          (case-clause-item sqlind-use-anchor-indentation +)
-          (case-clause-item-cont sqlind-right-justify-clause)
-          (select-clause sqlind-right-justify-clause)
-          (select-column sqlind-indent-select-column)
-          (select-column-continuation sqlind-indent-select-column +)
-          ;;(select-table-continuation 0)
-          ;; ((default . ++) (kinda . +) ( . sqlind-use-anchor-indentation))
-          (select-join-condition ++) ; this should wrap
-          (select-table sqlind-indent-select-table)
-          (select-table-continuation sqlind-indent-select-table +)
-          (in-select-clause sqlind-lineup-to-clause-end sqlind-right-justify-logical-operator)
-          (insert-clause sqlind-right-justify-clause)
-          (in-insert-clause sqlind-lineup-to-clause-end sqlind-right-justify-logical-operator)
-          (delete-clause sqlind-right-justify-clause)
-          (in-delete-clause sqlind-lineup-to-clause-end sqlind-right-justify-logical-operator)
-          (update-clause sqlind-right-justify-clause)
-          (in-update-clause sqlind-lineup-to-clause-end sqlind-right-justify-logical-operator))))
-     (custom-set-variables
-      '(sqlind-default-indentation-offsets-alist
-        '((syntax-error sqlind-report-sytax-error)
-          (in-string sqlind-report-runaway-string)
-          (comment-continuation sqlind-indent-comment-continuation)
-          (comment-start sqlind-indent-comment-start)
-          (toplevel 0)
-          (in-block +)
-          (in-begin-block +)
-          (block-start 0)
-          (block-end 0)
-          (declare-statement +)
-          (package ++)
-          (package-body 0)
-          (create-statement +)
-          (defun-start +)
-          (labeled-statement-start 0)
-          (statement-continuation +)
-          (nested-statement-open sqlind-use-anchor-indentation +)
-          (nested-statement-continuation sqlind-use-previous-line-indentation)
-          (nested-statement-close sqlind-use-anchor-indentation)
-          (with-clause sqlind-use-anchor-indentation)
-          (with-clause-cte +)
-          (with-clause-cte-cont ++)
-          (case-clause 0)
-          (case-clause-item sqlind-use-anchor-indentation +)
-          (case-clause-item-cont sqlind-right-justify-clause)
-          (select-clause sqlind-right-justify-clause)
-          (select-column sqlind-indent-select-column)
-          (select-column-continuation sqlind-indent-select-column +)
-          (select-join-condition -- --)
-          (select-table sqlind-indent-select-table)
-          ;;(select-table-continuation sqlind-indent-select-table +)
-          (select-table-continuation sqlind-lineup-joins-to-anchor)
-          (in-select-clause sqlind-lineup-to-clause-end sqlind-right-justify-logical-operator)
-          (insert-clause sqlind-right-justify-clause)
-          (in-insert-clause sqlind-lineup-to-clause-end sqlind-right-justify-logical-operator)
-          (delete-clause sqlind-right-justify-clause)
-          (in-delete-clause sqlind-lineup-to-clause-end sqlind-right-justify-logical-operator)
-          (update-clause sqlind-right-justify-clause)
-          (in-update-clause sqlind-lineup-to-clause-end sqlind-right-justify-logical-operator))))
-     (defun qz/sqlfluff-region (&optional beg end info)
-       "uses src block by default"
-       (interactive)
-       (let* ((info (or info (org-babel-get-src-block-info)))
-              (dialect (or (and info (cl-case
-                                         (intern (cdr (assoc :engine (nth 2 info))))
-                                       (bq "bigquery")
-                                       (postgres "postgresql")
-                                       (t (error "🙄 my lazy ass"))))
-                           ;; default
-                           "bigquery")))
-         (if info
-             (save-mark-and-excursion
-               (org-babel-mark-block))
-           ;; default
-           (unless (region-active-p)
-             (mark-whole-buffer)))
-         (cl-destructuring-bind
-             (beg end)
-             (or (and beg end (list beg end))
-                 (list (region-beginning) (region-end)))
-           (shell-command-on-region
-            beg end
-            (format "sqlfluff fix --FIX-EVEN-UNPARSABLE --force --disable-progress-bar --dialect %s -"
-                    dialect)
-            nil ;; no output buffer
-            'replace))))
-     (setq org-babel-default-header-args:sqlite '((:colnames . "yes")))
-     (defun qz/bq-consult-attrs ()
-       (interactive)
-       (let ((d (mapcar
-                 (lambda (line) (s-split "::" line))
-                 ;; lines
-                 (s-split "\n"
-                          ;; remove last empty line
-                          (s-trim (with-temp-buffer
-                                    ;; TODO memoize
-                                    (mapc 'insert-file
-                                          '("~/.cache/bq-scrape-p-t-business-intelligence-0da1.txt"
-                                            "~/.cache/bq-scrape-p-t-order-management-svc-6996.txt"))
-                                    (buffer-string)))))))
-         (consult--read
-          d
-          :prompt "choose attr: "
-          :annotate
-          (lambda (c)
-            (concat
-             (propertize " " 'display '(space :align-to center))
-             (nth 1 (assoc c d))
-             (propertize " " 'display '(space))
-                                             ;(nth 2 (assoc c d))
-     
+     (defun qz/atomic-chrome-choose (browser)
+       (interactive
+        (list
+         (completing-read "browser, port: " '(firefox chrome gcp))))
+       (setq atomic-chrome-server-ghost-text-port
+             (symbol-value (intern (concat "atomic-chrome-port--" browser))))
+       (atomic-chrome-stop-server)
+       (atomic-chrome-start-server)
+       (message "qz: atomic-chrome: Using %s:%s"
+                browser atomic-chrome-server-ghost-text-port))
+     (setq atomic-chrome-url-major-mode-alist
+           '(;;; jupyter
+             ("localhost:8890" . python-mode)
+             ("localhost:8888" . python-mode)
+             ("datacamp.com" . python-mode)
+             ("notebooks.googleusercontent.com" . python-mode)
+             ;;; etc
              ))
-          :sort nil)))
-     
-     (defun qz/bq-read-attrs ()
-       (interactive)
-       (let ((d (mapcar
-                 (lambda (line) (s-split "::" line))
-                 ;; lines
-                 (s-split "\n"
-                          ;; remove last empty line
-                          (s-trim (with-temp-buffer
-                                    ;; TODO memoize
-                                    (insert-file "~/.cache/bq-schema.txt")
-                                    (buffer-string)))))))
-         (insert (completing-read
-                  "choose attr: "
-                  (mapcar 'car d))
-                 )))
-     
-     
-     (setq temp-buffer-show-function 'hkey-help-show
-           temp-buffer-show-hook (remove 'hkey-help-show
-                                         temp-buffer-show-hook))
-     (add-to-list 'auto-mode-alist
-                  '("\\.tml\\'" . yaml-mode))
-     (defun qz/add-pdb-py-debug ()
-       "add debug code and move line down"
-       (interactive)
-       (back-to-indentation)
-       (insert "import pdb; pdb.set_trace();\n"))
-     (custom-set-variables '(python-indent-offset 4))
-     (add-to-list 'auto-mode-alist
-                  '("\\.pyx\\'" . python-mode))
-     (with-eval-after-load 'python-black
-       (setq python-black--base-args '("--quiet" "-l 78" "--preview")))
-     ;; NOWEB GOLANG START
-     (with-eval-after-load 'go-mode
-       (setq gofmt-command "golines")
-       (add-hook 'go-mode-hook
-                 (lambda () (add-hook 'before-save-hook
-                                      'gofmt-before-save
-                                      nil 'local)))
-       )
-     ;; NOWEB GOLANG END
-     ;; NOWEB ES START
-     (with-eval-after-load 'restclient
-       (defun qz/es-choose-url (&optional url backend env)
-         (interactive)
-         (and qz/debug (message "DEBUG qz/es-choose-url: %s"
-                                (list url backend env)))
-         (let* ((backend (qz/es-choose-backend backend))
-                (url (or url
-                         (and backend env
-                              (qz/es-choose-env env)
-                              (format qz/newstore-es-string backend env)))))
-           (message "es-default-url: %s"
-                    (setq es-default-url
-                          (or url (completing-read
-                                   "es-url: " qz/newstore-es-urls)))))
-         es-default-url)
-       
-       (defun qz/es-choose-backend (&optional backend)
-         (interactive)
-         (and qz/debug (message "DEBUG qz/es-choose-backend: %s" backend))
-         (message "qz/newstore-es-backend-current: %s"
-                  (setq qz/newstore-es-backend-current
-                        (or backend (completing-read "es-backend: " qz/newstore-es-backends))))
-         qz/newstore-es-backend-current)
-       
-       (defun qz/es-choose-env (&optional env)
-         (interactive)
-         (and qz/debug (message "DEBUG qz/es-choose-env: %s" env))
-         (message "qz/newstore-es-env-current: %s"
-                  (setq qz/newstore-es-env-current
-                        (or env (completing-read "es-env: " qz/newstore-envs))))
-         qz/newstore-es-env-current)
-       
-       (defun qz/test-es-ui (&optional url backend env)
-         (setq qz/newstore-es-env-current nil
-               qz/newstore-es-backend-current nil)
-         (funcall-interactively 'qz/es-choose-url url backend env)
-         (list
-          qz/newstore-es-env-current
-          qz/newstore-es-backend-current
-          es-default-url))
-       
-       ;;(qz/test-es-ui)              ;; prompt, noset
-       ;;(qz/test-es-ui nil)          ;; prompt, noset
-       ;;(qz/test-es-ui nil nil)      ;; prompt, noset
-       ;;(qz/test-es-ui nil nil nil)  ;; prompt, noset
-       ;;(qz/test-es-ui nil 'kibana 'production)    ;; noprompt, set
-       
-       (defun qz/es-choose-cookie-headers ()
-         "TODO"
-         (interactive)
-         (message
-          "es-default-headers: %s"
-          (setq es-default-headers `(("Content-Type" . "application/json; charset=UTF-8")
-                                     ("Cookie" . ,(format "ACCEZZIOCOOKIE=%s"
-                                                          (read-from-minibuffer "es cookie: ")))))))
-       (setq es-default-url "https://elasticsearch-production.newstore.luminatesec.com"
-             es-current-url es-default-url
-             es-default-headers nil
-             es-always-pretty-print t
-             es-default-headers
-             `(("Content-Type" . "application/json; charset=UTF-8")
-               ("Cookie" . ,(format "ACCEZZIOCOOKIE=%s"
-                                    "11fdbe68-b0f3-4dd0-9894-f97afe3662dc"))))
-       
-       (setq qz/newstore-es-string "https://%s-%s.newstore.luminatesec.com"
-             qz/newstore-es-backends '(kibana elasticsearch)
-             qz/newstore-es-backend-current nil
-             qz/newstore-es-env-current nil
-             qz/newstore-es-urls (cl-loop for env in qz/newstore-envs
-                                          append (cl-loop for es-backend in qz/newstore-es-backends
-                                                          collect (format qz/newstore-es-string es-backend env))))
-       )
-     ;; NOWEB ES END
-     ;; NOWEB RESTCLIENT START
-     (with-eval-after-load 'restclient
-       (defvar qz/restclient-env nil)
-       
-       (defun qz/restclient-choose-env (&optional env)
-         (interactive)
-         (message "qz/restclient-env: %s"
-                  (setq qz/restclient-env
-                        (cdr (assoc (intern (or env
-                                                (completing-read "restclient-env: " qz/newstore-envs)))
-                                    qz/newstore-envs-abbrev))))
-         qz/restclient-env)
-       (defvar qz/restclient-tenant nil)
-       
-       (defun qz/restclient-choose-tenant (&optional tenant)
-         (interactive)
-         (message "qz/restclient-tenant: %s"
-                  (setq qz/restclient-tenant
-                        (or tenant (completing-read
-                                    "restclient-tenant: " qz/newstore-tenants))))
-         qz/restclient-tenant)
-       (defvar qz/restclient-token nil)
-       (defvar qz/restclient-token-field 'access_token)
-       
-       (defun qz/restclient-hook ()
-         "Update token from a request."
-         ;; url is visible while the hook is running.
-         (let ((result))
-           (save-excursion
-             (cond
-              ((string-suffix-p "/token" url)
-               (condition-case nil
-                   (progn
-                     (setq result (cdr (assoc qz/restclient-token-field (json-read))))
-                     (when (stringp result)
-                       (progn
-                         (setq qz/restclient-token result)
-                         (message (concat "stored token: " qz/restclient-token)))))
-                 (error (message "That wasn't cleanly handled."))))))))
-       
-       (add-hook 'restclient-response-loaded-hook 'qz/restclient-hook)
-       (provide 'restclient-hooks)
-       )
-     ;; NOWEB RESTCLIENT END
-     (setq magit-bind-magit-project-status t)
-     (with-eval-after-load 'project
-       (with-eval-after-load 'magit
-         ;; Only more recent versions of project.el have `project-prefix-map' and
-         ;; `project-switch-commands', though project.el is available in Emacs 25.
-         (when (and magit-bind-magit-project-status
-                    (boundp 'project-prefix-map))
-           (unless ;; Only modify if it hasn't already been modified.
-               (equal project-switch-commands
-                      (eval (car (get 'project-switch-commands 'standard-value))
-                            t))
-             (message "qz: setting magit-project-status, but project-switch-commands has been changed already"))
-           (progn
-             (define-key project-prefix-map "m" 'magit-project-status)
-             (add-to-list 'project-switch-commands '(magit-project-status "Magit") t)))))
-     (with-eval-after-load 'magit
-       (if (fboundp 'magit-todos-mode)
-           (funcall 'magit-todos-mode)
-         (message "qz: config :: magit-todos-mode is not loaded")))
-     (setq js-indent-level 2)
+     (setq atomic-chrome-default-major-mode 'org-mode)
      (with-eval-after-load 'chatgpt-shell
        (setq chatgpt-shell-openai-key
              (auth-source-pass-get 'secret "chatgpt/api/emacs")
              dall-e-shell-openai-key chatgpt-shell-openai-key))
      
-     (with-eval-after-load 'gptel
-       (setq gptel-api-key
-             (lambda () (auth-source-pass-get 'secret "chatgpt/api/emacs")))
-       (setq gptel-default-mode 'org-mode)
-       ;; Llama.cpp offers an OpenAI compatible API
-       (gptel-make-openai "llama-cpp"          ;Any name
-                          :stream t                             ;Stream responses
-                          :protocol "http"
-                          :host "localhost:8080"                ;Llama.cpp server location
-                          :models '("test"))                    ;Any names, doesn't matter for Llama
-       )
-     (setq qz/llamafile-args
-           '(;; gpu offload
-             "-ngl 9999"
-             ;;"--nobrowser"
-             ))
-     
-     (defun qz/llamafile ()
-       (interactive)
-       (async-shell-command
-        (format "%s %s"
-                ;; choose model,
-                (cadr (s-split
-                       "	" (completing-read
-                                "model: " (s-split "\n" (s-trim (shell-command-to-string
-                                                                 "du -sh ~/dl/*.llamafile"))))))
-                ;; args
-                (s-join " " qz/llamafile-args))
-        "*process:llamafile*"))
      ;; NOWEB CONSULT START
      (with-eval-after-load 'consult
        (require 's)
@@ -937,17 +622,7 @@
                                         rg-dir (gensym) (s-replace "/" "-" f))))
                    files)
            (consult-ripgrep rg-dir)))
-       (defun qz/consult-ripgrep-bookmark ()
-         (interactive)
-         (let ((files (mapcar (lambda (b) (cdr (assoc 'filename b)))
-                              bookmark-alist)))
-           (qz/consult-ripgrep-files files)))
-       
-       (define-key global-map (kbd "C-c b s") 'qz/consult-ripgrep-bookmark)
        (define-key global-map (kbd "C-x C-M-SPC") 'consult-global-mark)
-       (with-eval-after-load 'project
-         (define-key project-prefix-map (kbd "M-g") 'consult-ripgrep)
-         (add-to-list 'project-switch-commands '(consult-ripgrep "ripgrep") t))
        (mapcar (lambda (bind)
                  (define-key global-map (kbd (car bind)) (cadr bind)))
                '(("C-x b" consult-buffer)))
@@ -1000,6 +675,10 @@
        (setq consult-recoll--index 0)
        (setq consult-recoll--snippets nil)
        `("recoll" "-t" ,@(consult-recoll--search-flags) ,text))
+     (require 'dimmer)
+     (with-eval-after-load 'dimmer
+       (dimmer-mode)
+       (setq dimmer-fraction 0.25))
      ;; NOWEB EMBARK START
      (define-key global-map (kbd "C-.") 'embark-act)
      (with-eval-after-load 'embark
@@ -1028,6 +707,7 @@
      (with-eval-after-load 'eww
        (define-key eww-mode-map (kbd "C-<return>") 'eww-open-in-new-buffer)
        )
+     (setq browse-url-browser-function 'eww-browse-url)
      (with-eval-after-load 'git-gutter-transient
        (defun git-gutter-transient:magit-commit ()
          "Close hunk buffer and call `magit-file-dispatch'."
@@ -1067,9 +747,42 @@
        
        (qz/advice- git-gutter:revert-hunk :around qz/filter--updated-timestamp)
      )
+     (with-eval-after-load 'gptel
+       (setq gptel-api-key
+             (lambda () (auth-source-pass-get 'secret "chatgpt/api/emacs")))
+       (setq gptel-default-mode 'org-mode)
+       ;; Llama.cpp offers an OpenAI compatible API
+       (gptel-make-openai "llama-cpp"          ;Any name
+                          :stream t                             ;Stream responses
+                          :protocol "http"
+                          :host "localhost:8080"                ;Llama.cpp server location
+                          :models '("test"))                    ;Any names, doesn't matter for Llama
+       )
+     (setq qz/llamafile-args
+           '(;; gpu offload
+             "-ngl 9999"
+             ;;"--nobrowser"
+             ))
+     
+     (defun qz/llamafile ()
+       (interactive)
+       (async-shell-command
+        (format "%s %s"
+                ;; choose model,
+                (cadr (s-split
+                       "	" (completing-read
+                                "model: " (s-split "\n" (s-trim (shell-command-to-string
+                                                                 "du -sh ~/dl/*.llamafile"))))))
+                ;; args
+                (s-join " " qz/llamafile-args))
+        "*process:llamafile*"))
      (with-eval-after-load 'justify-kp
        (defun pj-line-width ()
          (* (max 1 text-scale-mode-amount) 600)))
+     (global-hl-todo-mode 1)
+     (require 'hyperbole)
+     (define-key global-map (kbd "C-<mouse-2>") 'hkey-either)
+     (define-key global-map (kbd "M-<return>") 'hkey-either)
      (with-eval-after-load 'ligature
        (ligature-set-ligatures 'prog-mode '("|||>" "<|||" "<==>" "<!--" "####" "~~>" "***" "||=" "||>"
                                             ":::" "::=" "=:=" "===" "==>" "=!=" "=>>" "=<<" "=/=" "!=="
@@ -1135,10 +848,50 @@
      (global-prettify-symbols-mode 1)
      (cl-loop for c from (- 8746 10) to (+ 8746 50)
               collect (cons c (char-to-string c)))
-     (global-hl-todo-mode 1)
-     (require 'hyperbole)
-     (define-key global-map (kbd "C-<mouse-2>") 'hkey-either)
-     (define-key global-map (kbd "M-<return>") 'hkey-either)
+     (with-eval-after-load 'modus-themes
+       (defun qz/modus-themes-reload ()
+         (interactive)
+         (when current-prefix-arg
+           (setq modus-themes-common-palette-overrides qz/modus-overrides))
+         (when-let* ((modus-themes-custom-auto-reload t)
+                     (theme (modus-themes--current-theme)))
+           (modus-themes-load-theme theme)))
+       ;; Apply gray scale foreground, background, and overline (headings 0-8)
+       ;; headings are oblique (face:bold)
+       (setq qz/modus-overrides
+             (append
+              ;; '((default (:weight bold :slant italic))) ;; TODO default text is light
+       
+              (cl-loop for pre in '("" "fg-")
+                       append (cl-loop for n from 1 to 8
+                                       append (cl-labels ((s (pre) (intern (format "%s-heading-%s" pre n))))
+                                                `((,(s 'fg)
+                                                   ;; what color should the headings be?
+                                                   ;;fg-main   ;; 1.  whatever the main text color is.
+                                                   ;;"#333"    ;; 2.  a lightening.
+                                                   "#666"      ;; 2.  a lightening, 2.
+                                                   )
+                                                  ;;(,(s 'bg) nil)
+                                                  ))))
+              )
+             modus-themes-common-palette-overrides qz/modus-overrides)
+       ;; (qz/modus-themes-reload)
+       (setq modus-themes-headings
+             `((0 . (variable-pitch 1.5))
+               ,@(cl-loop for i from 1 to 20
+                          collect `(,i . (,(- 1.0 (* i .1 .1)) variable-pitch)))))
+       (defun qz/custom-faces--light (&rest _)
+         (interactive)
+         (set-face-attribute 'default nil :weight 'light))
+       
+       (add-hook 'modus-themes-after-load-theme-hook 'qz/custom-faces--light)
+       (qz/modus-themes-reload)
+       )
+     (defun qz/custom-faces--italic-bold (&rest _)
+       (interactive)
+       (set-face-attribute 'bold nil :weight 'medium :slant 'italic))
+     
+     (add-hook 'modus-themes-after-load-theme-hook 'qz/custom-faces--italic-bold)
      (defun qz/mold ()
        (interactive)
        (unless (fboundp 'me-mold)
@@ -1148,7 +901,7 @@
      ;;(setq me-molds-debug-on t)
      
      (with-eval-after-load 'moldable-emacs
-       (require 'dash)
+       (require 'dash) ;; for --map
      
        (defun qz/me-usable-molds (&optional molds buffer)
          "Return the usable molds among the `me-available-molds'.
@@ -1193,38 +946,6 @@
      
        (qz/me-mold--M-x))
      ;;(qz/me-mold--Stats)
-     (with-eval-after-load 'modus-themes
-       (defun qz/modus-themes-reload ()
-         (interactive)
-         (when current-prefix-arg
-           (setq modus-themes-common-palette-overrides qz/modus-overrides))
-         (when-let* ((modus-themes-custom-auto-reload t)
-                     (theme (modus-themes--current-theme)))
-           (modus-themes-load-theme theme)))
-       ;; Apply gray scale foreground, background, and overline (headings 0-8)
-       ;; headings are oblique (face:bold)
-       (setq
-        qz/modus-overrides
-        (append
-         '(
-           (default light) ;; TODO default text is light
-           )
-         (cl-loop
-          for pre in '("" "fg-") append
-          (cl-loop
-           for n from 1 to 8
-           append (cl-labels ((s (pre) (intern (format "%s-heading-%s" pre n))))
-                    `((,(s 'fg)
-                       ;;; what color should the headings be?
-                       ;;fg-main   ;; 1.  whatever the main text color is.
-                       ;;"#333"    ;; 2.  a lightening.
-                       "#666"      ;; 2.  a lightening, 2.
-                       )
-                      ;;(,(s 'bg) nil)
-                      ))))))
-       ;;; (qz/modus-themes-reload)
-       (qz/modus-themes-reload)
-       )
      (defun mpv-osd ()
        "Show the osd"
        (interactive)
@@ -1249,423 +970,8 @@
        (mpv--enqueue '("frame-back-step") 'ignore))
      
      
-     (with-eval-after-load
-         'project
-       (defun project-vterm ()
-         "Start vterm in the current project's root directory.
-     If a buffer already exists for running vterm in the project's root,
-     switch to it.  Otherwise, create a new vterm buffer.
-     With \\[universal-argument] prefix arg, create a new vterm buffer even
-     if one already exists."
-         (interactive)
-         (let* ((default-directory (project-root (project-current t)))
-                (vterm-buffer-name (project-prefixed-buffer-name "vterm"))
-                (vterm-buffer (get-buffer vterm-buffer-name)))
-           (if (and vterm-buffer (not current-prefix-arg))
-               (pop-to-buffer-same-window vterm-buffer)
-             (vterm t))))
-       (define-key project-prefix-map (kbd "t") 'project-vterm)
-       (add-to-list 'project-switch-commands
-                    '(project-vterm
-                      "Start vterm in the current project's root directory.")))
-     (setq qz/screenshot-tool "grim"
-           qz/screenshot-rect "screenshot") ;; grim -g \"$(slurp)\"
-     ;; ~/.local/bin/screenshot
-     
-     (defun password-store-otp-append-from-image (entry)
-       "Check clipboard for an image and scan it to get an OTP URI, append it to ENTRY."
-       (interactive (list (read-string "Password entry: ")))
-       (let ((qr-image-filename (password-store-otp--get-qr-image-filename entry)))
-         (when (not (zerop
-                     (shell-command (format "%s %s" qz/screenshot-rect qr-image-filename))))
-           (error "Couldn't get image from clipboard"))
-         (with-temp-buffer
-           (condition-case nil
-               (call-process "zbarimg" nil t nil "-q" "--raw"
-                             qr-image-filename)
-             (error
-              (error "It seems you don't have `zbar-tools' installed")))
-           (password-store-otp-append
-            entry
-            (buffer-substring (point-min) (point-max))))
-         (when (not password-store-otp-screenshots-path)
-           (delete-file qr-image-filename))))
-     (require 'atomic-chrome)
-     (atomic-chrome-start-server)
-     (setq atomic-chrome-port--firefox 4001
-           atomic-chrome-port--chrome 4002
-           atomic-chrome-port--gcp 4003)
-     
-     (defun qz/atomic-chrome-choose (browser)
-       (interactive
-        (list
-         (completing-read "browser, port: " '(firefox chrome gcp))))
-       (setq atomic-chrome-server-ghost-text-port
-             (symbol-value (intern (concat "atomic-chrome-port--" browser))))
-       (atomic-chrome-stop-server)
-       (atomic-chrome-start-server)
-       (message "qz: atomic-chrome: Using %s:%s"
-                browser atomic-chrome-server-ghost-text-port))
-     (setq atomic-chrome-url-major-mode-alist
-           '(;;; jupyter
-             ("localhost:8890" . python-mode)
-             ("localhost:8888" . python-mode)
-             ("datacamp.com" . python-mode)
-             ("notebooks.googleusercontent.com" . python-mode)
-             ;;; etc
-             ))
-     (setq atomic-chrome-default-major-mode 'org-mode)
-     (defun qz/month-files ()
-       (split-string
-        (shell-command-to-string
-         "rg '2023-04-1' ~/life/roam/ -c -t org | grep -vE 'org#' | awk -F '[,:]' '{print $1}'")))
-     (defun qz/org-link-highlight-last (&rest args)
-       (qz/debug- (message "highlight-last: args :: %s" args))
-       ;; XXX search back through stack & determine if org-store-link is
-       ;; interactive?
-       (when-let ((s (cadar org-stored-links)))
-         (highlight-phrase (s-trim s)
-                           (qz/anno-face))))
-     
-     (qz/advice- org-store-link :after qz/org-link-highlight-last)
-     (setq org-timer-default-timer  "00:25:00")
-     (setq qz/clock-sounds '("~/vids/gong-cut.wav"
-                             "~/vids/sing-cut.wav")
-           org-clock-sound (cadr qz/clock-sounds))
-     (defun qz/org-timer-set-timer (&optional duration)
-       "ergonomics
-     
-     if no prefix arg, set timer with value org-timer-default-timer.
-     if prefix arg, prompt for time (no arg call of 'org-timer-set-timer)
-     
-     how this is achieved, ontop of org semantics:
-     
-     we use the '(4) prefix arg, to respect a running timer, as follows (from doc of org-timer-set-timer):
-     
-     > Called with a C-u prefix arguments, use ‘org-timer-default-timer’
-     > without prompting the user for a duration."
-       (interactive)
-       (let* ((current-prefix-arg (if (or current-prefix-arg prefix-arg)
-                                      nil '(4))))
-         (call-interactively 'org-timer-set-timer)))
-     (define-key global-map (kbd "s-u") 'qz/org-timer-set-timer)
-     (defun qz/slug (str &optional allow-double-hyphens)
-       "Convert string STR to a `slug' and return that string.
-     
-     A `slug' is the part of a URL which identifies a particular page
-     on a website in an easy to read form.
-     
-     Example: If STR is \"My First Post\", it will be converted to a
-     slug \"my-first-post\", which can become part of an easy to read
-     URL like \"https://example.com/posts/my-first-post/\".
-     
-     In general, STR is a string.  But it can also be a string with
-     Markdown markup because STR is often a post's sub-heading (which
-     can contain bold, italics, link, etc markup).
-     
-     The `slug' generated from that STR follows these rules:
-     
-     - Contain only lower case alphabet, number and hyphen characters
-       ([[:alnum:]-]).
-     - Not have *any* HTML tag like \"<code>..</code>\",
-       \"<span class=..>..</span>\", etc.
-     - Not contain any URLs (if STR happens to be a Markdown link).
-     - Replace \".\" in STR with \"dot\", \"&\" with \"and\",
-       \"+\" with \"plus\".
-     - Replace parentheses with double-hyphens.  So \"foo (bar) baz\"
-       becomes \"foo--bar--baz\".
-     - Replace non [[:alnum:]-] chars with spaces, and then one or
-       more consecutive spaces with a single hyphen.
-     - If ALLOW-DOUBLE-HYPHENS is non-nil, at most two consecutive
-       hyphens are allowed in the returned string, otherwise consecutive
-       hyphens are not returned.
-     - No hyphens allowed at the leading or trailing end of the slug."
-       (let* (;; All lower-case
-              (str (downcase str))
-              ;; Remove "<FOO>..</FOO>" HTML tags if present.
-              (str (replace-regexp-in-string "<\\(?1:[a-z]+\\)[^>]*>.*</\\1>" "" str))
-              ;; Remove URLs if present in the string.  The ")" in the
-              ;; below regexp is the closing parenthesis of a Markdown
-              ;; link: [Desc](Link).
-              (str (replace-regexp-in-string (concat "\\](" ffap-url-regexp "[^)]+)") "]" str))
-              ;; Replace "&" with " and ", "." with " dot ", "+" with
-              ;; " plus ".
-              (str (replace-regexp-in-string
-                    "&" " and "
-                    (replace-regexp-in-string
-                     "\\." " dot "
-                     (replace-regexp-in-string
-                      "\\+" " plus " str))))
-              ;; Replace all characters except alphabets, numbers and
-              ;; parentheses with spaces.
-              (str (replace-regexp-in-string "[^[:alnum:]()]" " " str))
-              ;; On emacs 24.5, multibyte punctuation characters like "："
-              ;; are considered as alphanumeric characters! Below evals to
-              ;; non-nil on emacs 24.5:
-              ;;   (string-match-p "[[:alnum:]]+" "：")
-              ;; So replace them with space manually..
-              (str (if (version< emacs-version "25.0")
-                       (let ((multibyte-punctuations-str "：")) ;String of multibyte punctuation chars
-                         (replace-regexp-in-string (format "[%s]" multibyte-punctuations-str) " " str))
-                     str))
-              ;; Remove leading and trailing whitespace.
-              (str (replace-regexp-in-string "\\(^[[:space:]]*\\|[[:space:]]*$\\)" "" str))
-              ;; Replace 2 or more spaces with a single space.
-              (str (replace-regexp-in-string "[[:space:]]\\{2,\\}" " " str))
-              ;; Replace parentheses with double-hyphens.
-              (str (replace-regexp-in-string "\\s-*([[:space:]]*\\([^)]+?\\)[[:space:]]*)\\s-*" " -\\1- " str))
-              ;; Remove any remaining parentheses character.
-              (str (replace-regexp-in-string "[()]" "" str))
-              ;; Replace spaces with hyphens.
-              (str (replace-regexp-in-string " " "-" str))
-              ;; Remove leading and trailing hyphens.
-              (str (replace-regexp-in-string "\\(^[-]*\\|[-]*$\\)" "" str)))
-         (unless allow-double-hyphens
-           (setq str (replace-regexp-in-string "--" "-" str)))
-         str))
-     (defun qz/ensure-alias (alias &optional node)
-       (let ((node (or node  (org-roam-node-at-point 'assert))))
-         (save-excursion
-           (with-current-buffer (find-file-noselect (org-roam-node-file node))
-             (goto-char (org-roam-node-point node))
-             (org-roam-alias-add alias)))))
-     (defun qz/should-be-private-p (file)
-       (with-current-buffer (or (find-buffer-visiting file)
-                                (find-file-noselect file))
-         (qz/is-private-p)))
-     
-     (defun qz/is-file-private ()
-       (interactive)
-       (message (concat "should " (f-this-file) " be private..? "
-                        (or (and (qz/should-be-private-p (f-this-file)) "yes") "no"))))
-     (defun qz/is-daily-p (&optional node &rest _)
-       (if-let ((title (qz/node-title node)))
-           (string-match-p qz/daily-title-regexp title)))
-     (defun qz/is-project-p (&optional node &rest _)
-       (or (qz/file-has-todo-p node _)
-           (qz/is-daily-p node _)))
-     (defun qz/is-person-p (&optional node &rest _)
-       (qz/has-link-to-p (qz/title->roam-id "person")
-                         (and node (org-roam-node-p node)
-                              (org-roam-node-id node))))
-     (defun qz/file-has-todo-p (&optional node &rest _)
-       "Return non-nil if current buffer has any todo entry.
-     
-     TODO entries marked as done are ignored, meaning the this
-     function returns nil if current buffer contains only completed
-     tasks.
-     
-     (1) parse the buffer using org-element-parse-buffer. It
-       returns an abstract syntax tree of the current Org buffer. But
-       since we care only about headings, we ask it to return only them
-       by passing a GRANULARITY parameter - 'headline. This makes
-       things faster.
-     
-     (2) Then we extract information about TODO keyword from
-       headline AST, which contains a property we are interested in -
-       :todo-type, which returns the type of TODO keyword according to
-       org-todo-keywords - 'done, 'todo or nil (when keyword is not
-       present).
-     
-     (3) Now all we have to do is to check if the buffer list contains
-       at least one keyword with 'todo type. We could use seq=find on
-       the result of org-element-map, but it turns out that it provides
-       an optional first-match argument that can be used for our needs."
-       (save-excursion
-         (with-current-buffer (or (and node (org-roam-node-p node)
-                                       (find-file-noselect (org-roam-node-file node)))
-                                  (current-buffer))
-           (org-with-wide-buffer
-            (org-element-map                          ; (2)
-                (org-element-parse-buffer 'headline) ; (1)
-                'headline
-              (lambda (h)
-                (eq (org-element-property :todo-type h)
-                    'todo))
-              nil 'first-match)))))                     ; (3)
-     
-     (defun qz/has-link-p (src dst)
-       "undirected connection exists, from `src' to `dst'"
-       (org-roam-db-query
-        [:select [source dest]
-                 :from links
-                 :where (or (and (= dest $s1) (= source $s2))
-                            (and (= dest $s2) (= source $s1)))]
-        src dst))
-     
-     (defun qz/node-has-link-p (src dst)
-       (qz/has-link-p (org-roam-node-id src)
-                      (org-roam-node-id dst)))
-     (setq qz/transitive-query "
-     with recursive cte (id, degree) as (
-     
-       select n.id, 0 as degree
-       from nodes n
-       where n.id = $s1
-     
-       union all
-     
-       select distinct
-         source as id, c.degree + 1 as degree
-       from links l
-       join cte c on l.dest = c.id
-       where degree <= 1 -- therefore, yield 1st degree transitivity
-     
-     )
-     select distinct id, degree
-     from cte
-     --where cte.id = $s2
-     --where degree = 2
-     order by degree desc
-     ")
-     
-     (defun qz/transitive-links (dst)
-       (org-roam-db-query qz/transitive-query dst))
-     
-     
-     
-     (defun qz/has-transitive-link-p (dst &optional src)
-       (if-let* ((nap (or src (org-roam-node-at-point)))
-                 (src (or src (org-roam-node-id nap))))
-           (seq-contains
-            (seq-map 'car
-                     (org-roam-db-query qz/transitive-query dst src))
-            src)
-         ))
-     
-     ;;(seq-contains '(1 2 4) 1)
-     
-     (defun qz/node-has-transitive-link-p (dst &optional src)
-       (qz/has-transitive-link (org-roam-node-id dst) src))
-     
-     ;;x(qz/has-transitive-link-p (qz/title->roam-id "emacs"))
-     (defun qz/org-roam-migrate-jobs ()
-       (interactive )
-       (dolist (file (org-roam--list-all-files))
-         (with-current-buffer (or (find-buffer-visiting file)
-                                  (find-file-noselect file))
-           (message "%s visiting" file)
-           (qz/dispatch-hook)
-           (save-buffer))))
-     
-                                             ;(qz/org-roam-migrate-jobs)
-     
-     (defun qz/file-created-as-timestamp (&optional file)
-       (when-let* ((file (or file (buffer-file-name (current-buffer))))
-                   (ffile (f-base file))
-                   (p (string-match "-" ffile))
-                   (s (substring ffile 0 p)))
-         (cond
-          ((= p 16) (let* ((td (timezone-parse-date s))
-                           (tt (timezone-parse-time (elt td 3))))
-                      (format "[%s %s]"
-                              (s-join "-" (cl-subseq td nil 3))
-                              (s-join ":" tt))))
-          ((= p 14) (let* ((yy (substring s 0 4))
-                           (mm (substring s 4 6))
-                           (dd (substring s 6 8))
-                           (hh (substring s 8 10))
-                           (MM (substring s 10 12))
-                           (ss (substring s 12 14)))
-                      (format "[%s-%s-%s %s:%s:%s]"
-                              yy mm dd
-                              hh MM ss))))))
-     
-     (defun qz/org-roam-node-updated-precedence (pt file)
-       (list (org-roam-get-keyword "UPDATED")
-             (let ((v (s-join " " (org-entry-get-multivalued-property pt "UPDATED"))))
-               (when (not (string-empty-p v)) v))
-             (format-time-string
-              "[%Y-%m-%d %H:%M:%S]"
-              (file-attribute-modification-time (file-attributes file)))))
-     
-     (defun qz/org-roam-node-created-precedence (pt file)
-       (list (org-roam-get-keyword "CREATED")
-             (let ((v (s-join " " (org-entry-get-multivalued-property pt "CREATED"))))
-               (when (not (string-empty-p v)) v))
-             (qz/file-created-as-timestamp file)))
-     
-     (defun qz/org-roam-node-date-precedence (node date-fn)
-       (save-excursion
-         (let* ((pt (org-roam-node-point node))
-                (file (org-roam-node-file node)))
-           (with-current-buffer (or (find-buffer-visiting file)
-                                    (find-file-noselect file))
-             (goto-char pt)
-             ;;(message "qz: getting node updated: %s" (org-roam-node-title node))
-             (org-with-wide-buffer
-              (car (remove nil (funcall date-fn pt file))))))))
-     
-     (defun qz/org-roam-node-updated-date (node)
-       (qz/org-roam-node-date-precedence
-        node
-        (lambda (pt file)
-          (append (qz/org-roam-node-updated-precedence pt file)
-                  (qz/org-roam-node-created-precedence pt file)))))
-     
-     (defun qz/org-roam-node-created-date (node)
-       (qz/org-roam-node-date-precedence
-        node
-        '(lambda (pt file)
-           (append (qz/org-roam-node-created-precedence pt file)
-                   (reverse (qz/org-roam-node-updated-precedence pt file))))))
-     
-     ;;(cl-subseq [1 2 3] 1 2)
-     ;;(car [1 2 3])
-     ;;(or (s-join "a" nil) "b")
-     
-     ;; (let ((node (org-roam-node-from-title-or-alias "wine")))
-     ;;   (list (qz/org-roam-node-updated-date node)
-     ;;         (qz/org-roam-node-created-date node)))
-     
-     ;;(funcall (lambda (a b c) (message "%s %s %s" a b c)) 1 2 3)
-     
-     (defun qz/do-migration--created-updated ()
-       (let ((org-mode-hook nil))
-         (cl-loop for node in (seq-map 'car (org-roam-db-query [:select id :from nodes]))
-                  ;;(org-roam-node-list) groups erroneously
-                  collect
-                  (let ((node (org-roam-populate (org-roam-node-create :id node))))
-                    (format "%s,%s,%s,%s,%s"
-                            ;;"%s:%s,%s,%s,%s" to show with point
-                            (org-roam-node-id node)
-                            ;;(org-roam-node-point node)
-                            (qz/org-roam-node-updated-date node)
-                            (qz/org-roam-node-created-date node)
-                            (org-roam-node-title node))
-                    (kill-buffer (get-file-buffer (org-roam-node-file node)))))))
-     (cl-defun qz/org-web-tools-read-url-as-org (url &key (show-buffer-fn 'switch-to-buffer))
-       "Read URL's readable content in an Org buffer.
-     Buffer is displayed using SHOW-BUFFER-FN."
-       (interactive (list (org-web-tools--get-first-url)))
-       (let ((entry (org-web-tools--url-as-readable-org url)))
-         (when entry
-           (funcall show-buffer-fn url)
-           (org-mode)
-           (insert entry)
-           ;; Set buffer title
-           (goto-char (point-min))
-           (org-next-link)
-           (rename-buffer (format "*org-web [%s]*"
-                                  (cdr (qz/org-web-tools--read-org-bracket-link)))))))
-     
-     (defun qz/read-org-bracket-link (&optional link)
-       "Return (TARGET . DESCRIPTION) for Org bracket LINK or next link on current line."
-       ;; Searching to the end of the line seems the simplest way
-       (save-excursion
-         (when (org-in-regexp org-link-any-re)
-           (let* ((full (match-string-no-properties 0))
-                  (target (or (match-string-no-properties 2)
-                              (match-string-no-properties 0)))
-                  (description (match-string-no-properties 3)))
-             (cons target description)))))
-     
-     ;;(ignore-errors (call-interactively 'qz/org-web-tools-read-url-as-org))
-     ;;(concat org-directory "data/web/")
-     (defun qz/org-download-image-at-point ()
-       (interactive)
-       (when-let ((l (qz/read-org-bracket-link)))
-         (org-download-image l)))
+     (when (fboundp 'adaptive-wrap-prefix-mode)
+       (add-hook 'org-mode-hook 'adaptive-wrap-prefix-mode))
      ;; NOWEB ORG START
      (message "pre org: %s" (shell-command-to-string "date"))
      (with-eval-after-load 'org
@@ -1767,6 +1073,7 @@
            ;;; HACK Indent, if active
            (when (and (boundp 'org-indent-mode) org-indent-mode)
              (org-indent-indent-buffer))
+           (qz/org-align-tags)
            ;; FOR SOME JAZZ, PRINT THE OUTLINE
            (org-display-outline-path 'with-self t)))
        (defvar qz/org-refile-last-prior-location nil)
@@ -1864,79 +1171,236 @@
            ))
        
        (define-key org-mode-map (kbd "C-s-0") 'qz/org-search-from-heading)
-       
-       (setq qz/org-babel-default-header-args:sql:postgres
-             '((:engine . "postgres")
-               (:dbport . 5432) ;; NEVER connect to an external on 5433 by default
-               (:dbhost . "localhost"))
-             qz/bq/bi "`p-t-business-intelligence-0da1`"
-             qz/org-babel-default-header-args:sql:bq
-             `((:engine . "bq")
-               (:results . "raw"))
-             qz/sql:bq:etc
-             `((:var bi . ,qz/bq/bi)
-               (:var datep . "> timestamp_add(current_date(), interval -$period day)")
-               (:var timep . "> timestamp_add(current_timestamp(), interval -$period day)")
-               ;; this var 'period' must go "at the end", such that it may be
-               ;; referenced by vars "at the start".  'timep' & 'datep' here
-               ;; would fail otherwise.
-               (:var period . 7)
-               (:var return . ,(concat qz/bq/bi ".t_checkout.vw_item_return"))
-               (:var soi    . ,(concat qz/bq/bi ".t_order_management.vw_dim_sales_order_item_all_time"))
-               (:var so     . "`p-t-business-intelligence-0da1`.t_order_management.vw_order")
-               (:var vsoi   . "`p-t-order-management-svc-6996`.validation_stream.om_public_sales_order_item")
-               (:var rsoi   . "`p-t-order-management-svc-6996`.raw_stream.om_public_sales_order_item")
-               (:var dmsoi  . "`p-t-order-management-svc-6996`.dm.dimension_sales_order_item")))
-       (defun qz/choose-org-babel-default-header-args:sql (&optional dialect)
+       (defun qz/org-inbox-capture ()
          (interactive)
-         (setq org-babel-default-header-args:sql
-               (symbol-value (intern
-                              (format "qz/org-babel-default-header-args:sql:%s"
-                                      (or dialect
-                                          (completing-read "dialect: "
-                                                           '(bq postgres))))))))
+         "Capture a task in agenda mode."
+         (org-capture nil "i"))
+       (define-key org-mode-map (kbd "C-<return>")
+                   'org-insert-heading-respect-content)
+       (define-key org-mode-map (kbd "C-S-<return>")
+                   'org-insert-heading)
        
-       (qz/choose-org-babel-default-header-args:sql 'bq)
-       (defun org-babel-execute:bq (orig-fun body params)
-         (let* ((dry? (assq :dry params))
-                (cmd (format "bq query --format=json --nouse_legacy_sql %s '
-       %s
-       '"
-                             (if dry? "--dry_run" "")
-                             (s-replace-all '(
-                                              ("'" . "\"")
-                                              ;;("*" . "\*") ;; TODO \* (rde)
-                                              ;; ("`" . "\\`")
-                                              ;;   ("\"" . "\\\"")
-                                              )
-                                            (org-babel-expand-body:sql body params)))))
-           (if (string-equal-ignore-case (cdr (assq :engine params)) "bq")
-               (let ((res (org-babel-execute:shell
-                           ;; ....the quoting ..... i know......
-                           cmd
-                           params)))
-                 (ignore-errors
-                   (message "Estimated Bytes: %.2f MB"
-                            (let ((b (string-to-number (or (cdr (assoc 'totalBytesProcessed
-                                                                       (cdr (assoc 'statistics
-                                                                                   (json-read-from-string res)))))
-                                                           0))))
-                              ;; get MiB
-                              (/ (/ b 1024.0) 1024.0))))
-                 (json-to-org-table-parse-json-string res))
-             (org-babel-execute:sql body params))))
+       (defun org-insert-subheading-respect-content (&rest arg)
+         (interactive "P")
+         (let ((org-insert-heading-respect-content t))
+           (org-insert-subheading arg)
+           ;; [[id:28622111-aa1e-4d9a-ac23-0140a67e3d7f]]
+           (end-of-line)))
        
-       (qz/advice- org-babel-execute:sql :around org-babel-execute:bq)
-       (setq org-babel-python-command "python3")
-       (setq org-babel-default-header-args:jq
-             '((:results . "output")
-               (:compact . "no")
-               ;;(:wrap . "src json")
-               ))
-       (setq org-babel-default-header-args:shell '((:results . "drawer"))
-             org-babel-default-header-args:sh org-babel-default-header-args:shell
-             org-babel-default-header-args:bash org-babel-default-header-args:shell
-             org-babel-default-header-args:zsh org-babel-default-header-args:shell)
+       
+       (define-key org-mode-map (kbd "C-M-<return>")
+                   'org-insert-subheading-respect-content)
+       (define-key org-mode-map (kbd "C-M-S-<return>")
+                   'org-insert-subheading)
+       
+       (define-key org-mode-map (kbd "C-c C-M-<") 'org-do-promote)
+       (define-key org-mode-map (kbd "C-c C-M->") 'org-do-demote)
+       
+       (define-key org-mode-map (kbd "C-c C-M-p")
+                   (lambda ()
+                     (interactive)
+                     (make-marker)
+                     (org-up-heading-or-point-min)))
+       (setq org-agenda-columns-add-appointments-to-effort-sum t)
+       (setq org-agenda-default-appointment-duration 30)
+       (add-to-list 'org-global-properties
+                    '("Effort_ALL" . "0 0:15 0:30 1:00 2:00 4:00 8:00"))
+       (defun qz/org-sort-subtree ()
+         (interactive)
+         (save-mark-and-excursion
+           (org-up-heading-or-point-min)
+           (call-interactively 'org-sort)))
+       
+       (define-key org-mode-map (kbd "C-c C-M-6") 'qz/org-sort-subtree)
+       (require 'ox)
+       (require 'ox-md)
+       
+       (defun qz/org-md-nolink (link contents info)
+         (format "%s" contents))
+       
+       (org-export-define-derived-backend 'my-md 'md
+         :menu-entry
+         '(?M "Export to Markdown without links" (lambda (a s v b) (org-md-export-to-markdown a s v)))
+         :translate-alist '((link . qz/org-md-nolink)))
+       (defun qz/org-export-headline (&optional backend async subtreep visible-only body-only ext-plist)
+         "Export the current Org headline using BACKEND.
+       
+       The available backends are the ones of `org-export-backends' and
+       'pdf.
+       
+       When optional argument SUBTREEP is non-nil, transcode the
+       sub-tree at point, extracting information from the headline
+       properties first.
+       
+       When optional argument VISIBLE-ONLY is non-nil, don't export
+       contents of hidden elements.
+       
+       When optional argument BODY-ONLY is non-nil, only return body
+       code, without surrounding template.
+       
+       Optional argument EXT-PLIST, when provided, is a property list
+       with external parameters overriding Org default settings, but
+       still inferior to file-local settings."
+         (interactive)
+         (let* ((backend (unless backend
+                           (intern
+                            (completing-read "Available backends: "
+                                             (append org-export-backends '(pdf slack))))))
+                (headline (car (last (org-get-outline-path t))))
+                (headline-alnum (replace-regexp-in-string "[^[:alnum:]-_]" "-" headline))
+                (file-prefix (file-name-sans-extension (buffer-file-name)))
+                (filename (format "%s-%s.%s" file-prefix headline-alnum
+                                  (cl-case backend
+                                    (pdf   "tex")
+                                    (slack "md")
+                                    (t backend)))))
+           (save-restriction
+             (org-narrow-to-subtree)
+             (kill-new (s-join " -> " (org-get-outline-path t nil)))
+             (org-export-to-file
+                 (if (eq backend 'pdf) 'latex backend)
+                 filename async subtreep visible-only body-only ext-plist
+                 (when (eq backend 'pdf)
+                   (lambda (file) (org-latex-compile file))))
+             (widen))
+           (with-temp-buffer
+             (insert-file-contents filename)
+             (kill-new (buffer-string)))))
+       (define-key org-mode-map (kbd "C-c C-M-e") 'qz/org-export-headline)
+       (defun org-slack-headline (headline contents info)
+         "Transcode HEADLINE element into Markdown format.
+       CONTENTS is the headline contents.  INFO is a plist used as
+       a communication channel."
+         (unless (org-element-property :footnote-section-p headline)
+           (let* ((level (org-export-get-relative-level headline info))
+                  (title (org-export-data (org-element-property :title headline) info))
+                  (todo (and (plist-get info :with-todo-keywords)
+                             (let ((todo (org-element-property :todo-keyword
+                                                               headline)))
+                               (and todo (concat (org-export-data todo info) " ")))))
+                  (tags (and (plist-get info :with-tags)
+                             (let ((tag-list (org-export-get-tags headline info)))
+                               (and tag-list
+                                    (concat "     " (org-make-tag-string tag-list))))))
+                  (priority
+                   (and (plist-get info :with-priority)
+                        (let ((char (org-element-property :priority headline)))
+                          (and char (format "[#%c] " char)))))
+                  ;; Headline text without tags.
+                  (heading (concat todo priority title)))
+             (format "%s*%s*\n\n%s"
+                     (if (gt level 1)
+                         (concat (s-repeat (- level 3) ;; starting flush
+                                           "  ")
+                                 "- ")
+                       "")
+                     title contents))))
+       (defun qz/create-excluded-ids-for-headlines-in-buffer ()
+         "Add ID properties to all headlines in the current file which
+       do not already have one."
+         (interactive)
+         (when (file-exists-p (buffer-file-name (current-buffer)))
+           (org-map-entries (lambda (&rest r)
+                              (unless (ignore-errors (org-id-get))
+                                (ignore-errors (org-id-get-create))
+                                (org-set-property "ROAM_EXCLUDE" "t"))))))
+       
+       
+       (add-hook 'org-mode-hook
+                 (lambda ()
+                   (add-hook 'before-save-hook
+                             'qz/create-excluded-ids-for-headlines-in-buffer nil 'local)))
+       
+       (setq org-id-link-to-org-use-id t)
+       (defun qz/org-choose-current-attachment ()
+         (let ((attach-dir (org-attach-dir)))
+           (if attach-dir
+               (let* ((file (pcase (org-attach-file-list attach-dir)
+                              (`(,file) file)
+                              (files (completing-read "Open attachment: "
+                                                      (mapcar 'list files) nil t))))
+                      (path (expand-file-name file attach-dir)))
+                 path))))
+       
+       (defun qz/org-insert-current-attachment ()
+         (interactive)
+         (insert
+          (format "[[file:./%s]]"
+                  (dired-make-relative
+                   (qz/org-choose-current-attachment)))))
+       
+       (define-key org-mode-map (kbd "C-c M-a") 'qz/org-insert-current-attachment)
+       
+       (defun qz/org-insert-last-stored-link (arg)
+         "Insert the last link stored in `org-stored-links'."
+         (interactive "p")
+         (qz/org-insert-all-links arg "" "\n"))
+       
+       (defun qz/org-insert-all-links (arg &optional pre post)
+         "Insert all links in `org-stored-links'.
+       When a universal prefix, do not delete the links from `org-stored-links'.
+       When `ARG' is a number, insert the last N link(s).
+       `PRE' and `POST' are optional arguments to define a string to
+       prepend or to append."
+         (interactive "P")
+         (let ((org-link-keep-stored-after-insertion (equal arg '(4)))
+               (links (copy-sequence org-stored-links))
+               (pr (or pre "- "))
+               (po (or post "\n"))
+               (cnt 1) l)
+           (if (null org-stored-links)
+               (message "No link to insert")
+             (while (and (or (listp arg) (>= arg cnt))
+                         (setq l (if (listp arg)
+                                     (pop links)
+                                   (pop org-stored-links))))
+               (setq cnt (+ 1 cnt))
+               (insert pr)
+               (message "%s" `((:l ,l)
+                               (:car-l ,(car l))
+                               (:cadr-l ,(cadr l))
+                               (:mod-l ,(car (last (s-split "/" (car l)))))))
+               (org-insert-link
+                nil (car l)
+                (or (cadr l)
+                    (qz/ol-file l)))
+               (insert po)))))
+       
+       (define-key org-mode-map (kbd "C-c M-l") 'qz/org-insert-last-stored-link)
+       (require 'f)
+       
+       (defun qz/ol-file (link)
+         "transform file path into pretty ol-output
+                   - respect projects; truncate prior path, keeping only basename
+       "
+         ;; (car (last (s-split "/" "file:~/sys/rde/goop.boop::pattern")))
+         ;; == "goop.boop::pattern"
+         ;; (message  "HELLO :: %s/%s" p (car (last (s-split "/" p))))
+         (let* ((p (car link))
+                (inner (mapcar
+                        (lambda (s) (let ((ss (car s)))
+                                      (and (s-contains? (f-base ss) p)
+                                           (cons (f-base ss) ss))))
+                        project--list))
+                (suffix (s-join
+                         " . "
+                         ;; sort by length of path desc, taking the innermost subproj
+                         ;; take first value of first result
+                         (--tb (cl-sort (remove nil inner)
+                                        (lambda (a b) (gt (length a) (length b)))
+                                        :key 'cdr)
+                               (mapcar 'car)
+                               (reverse)))))
+           (format "%s%s"
+                   (or (and suffix (format "(%s)" suffix)) "")
+                   (car (last (s-split "/" p))))))
+       
+       ;;(car org-stored-links)
+       ;;(qz/ol-file (car org-stored-links))
+       (defalias '--tb '->>)
+       (defalias '--tf '->)
+       (defalias 'gt '>)
+       (defalias 'lt '<)
        ;; NOWEB AGENDA START
        
        (with-eval-after-load 'org-agenda
@@ -2918,6 +2382,81 @@
          (require 'org-roam-protocol)
          (setq qz/org-roam-dailies-filespec "private-%<%Y-%m-%d>.org")
        
+         ;; [[file:~/.doom.d/config.org::*templates][templates]]
+         (setq org-capture-templates
+               `(;; basic fire&forget
+                 ("i" "inbox" entry
+                  (file ,(concat org-roam-directory "/inbox.org"))
+                  "* TODO %? \n\n - from :: %a")
+         
+                 ;; spanish language capturing
+                 ("v" "vocab; spanish" entry
+                  (file+headline ,(concat org-roam-directory "/spanish_language.org") "vocab, phrases")
+                  ,(s-join "\n" '("** \"%?\" :es:"
+                                  "- from :: %a" ""
+                                  "*** :en:" "")))
+         
+                 ;; capture link to live `org-roam' thing
+                 ("n" "now, as in NOW" entry (file ,(concat org-roam-directory "/wip.org"))
+                  ,(s-join "\n" '("* TODO [#A1] %? "
+                                  "DEADLINE: %T"
+                                  "CREATED: %u")))
+         
+                 ;; fire directly into inbox from outside of emacs
+                 ("c" "org-protocol-capture" entry (file ,(concat
+                                                           org-roam-directory "/inbox.org"))
+                  ,(s-join "\n" '("* TODO [[%:link][%:description]]" ""
+                                  "#+begin_quote" ""
+                                  "%i"
+                                  "#+end_quote"))
+                  :immediate-finish t)
+         
+                 ;; push last captured item into inbox
+                 ("l" "last-capture" entry (file ,(concat org-roam-directory "/inbox.org"))
+                  (function qz/inbox-last-captured)
+                  :immediate-finish t)
+         
+                 ("I" "current-roam" entry (file ,(concat org-roam-directory "/inbox.org"))
+                  (function qz/current-roam-link)
+                  :immediate-finish t)
+         
+                 ("W" "weekly review" entry
+                  (file+datetree ,(concat org-roam-directory "/reviews.org"))
+                  ;; ... from template
+                  (file ,(concat org-roam-directory "/templates/weekly_review.org")))
+         
+                 ("D" "daily review" entry
+                  (file+datetree ,(concat org-roam-directory "/reviews.org"))
+                  ;; ... from template
+                  (file ,(concat org-roam-directory "/templates/daily_review.org")))
+         
+                 ("S" "screenshot" entry
+                  (file ,(concat org-roam-directory "/screenshots.org"))
+                  ,(s-join "\n" '("* screenshot: %?" ""
+                                  "%(qz/screenshot-clip)"
+                                  )))
+                 ))
+         
+         
+         (defun qz/screenshot-clip ()
+           (interactive)
+           (let ((default-directory (concat org-roam-directory "/images")))
+             (s-replace "file:" (format "file:%s/" default-directory)
+                        (with-temp-buffer
+                          (let ((default-directory default-directory))
+                            (org-mode)
+                            (org-download-clipboard)
+                            (buffer-string))))))
+         
+         
+         
+         
+         ;; (setq org-screenshot-method ;;"/gnu/store/n4arghf8l3f6svv2xlxwnvw4jcwa48qk-sway-shot-output %s"
+         ;;       "/gnu/store/am017g4gdhf45kvg5xkp3s2lhkbfdwzh-sway-shot-window-or-selection %s")
+         
+         
+         ;; [[file:~/.doom.d/config.org::*capture templates][roam capture templates]]
+         
          (defun qz/inspect-agenda-files ()
            `((org-files-list . ,(length (org-files-list)))
              ((org-agenda-files . ,(length (org-agenda-files)))
@@ -2988,7 +2527,39 @@
                      ;; do not match. This allows the default Org capfs or custom capfs
                      ;; of lower priority to run.
                      :exclusive 'no))))
-         (setq org-roam-node-display-template "${title}")
+         ;; [[file:~/.doom.d/config.org::*capture convenience functions][capture convenience functions]]
+         (defun qz/current-roam-link ()
+           "Get link to org-roam file with title"
+           (interactive)
+         
+           (concat "* TODO "
+                   (let ((n (qz/org-roam-node-at-point)))
+                     (org-link-make-string
+                      (concat "id:" (org-roam-node-id n))
+                      (org-roam-node-title n)))))
+         (defun qz/node-tags (&optional node)
+           (or (and node (org-roam-node-tags node))
+               (save-excursion
+                 (goto-char (org-roam-node-point (org-roam-node-at-point 'assert)))
+                 (if (= (org-outline-level) 0)
+                     (split-string-and-unquote (or (cadr (car (org-collect-keywords '("filetags")))) ""))
+                   (org-get-tags)))))
+         
+         (defun qz/node-title (&optional node limit)
+           (or (and node (org-roam-node-title node))
+               (save-excursion
+                 (goto-char (org-roam-node-point (org-roam-node-at-point 'assert)))
+                 (if (= (org-outline-level) 0)
+                     (cadr (car (org-collect-keywords '("title"))))
+                   (substring-no-properties (org-get-heading t t t))))))
+         (defun qz/title->roam-id (title)
+           (org-roam-node-id (org-roam-node-from-title-or-alias title)))
+         (defun qz/ensure-tag (tagstring tag)
+           "Apply `org-roam-tag-add' for `tag' to `(OR node@pt NODE)'"
+           (let ((ltag (-flatten (or (and (listp tag) tag)
+                                     (list tag)))))
+             (message "ensuring tag for %s" ltag)
+             (org-roam-tag-add ltag)))
          (defun qz/create-node ()
            "assumes point is at the desired headline"
            (interactive)
@@ -3000,57 +2571,6 @@
            (org-set-property "ROAM_EXCLUDE" "t"))
          
          (define-key org-mode-map (kbd "C-c C-x i") 'qz/create-node)
-         (defun org-roam-extract-subtree ()
-           "Convert current subtree at point to a node, and extract it into a new file."
-           (interactive)
-           (save-excursion
-             (org-back-to-heading-or-point-min t)
-             (when (bobp) (user-error "Already a top-level node"))
-             (org-id-get-create)
-             (save-buffer)
-             (org-roam-db-update-file)
-             (let* ((template-info nil)
-                    (node (org-roam-node-at-point))
-                    (template (org-roam-format-template
-                               (string-trim (org-capture-fill-template org-roam-extract-new-file-path))
-                               (lambda (key default-val)
-                                 (let ((fn (intern key))
-                                       (node-fn (intern (concat "org-roam-node-" key)))
-                                       (ksym (intern (concat ":" key))))
-                                   (cond
-                                    ((fboundp fn)
-                                     (funcall fn node))
-                                    ((fboundp node-fn)
-                                     (funcall node-fn node))
-                                    (t (let ((r (read-from-minibuffer (format "%s: " key) default-val)))
-                                         (plist-put template-info ksym r)
-                                         r)))))))
-                    (file-path
-                     ;; ✂️ removing the "read" interactive bit
-                     (expand-file-name
-                      (concat (file-name-as-directory org-roam-directory) template)
-                      org-roam-directory)))
-               (when (file-exists-p file-path)
-                 (user-error "%s exists. Aborting" file-path))
-               (org-cut-subtree)
-               (save-buffer)
-               (with-current-buffer (find-file-noselect file-path)
-                 (org-paste-subtree)
-                 (save-buffer) ;; HACK this save is  just for `org-roam-promote-entire-buffer' to find the file....
-                 (while (> (org-current-level) 1) (org-promote-subtree))
-                 (org-roam-promote-entire-buffer)
-                 (save-buffer)
-                 (org-roam-node-at-point)))))
-         
-         (defun qz/org-roam-extract-subtree-as-link (&rest args)
-           (interactive)
-           (save-excursion
-             (qz/create-node)
-             (let ((n (org-roam-extract-subtree)))
-               (org-previous-visible-heading 1)
-               (org-insert-subheading-respect-content nil)
-               (insert (org-link-make-string (concat "id:" (org-roam-node-id n))
-                                             (org-roam-node-title n))))))
          (defun qz/org-roam-capture-current ()
            (interactive)
            "Capture a task in agenda mode."
@@ -3083,6 +2603,67 @@
                   :if-new (file+head ,qz/capture-title-timestamp-roam
                                      ,qz/org-roam-capture-head)
                   :immediate-finish t)))
+         (defun qz/org-roam-extract-subtree ()
+           "Convert current subtree at point to a node, and extract it into a new file."
+           (interactive)
+           (save-excursion
+             (org-back-to-heading-or-point-min t)
+             (when (bobp) (user-error "Already a top-level node"))
+             (org-id-get-create)
+             (save-buffer)
+             (org-roam-db-update-file)
+             (let* ((template-info nil)
+                    (node (org-roam-node-at-point))
+                    (template (org-roam-format-template
+                               (string-trim (org-capture-fill-template org-roam-extract-new-file-path))
+                               (lambda (key default-val)
+                                 (let ((fn (intern key))
+                                       (node-fn (intern (concat "org-roam-node-" key)))
+                                       (ksym (intern (concat ":" key))))
+                                   (cond
+                                    ((fboundp fn)
+                                     (funcall fn node))
+                                    ((fboundp node-fn)
+                                     (funcall node-fn node))
+                                    (t (let ((r (read-from-minibuffer (format "%s: " key) default-val)))
+                                         (plist-put template-info ksym r)
+                                         r)))))))
+                    (file-path
+                     (expand-file-name
+                      ;; (✂️ start) removing the "read" interactive bit
+                      (concat (file-name-as-directory org-roam-directory) template)
+                      ;; (✂️ end)
+                      org-roam-directory)))
+               (when (file-exists-p file-path)
+                 (user-error "%s exists. Aborting" file-path))
+               (org-cut-subtree)
+               (save-buffer)
+               (with-current-buffer (find-file-noselect file-path)
+                 (org-paste-subtree)
+                 (save-buffer) ;; HACK this save is just for `org-roam-promote-entire-buffer' to find the file....
+                 (while (> (org-current-level) 1) (org-promote-subtree))
+                 (org-roam-promote-entire-buffer)
+                 (save-buffer)
+                 (cons node (org-roam-node-at-point))))))
+         
+         (defun qz/org-roam-extract-subtree-as-link (&rest args)
+           (interactive)
+           (save-excursion
+             ;; ensure node has ID.
+             (qz/create-node)
+             (save-buffer)
+             ;; kill subtree & refile to new place.
+             ;;  (N.B. see change to recent-file and kill-ring)
+             (let* ((old.new (qz/org-roam-extract-subtree))
+                    (n (or (car old.new) (cadr old))))
+               ;; navigate up to old parent.
+               (org-previous-visible-heading 1)
+               ;; create replacement child for the one just killed.
+               ;; HACK killed heading might be improperly demoted -- we assume it's the first node in the tree, but this may not always be the case.
+               (org-insert-subheading-respect-content nil)
+               ;; child text new = old.
+               (insert (org-link-make-string
+                        (concat "id:" (org-roam-node-id n)) (org-roam-node-title n))))))
          (setq org-roam-mode-sections
                (list 'org-roam-backlinks-section
                      'org-roam-reflinks-section
@@ -3240,27 +2821,26 @@
              s))
          (defun qz/capture-tab-or-nada (&rest args)
            (if-let ((d (qz/tab nil 'as-link)))
-               (format "- from: tab   :: %s" d)
+               ;; (format "- from: tab   :: %s" d)
+               d
              ""))
          
          (defun qz/dailies-capture-template (&optional time)
            `(("d" "default" entry
               "* [%<%H:%M:%S>]
-         - from: point :: %a
-         - clocking    :: %K
-         %(qz/capture-tab-or-nada)
+         :PROPERTIES:
+         :CURRENT_POINT: %a
+         :CURRENT_CLOCK: %K
+         :CURRENT_TAB: %(qz/capture-tab-or-nada)
+         :END:
+         ** %?
          %(qz/region-quotada-o-nada)
-         
-         %?"
+         -----"
               :if-new (file+head+olp
                        ,qz/org-roam-dailies-filespec
                        ,(s-join "\n" '("#+title: <%<%Y-%m-%d>>"
                                        "#+filetags: daily private project" "" ""
-                                       "%(qz/today-dateref)" "" ""
-                                       "* today, I will"
-                                       "** daily review"
-                                       "** life"
-                                       "** work"))
+                                       "%(qz/today-dateref)" "" ""))
                        ,(qz/org-roam-dailies-capture-fulcrum time)))))
          
          (defun qz/dailies-capture-template--set (&rest args)
@@ -3313,40 +2893,6 @@
            (org-capture nil "t"))
          (defun qz/today-as-daily-file ()
            (format-time-string "private-%Y-%m-%d.org"))
-         ;; [[file:~/.doom.d/config.org::*capture convenience functions][capture convenience functions]]
-         (defun qz/current-roam-link ()
-           "Get link to org-roam file with title"
-           (interactive)
-         
-           (concat "* TODO "
-                   (let ((n (qz/org-roam-node-at-point)))
-                     (org-link-make-string
-                      (concat "id:" (org-roam-node-id n))
-                      (org-roam-node-title n)))))
-         (defun qz/node-tags (&optional node)
-           (or (and node (org-roam-node-tags node))
-               (save-excursion
-                 (goto-char (org-roam-node-point (org-roam-node-at-point 'assert)))
-                 (if (= (org-outline-level) 0)
-                     (split-string-and-unquote (or (cadr (car (org-collect-keywords '("filetags")))) ""))
-                   (org-get-tags)))))
-         
-         (defun qz/node-title (&optional node limit)
-           (or (and node (org-roam-node-title node))
-               (save-excursion
-                 (goto-char (org-roam-node-point (org-roam-node-at-point 'assert)))
-                 (if (= (org-outline-level) 0)
-                     (cadr (car (org-collect-keywords '("title"))))
-                   (substring-no-properties (org-get-heading t t t))))))
-         (defun qz/title->roam-id (title)
-           (org-roam-node-id (org-roam-node-from-title-or-alias title)))
-         (defun qz/ensure-tag (tagstring tag)
-           "Apply `org-roam-tag-add' for `tag' to `(OR node@pt NODE)'"
-           (let ((ltag (-flatten (or (and (listp tag) tag)
-                                     (list tag)))))
-             (message "ensuring tag for %s" ltag)
-             (org-roam-tag-add ltag)))
-         
          (defun qz/timestamp ()
            (format-time-string "[%Y-%m-%d %a %H:%M]"))
          
@@ -3463,89 +3009,17 @@
          
          (add-hook 'org-roam-mode-hook 'qz/roam-buffer-image-width)
          (cons->table
-          (add-to-list 'magit-section-initial-visibility-alist (cons 'org-roam-node-section 'hide)))
+          (add-to-list 'magit-section-initial-visibility-alist
+                       (cons 'org-roam-node-section 'hide)))
+         (setq org-roam-node-display-template "${title} ")
          (setq org-roam-graph-executable "neato")
          (setq org-roam-graph-extra-config '(("overlap" . "false")))
-         ;; [[file:~/.doom.d/config.org::*templates][templates]]
-         (setq org-capture-templates
-               `(;; basic fire&forget
-                 ("i" "inbox" entry
-                  (file ,(concat org-roam-directory "/inbox.org"))
-                  "* TODO %? \n\n - from :: %a")
-         
-                 ;; spanish language capturing
-                 ("v" "vocab; spanish" entry
-                  (file+headline ,(concat org-roam-directory "/spanish_language.org") "vocab, phrases")
-                  ,(s-join "\n" '("** \"%?\" :es:"
-                                  "- from :: %a" ""
-                                  "*** :en:" "")))
-         
-                 ;; capture link to live `org-roam' thing
-                 ("n" "now, as in NOW" entry (file ,(concat org-roam-directory "/wip.org"))
-                  ,(s-join "\n" '("* TODO [#A1] %? "
-                                  "DEADLINE: %T"
-                                  "CREATED: %u")))
-         
-                 ;; fire directly into inbox from outside of emacs
-                 ("c" "org-protocol-capture" entry (file ,(concat
-                                                           org-roam-directory "/inbox.org"))
-                  ,(s-join "\n" '("* TODO [[%:link][%:description]]" ""
-                                  "#+begin_quote" ""
-                                  "%i"
-                                  "#+end_quote"))
-                  :immediate-finish t)
-         
-                 ;; push last captured item into inbox
-                 ("l" "last-capture" entry (file ,(concat org-roam-directory "/inbox.org"))
-                  (function qz/inbox-last-captured)
-                  :immediate-finish t)
-         
-                 ("I" "current-roam" entry (file ,(concat org-roam-directory "/inbox.org"))
-                  (function qz/current-roam-link)
-                  :immediate-finish t)
-         
-                 ("W" "weekly review" entry
-                  (file+datetree ,(concat org-roam-directory "/reviews.org"))
-                  ;; ... from template
-                  (file ,(concat org-roam-directory "/templates/weekly_review.org")))
-         
-                 ("D" "daily review" entry
-                  (file+datetree ,(concat org-roam-directory "/reviews.org"))
-                  ;; ... from template
-                  (file ,(concat org-roam-directory "/templates/daily_review.org")))
-         
-                 ("S" "screenshot" entry
-                  (file ,(concat org-roam-directory "/screenshots.org"))
-                  ,(s-join "\n" '("* screenshot: %?" ""
-                                  "%(qz/screenshot-clip)"
-                                  )))
-                 ))
-         
-         
-         (defun qz/screenshot-clip ()
-           (interactive)
-           (let ((default-directory (concat org-roam-directory "/images")))
-             (s-replace "file:" (format "file:%s/" default-directory)
-                        (with-temp-buffer
-                          (let ((default-directory default-directory))
-                            (org-mode)
-                            (org-download-clipboard)
-                            (buffer-string))))))
-         
-         
-         
-         
-         ;; (setq org-screenshot-method ;;"/gnu/store/n4arghf8l3f6svv2xlxwnvw4jcwa48qk-sway-shot-output %s"
-         ;;       "/gnu/store/am017g4gdhf45kvg5xkp3s2lhkbfdwzh-sway-shot-window-or-selection %s")
-         
-         
-         ;; [[file:~/.doom.d/config.org::*capture templates][roam capture templates]]
-         
          ;; NOWEB ROAM END
          )
        (require 'org-download)
        (defun org-download--dir-2 () "screenshots")
-       (setq qz/bullets--newline? nil
+       (setq org-modern-star 'replace
+             qz/bullets--newline? nil
              qz/bullets--spacing 2
              qz/bullets--list
              '((◉ ○ ◈ ◇ ✳)
@@ -3573,7 +3047,8 @@
                                     qz/bullets--list)))
                      (cdr (assoc (completing-read "bullets? " (mapcar 'car v))
                                  v))))
-               org-modern-star
+               ;; org-modern-star
+               org-modern-replace-stars
                (cl-loop for star in
                         (seq-take
                          (-cycle qz/bullets
@@ -3589,6 +3064,8 @@
                                         star))))
        
        (qz/org-modern--choose-bullets 8)
+       
+       ;; see 'org-modern-replace-stars
        (setq org-modern-list
              '((43 . "◦")
                (45 . "–")
@@ -3596,7 +3073,34 @@
        
        (mapcar (lambda (e) (char-to-string (car e))) org-modern-list)
        (setq org-modern-tag t)
+       (defun qz/org-roam-lookup-node-by-ref (ref)
+         (when-let ((existing-nodes
+                     (-filter
+                      (lambda (rn) (s-contains-p
+                                    ;;; HACK org-roam appends a uuid to each ref, trim it.
+                                    (substring (car rn) 0 (- (length (car rn)) 40))
+                                    ref))
+                      (org-roam-ref-read--completions))))
+           (message "%s refs found for '%s'"
+                    (length existing-nodes) ref)
+           existing-nodes))
        
+       ;; (qz/org-roam-lookup-node-by-ref "https://capnfabs.net/posts/parsing-huge-xml-quickxml-rust-serde")))
+       (defun qz/org-web-tools-read-url-as-org-and-save (&optional url path)
+         (interactive)
+         (let* ((url (or url (org-web-tools--get-first-url)))
+                (path (or path (format "%s/web/%s-%s.org"
+                                       org-roam-directory
+                                       (qz/utc-timestamp)
+                                       (qz/slug url)))))
+           (if-let ((node (car (qz/org-roam-lookup-node-by-ref url))))
+               (org-roam-node-visit (cdr node))
+             (progn
+               (with-current-buffer (qz/org-web-tools-read-url-as-org url)
+                 (write-file path)
+                 (qz/create-node)
+                 (org-roam-ref-add url)
+                 (read-only-mode))))))
        (defvar qz/orgtbl-plot-function
          ;;'orgtbl-uc-draw-cont
          'orgtbl-uc-draw-grid
@@ -3647,40 +3151,6 @@
            (org-table-recalculate t)))
        
        (define-key org-mode-map (kbd "C-c \" a") 'qz/orgtbl-plot)
-       (defun qz/org-inbox-capture ()
-         (interactive)
-         "Capture a task in agenda mode."
-         (org-capture nil "i"))
-       (define-key org-mode-map (kbd "C-<return>")
-                   'org-insert-heading-respect-content)
-       (define-key org-mode-map (kbd "C-S-<return>")
-                   'org-insert-heading)
-       
-       (defun org-insert-subheading-respect-content (&rest arg)
-         (interactive "P")
-         (let ((org-insert-heading-respect-content t))
-           (org-insert-subheading arg)
-           ;; [[id:28622111-aa1e-4d9a-ac23-0140a67e3d7f]]
-           (end-of-line)))
-       
-       
-       (define-key org-mode-map (kbd "C-M-<return>")
-                   'org-insert-subheading-respect-content)
-       (define-key org-mode-map (kbd "C-M-S-<return>")
-                   'org-insert-subheading)
-       
-       (define-key org-mode-map (kbd "C-c C-M-<") 'org-do-promote)
-       (define-key org-mode-map (kbd "C-c C-M->") 'org-do-demote)
-       
-       (define-key org-mode-map (kbd "C-c C-M-p")
-                   (lambda ()
-                     (interactive)
-                     (make-marker)
-                     (org-up-heading-or-point-min)))
-       (setq org-agenda-columns-add-appointments-to-effort-sum t)
-       (setq org-agenda-default-appointment-duration 30)
-       (add-to-list 'org-global-properties
-                    '("Effort_ALL" . "0 0:15 0:30 1:00 2:00 4:00 8:00"))
        (setq org-confirm-babel-evaluate nil)
        ;; [[file:~/.doom.d/config.org::*refile][refile]]
        (setq org-refile-targets '(("reading.org" :level . 0)
@@ -3723,112 +3193,6 @@
        (setq org-enforce-todo-checkbox-dependencies t)
        (setq org-tags-exclude-from-inheritance '("daily" "project"))
        (setq org-hierarchical-todo-statistics nil)
-       (defun qz/org-choose-current-attachment ()
-         (let ((attach-dir (org-attach-dir)))
-           (if attach-dir
-               (let* ((file (pcase (org-attach-file-list attach-dir)
-                              (`(,file) file)
-                              (files (completing-read "Open attachment: "
-                                                      (mapcar 'list files) nil t))))
-                      (path (expand-file-name file attach-dir)))
-                 path))))
-       
-       (defun qz/org-insert-current-attachment ()
-         (interactive)
-         (insert
-          (format "[[file:./%s]]"
-                  (dired-make-relative
-                   (qz/org-choose-current-attachment)))))
-       
-       (define-key org-mode-map (kbd "C-c M-a") 'qz/org-insert-current-attachment)
-       
-       (defun qz/org-insert-last-stored-link (arg)
-         "Insert the last link stored in `org-stored-links'."
-         (interactive "p")
-         (qz/org-insert-all-links arg "" "\n"))
-       
-       (defun qz/org-insert-all-links (arg &optional pre post)
-         "Insert all links in `org-stored-links'.
-       When a universal prefix, do not delete the links from `org-stored-links'.
-       When `ARG' is a number, insert the last N link(s).
-       `PRE' and `POST' are optional arguments to define a string to
-       prepend or to append."
-         (interactive "P")
-         (let ((org-link-keep-stored-after-insertion (equal arg '(4)))
-               (links (copy-sequence org-stored-links))
-               (pr (or pre "- "))
-               (po (or post "\n"))
-               (cnt 1) l)
-           (if (null org-stored-links)
-               (message "No link to insert")
-             (while (and (or (listp arg) (>= arg cnt))
-                         (setq l (if (listp arg)
-                                     (pop links)
-                                   (pop org-stored-links))))
-               (setq cnt (+ 1 cnt))
-               (insert pr)
-               (message "%s" `((:l ,l)
-                               (:car-l ,(car l))
-                               (:cadr-l ,(cadr l))
-                               (:mod-l ,(car (last (s-split "/" (car l)))))))
-               (org-insert-link
-                nil (car l)
-                (or (cadr l)
-                    (qz/ol-file l)))
-               (insert po)))))
-       
-       (define-key org-mode-map (kbd "C-c M-l") 'qz/org-insert-last-stored-link)
-       (require 'f)
-       
-       (defun qz/ol-file (link)
-         "transform file path into pretty ol-output
-                   - respect projects; truncate prior path, keeping only basename
-       "
-         ;; (car (last (s-split "/" "file:~/sys/rde/goop.boop::pattern")))
-         ;; == "goop.boop::pattern"
-         ;; (message  "HELLO :: %s/%s" p (car (last (s-split "/" p))))
-         (let* ((p (car link))
-                (inner (mapcar
-                        (lambda (s) (let ((ss (car s)))
-                                      (and (s-contains? (f-base ss) p)
-                                           (cons (f-base ss) ss))))
-                        project--list))
-                (suffix (s-join
-                         " . "
-                         ;; sort by length of path desc, taking the innermost subproj
-                         ;; take first value of first result
-                         (--tb (cl-sort (remove nil inner)
-                                        (lambda (a b) (gt (length a) (length b)))
-                                        :key 'cdr)
-                               (mapcar 'car)
-                               (reverse)))))
-           (format "%s%s"
-                   (or (and suffix (format "(%s)" suffix)) "")
-                   (car (last (s-split "/" p))))))
-       
-       ;;(car org-stored-links)
-       ;;(qz/ol-file (car org-stored-links))
-       (defalias '--tb '->>)
-       (defalias '--tf '->)
-       (defalias 'gt '>)
-       (defalias 'lt '<)
-       (defun qz/create-excluded-ids-for-headlines-in-buffer ()
-         "Add ID properties to all headlines in the current file which
-       do not already have one."
-         (interactive)
-         (when (file-exists-p (buffer-file-name (current-buffer)))
-           (org-map-entries (lambda (&rest r)
-                              (unless (ignore-errors (org-id-get))
-                                (ignore-errors (org-id-get-create))
-                                (org-set-property "ROAM_EXCLUDE" "t"))))))
-       
-       
-       (add-hook 'org-mode-hook
-                 (lambda ()
-                   (add-hook 'before-save-hook
-                             'qz/create-excluded-ids-for-headlines-in-buffer nil 'local)))
-       
-       (setq org-id-link-to-org-use-id t)
        (setq qz/org-image-actual-width 640)
        (defun qz/org-image-width (&optional n)
          (setq org-image-actual-width (or n qz/org-image-actual-width)))
@@ -3874,99 +3238,446 @@
        (defun qz/org-align-tags ()
          (interactive)
          (org-align-tags 'yes-all-the-bloody-tags))
-       (defun qz/org-sort-subtree ()
+       (setq org-babel-default-header-args:jq
+             '((:results . "output")
+               (:compact . "no")
+               ;;(:wrap . "src json")
+               ))
+       (setq org-babel-python-command "python3")
+       (setq org-babel-default-header-args:shell '((:results . "drawer"))
+             org-babel-default-header-args:sh org-babel-default-header-args:shell
+             org-babel-default-header-args:bash org-babel-default-header-args:shell
+             org-babel-default-header-args:zsh org-babel-default-header-args:shell)
+       
+       (setq qz/org-babel-default-header-args:sql:postgres
+             '((:engine . "postgres")
+               (:dbport . 5432) ;; NEVER connect to an external on 5433 by default
+               (:dbhost . "localhost"))
+             qz/bq/bi "`p-t-business-intelligence-0da1`"
+             qz/org-babel-default-header-args:sql:bq
+             `((:engine . "bq")
+               (:results . "raw"))
+             qz/sql:bq:etc
+             `((:var bi . ,qz/bq/bi)
+               (:var datep . "> timestamp_add(current_date(), interval -$period day)")
+               (:var timep . "> timestamp_add(current_timestamp(), interval -$period day)")
+               ;; this var 'period' must go "at the end", such that it may be
+               ;; referenced by vars "at the start".  'timep' & 'datep' here
+               ;; would fail otherwise.
+               (:var period . 7)
+               (:var return . ,(concat qz/bq/bi ".t_checkout.vw_item_return"))
+               (:var soi    . ,(concat qz/bq/bi ".t_order_management.vw_dim_sales_order_item_all_time"))
+               (:var so     . "`p-t-business-intelligence-0da1`.t_order_management.vw_order")
+               (:var vsoi   . "`p-t-order-management-svc-6996`.validation_stream.om_public_sales_order_item")
+               (:var rsoi   . "`p-t-order-management-svc-6996`.raw_stream.om_public_sales_order_item")
+               (:var dmsoi  . "`p-t-order-management-svc-6996`.dm.dimension_sales_order_item")))
+       (defun qz/choose-org-babel-default-header-args:sql (&optional dialect)
          (interactive)
-         (save-mark-and-excursion
-           (org-up-heading-or-point-min)
-           (call-interactively 'org-sort)))
+         (setq org-babel-default-header-args:sql
+               (symbol-value (intern
+                              (format "qz/org-babel-default-header-args:sql:%s"
+                                      (or dialect
+                                          (completing-read "dialect: "
+                                                           '(bq postgres))))))))
        
-       (define-key org-mode-map (kbd "C-c C-M-6") 'qz/org-sort-subtree)
-       (require 'ox)
-       (require 'ox-md)
+       (qz/choose-org-babel-default-header-args:sql 'bq)
+       (defun org-babel-execute:bq (orig-fun body params)
+         (let* ((dry? (assq :dry params))
+                (cmd (format "bq query --format=json --nouse_legacy_sql %s '
+       %s
+       '"
+                             (if dry? "--dry_run" "")
+                             (s-replace-all '(
+                                              ("'" . "\"")
+                                              ;;("*" . "\*") ;; TODO \* (rde)
+                                              ;; ("`" . "\\`")
+                                              ;;   ("\"" . "\\\"")
+                                              )
+                                            (org-babel-expand-body:sql body params)))))
+           (if (string-equal-ignore-case (cdr (assq :engine params)) "bq")
+               (let ((res (org-babel-execute:shell
+                           ;; ....the quoting ..... i know......
+                           cmd
+                           params)))
+                 (ignore-errors
+                   (message "Estimated Bytes: %.2f MB"
+                            (let ((b (string-to-number (or (cdr (assoc 'totalBytesProcessed
+                                                                       (cdr (assoc 'statistics
+                                                                                   (json-read-from-string res)))))
+                                                           0))))
+                              ;; get MiB
+                              (/ (/ b 1024.0) 1024.0))))
+                 (json-to-org-table-parse-json-string res))
+             (org-babel-execute:sql body params))))
        
-       (defun qz/org-md-nolink (link contents info)
-         (format "%s" contents))
-       
-       (org-export-define-derived-backend 'my-md 'md
-         :menu-entry
-         '(?M "Export to Markdown without links" (lambda (a s v b) (org-md-export-to-markdown a s v)))
-         :translate-alist '((link . qz/org-md-nolink)))
-       (defun qz/org-export-headline (&optional backend async subtreep visible-only body-only ext-plist)
-         "Export the current Org headline using BACKEND.
-       
-       The available backends are the ones of `org-export-backends' and
-       'pdf.
-       
-       When optional argument SUBTREEP is non-nil, transcode the
-       sub-tree at point, extracting information from the headline
-       properties first.
-       
-       When optional argument VISIBLE-ONLY is non-nil, don't export
-       contents of hidden elements.
-       
-       When optional argument BODY-ONLY is non-nil, only return body
-       code, without surrounding template.
-       
-       Optional argument EXT-PLIST, when provided, is a property list
-       with external parameters overriding Org default settings, but
-       still inferior to file-local settings."
-         (interactive)
-         (let* ((backend (unless backend
-                           (intern
-                            (completing-read "Available backends: "
-                                             (append org-export-backends '(pdf slack))))))
-                (headline (car (last (org-get-outline-path t))))
-                (headline-alnum (replace-regexp-in-string "[^[:alnum:]-_]" "-" headline))
-                (file-prefix (file-name-sans-extension (buffer-file-name)))
-                (filename (format "%s-%s.%s" file-prefix headline-alnum
-                                  (cl-case backend
-                                    (pdf   "tex")
-                                    (slack "md")
-                                    (t backend)))))
-           (save-restriction
-             (org-narrow-to-subtree)
-             (kill-new (s-join " -> " (org-get-outline-path t nil)))
-             (org-export-to-file
-                 (if (eq backend 'pdf) 'latex backend)
-                 filename async subtreep visible-only body-only ext-plist
-                 (when (eq backend 'pdf)
-                   (lambda (file) (org-latex-compile file))))
-             (widen))
-           (with-temp-buffer
-             (insert-file-contents filename)
-             (kill-new (buffer-string)))))
-       (define-key org-mode-map (kbd "C-c C-M-e") 'qz/org-export-headline)
-       (defun org-slack-headline (headline contents info)
-         "Transcode HEADLINE element into Markdown format.
-       CONTENTS is the headline contents.  INFO is a plist used as
-       a communication channel."
-         (unless (org-element-property :footnote-section-p headline)
-           (let* ((level (org-export-get-relative-level headline info))
-                  (title (org-export-data (org-element-property :title headline) info))
-                  (todo (and (plist-get info :with-todo-keywords)
-                             (let ((todo (org-element-property :todo-keyword
-                                                               headline)))
-                               (and todo (concat (org-export-data todo info) " ")))))
-                  (tags (and (plist-get info :with-tags)
-                             (let ((tag-list (org-export-get-tags headline info)))
-                               (and tag-list
-                                    (concat "     " (org-make-tag-string tag-list))))))
-                  (priority
-                   (and (plist-get info :with-priority)
-                        (let ((char (org-element-property :priority headline)))
-                          (and char (format "[#%c] " char)))))
-                  ;; Headline text without tags.
-                  (heading (concat todo priority title)))
-             (format "%s*%s*\n\n%s"
-                     (if (gt level 1)
-                         (concat (s-repeat (- level 3) ;; starting flush
-                                           "  ")
-                                 "- ")
-                       "")
-                     title contents))))
+       (qz/advice- org-babel-execute:sql :around org-babel-execute:bq)
        )
      (message "post org: %s" (shell-command-to-string "date"))
      ;; NOWEB ORG END
+     (defun qz/month-files ()
+       (split-string
+        (shell-command-to-string
+         "rg '2023-04-1' ~/life/roam/ -c -t org | grep -vE 'org#' | awk -F '[,:]' '{print $1}'")))
+     (defun qz/org-link-highlight-last (&rest args)
+       (qz/debug- (message "highlight-last: args :: %s" args))
+       ;; XXX search back through stack & determine if org-store-link is
+       ;; interactive?
+       (when-let ((s (cadar org-stored-links)))
+         (highlight-phrase (s-trim s)
+                           (qz/anno-face))))
+     
+     (qz/advice- org-store-link :after qz/org-link-highlight-last)
+     (setq org-timer-default-timer  "00:25:00")
+     (setq qz/clock-sounds '("~/vids/gong-cut.wav"
+                             "~/vids/sing-cut.wav")
+           org-clock-sound (cadr qz/clock-sounds))
+     (defun qz/org-timer-set-timer (&optional duration)
+       "ergonomics
+     
+     if no prefix arg, set timer with value org-timer-default-timer.
+     if prefix arg, prompt for time (no arg call of 'org-timer-set-timer)
+     
+     how this is achieved, ontop of org semantics:
+     
+     we use the '(4) prefix arg, to respect a running timer, as follows (from doc of org-timer-set-timer):
+     
+     > Called with a C-u prefix arguments, use ‘org-timer-default-timer’
+     > without prompting the user for a duration."
+       (interactive)
+       (let* ((current-prefix-arg (if (or current-prefix-arg prefix-arg)
+                                      nil '(4))))
+         (call-interactively 'org-timer-set-timer)))
+     (define-key global-map (kbd "s-u") 'qz/org-timer-set-timer)
+     (defun qz/ensure-alias (alias &optional node)
+       (let ((node (or node  (org-roam-node-at-point 'assert))))
+         (save-excursion
+           (with-current-buffer (find-file-noselect (org-roam-node-file node))
+             (goto-char (org-roam-node-point node))
+             (org-roam-alias-add alias)))))
+     (defun qz/slug (str &optional allow-double-hyphens)
+       "Convert string STR to a `slug' and return that string.
+     
+     A `slug' is the part of a URL which identifies a particular page
+     on a website in an easy to read form.
+     
+     Example: If STR is \"My First Post\", it will be converted to a
+     slug \"my-first-post\", which can become part of an easy to read
+     URL like \"https://example.com/posts/my-first-post/\".
+     
+     In general, STR is a string.  But it can also be a string with
+     Markdown markup because STR is often a post's sub-heading (which
+     can contain bold, italics, link, etc markup).
+     
+     The `slug' generated from that STR follows these rules:
+     
+     - Contain only lower case alphabet, number and hyphen characters
+       ([[:alnum:]-]).
+     - Not have *any* HTML tag like \"<code>..</code>\",
+       \"<span class=..>..</span>\", etc.
+     - Not contain any URLs (if STR happens to be a Markdown link).
+     - Replace \".\" in STR with \"dot\", \"&\" with \"and\",
+       \"+\" with \"plus\".
+     - Replace parentheses with double-hyphens.  So \"foo (bar) baz\"
+       becomes \"foo--bar--baz\".
+     - Replace non [[:alnum:]-] chars with spaces, and then one or
+       more consecutive spaces with a single hyphen.
+     - If ALLOW-DOUBLE-HYPHENS is non-nil, at most two consecutive
+       hyphens are allowed in the returned string, otherwise consecutive
+       hyphens are not returned.
+     - No hyphens allowed at the leading or trailing end of the slug."
+       (let* (;; All lower-case
+              (str (downcase str))
+              ;; Remove "<FOO>..</FOO>" HTML tags if present.
+              (str (replace-regexp-in-string "<\\(?1:[a-z]+\\)[^>]*>.*</\\1>" "" str))
+              ;; Remove URLs if present in the string.  The ")" in the
+              ;; below regexp is the closing parenthesis of a Markdown
+              ;; link: [Desc](Link).
+              (str (replace-regexp-in-string (concat "\\](" ffap-url-regexp "[^)]+)") "]" str))
+              ;; Replace "&" with " and ", "." with " dot ", "+" with
+              ;; " plus ".
+              (str (replace-regexp-in-string
+                    "&" " and "
+                    (replace-regexp-in-string
+                     "\\." " dot "
+                     (replace-regexp-in-string
+                      "\\+" " plus " str))))
+              ;; Replace all characters except alphabets, numbers and
+              ;; parentheses with spaces.
+              (str (replace-regexp-in-string "[^[:alnum:]()]" " " str))
+              ;; On emacs 24.5, multibyte punctuation characters like "："
+              ;; are considered as alphanumeric characters! Below evals to
+              ;; non-nil on emacs 24.5:
+              ;;   (string-match-p "[[:alnum:]]+" "：")
+              ;; So replace them with space manually..
+              (str (if (version< emacs-version "25.0")
+                       (let ((multibyte-punctuations-str "：")) ;String of multibyte punctuation chars
+                         (replace-regexp-in-string (format "[%s]" multibyte-punctuations-str) " " str))
+                     str))
+              ;; Remove leading and trailing whitespace.
+              (str (replace-regexp-in-string "\\(^[[:space:]]*\\|[[:space:]]*$\\)" "" str))
+              ;; Replace 2 or more spaces with a single space.
+              (str (replace-regexp-in-string "[[:space:]]\\{2,\\}" " " str))
+              ;; Replace parentheses with double-hyphens.
+              (str (replace-regexp-in-string "\\s-*([[:space:]]*\\([^)]+?\\)[[:space:]]*)\\s-*" " -\\1- " str))
+              ;; Remove any remaining parentheses character.
+              (str (replace-regexp-in-string "[()]" "" str))
+              ;; Replace spaces with hyphens.
+              (str (replace-regexp-in-string " " "-" str))
+              ;; Remove leading and trailing hyphens.
+              (str (replace-regexp-in-string "\\(^[-]*\\|[-]*$\\)" "" str)))
+         (unless allow-double-hyphens
+           (setq str (replace-regexp-in-string "--" "-" str)))
+         str))
+     (defun qz/should-be-private-p (file)
+       (with-current-buffer (or (find-buffer-visiting file)
+                                (find-file-noselect file))
+         (qz/is-private-p)))
+     
+     (defun qz/is-file-private ()
+       (interactive)
+       (message (concat "should " (f-this-file) " be private..? "
+                        (or (and (qz/should-be-private-p (f-this-file)) "yes") "no"))))
+     (defun qz/is-daily-p (&optional node &rest _)
+       (if-let ((title (qz/node-title node)))
+           (string-match-p qz/daily-title-regexp title)))
+     (defun qz/is-project-p (&optional node &rest _)
+       (or (qz/file-has-todo-p node _)
+           (qz/is-daily-p node _)))
+     (defun qz/is-person-p (&optional node &rest _)
+       (qz/has-link-to-p (qz/title->roam-id "person")
+                         (and node (org-roam-node-p node)
+                              (org-roam-node-id node))))
+     (defun qz/file-has-todo-p (&optional node &rest _)
+       "Return non-nil if current buffer has any todo entry.
+     
+     TODO entries marked as done are ignored, meaning the this
+     function returns nil if current buffer contains only completed
+     tasks.
+     
+     (1) parse the buffer using org-element-parse-buffer. It
+       returns an abstract syntax tree of the current Org buffer. But
+       since we care only about headings, we ask it to return only them
+       by passing a GRANULARITY parameter - 'headline. This makes
+       things faster.
+     
+     (2) Then we extract information about TODO keyword from
+       headline AST, which contains a property we are interested in -
+       :todo-type, which returns the type of TODO keyword according to
+       org-todo-keywords - 'done, 'todo or nil (when keyword is not
+       present).
+     
+     (3) Now all we have to do is to check if the buffer list contains
+       at least one keyword with 'todo type. We could use seq=find on
+       the result of org-element-map, but it turns out that it provides
+       an optional first-match argument that can be used for our needs."
+       (save-excursion
+         (with-current-buffer (or (and node (org-roam-node-p node)
+                                       (find-file-noselect (org-roam-node-file node)))
+                                  (current-buffer))
+           (org-with-wide-buffer
+            (org-element-map                          ; (2)
+                (org-element-parse-buffer 'headline) ; (1)
+                'headline
+              (lambda (h)
+                (eq (org-element-property :todo-type h)
+                    'todo))
+              nil 'first-match)))))                     ; (3)
+     
+     (defun qz/has-link-p (src dst)
+       "undirected connection exists, from `src' to `dst'"
+       (org-roam-db-query
+        [:select [source dest]
+                 :from links
+                 :where (or (and (= dest $s1) (= source $s2))
+                            (and (= dest $s2) (= source $s1)))]
+        src dst))
+     
+     (defun qz/node-has-link-p (src dst)
+       (qz/has-link-p (org-roam-node-id src)
+                      (org-roam-node-id dst)))
+     (setq qz/transitive-query "
+     with recursive cte (id, degree) as (
+     
+       select n.id, 0 as degree
+       from nodes n
+       where n.id = $s1
+     
+       union all
+     
+       select distinct
+         source as id, c.degree + 1 as degree
+       from links l
+       join cte c on l.dest = c.id
+       where degree <= 1 -- therefore, yield 1st degree transitivity
+     
+     )
+     select distinct id, degree
+     from cte
+     --where cte.id = $s2
+     --where degree = 2
+     order by degree desc
+     ")
+     
+     (defun qz/transitive-links (dst)
+       (org-roam-db-query qz/transitive-query dst))
+     
+     
+     
+     (defun qz/has-transitive-link-p (dst &optional src)
+       (if-let* ((nap (or src (org-roam-node-at-point)))
+                 (src (or src (org-roam-node-id nap))))
+           (seq-contains
+            (seq-map 'car
+                     (org-roam-db-query qz/transitive-query dst src))
+            src)
+         ))
+     
+     ;;(seq-contains '(1 2 4) 1)
+     
+     (defun qz/node-has-transitive-link-p (dst &optional src)
+       (qz/has-transitive-link (org-roam-node-id dst) src))
+     
+     ;;x(qz/has-transitive-link-p (qz/title->roam-id "emacs"))
+     (defun qz/org-roam-migrate-jobs ()
+       (interactive )
+       (dolist (file (org-roam--list-all-files))
+         (with-current-buffer (or (find-buffer-visiting file)
+                                  (find-file-noselect file))
+           (message "%s visiting" file)
+           (qz/dispatch-hook)
+           (save-buffer))))
+     
+                                             ;(qz/org-roam-migrate-jobs)
+     
+     (defun qz/file-created-as-timestamp (&optional file)
+       (when-let* ((file (or file (buffer-file-name (current-buffer))))
+                   (ffile (f-base file))
+                   (p (string-match "-" ffile))
+                   (s (substring ffile 0 p)))
+         (cond
+          ((= p 16) (let* ((td (timezone-parse-date s))
+                           (tt (timezone-parse-time (elt td 3))))
+                      (format "[%s %s]"
+                              (s-join "-" (cl-subseq td nil 3))
+                              (s-join ":" tt))))
+          ((= p 14) (let* ((yy (substring s 0 4))
+                           (mm (substring s 4 6))
+                           (dd (substring s 6 8))
+                           (hh (substring s 8 10))
+                           (MM (substring s 10 12))
+                           (ss (substring s 12 14)))
+                      (format "[%s-%s-%s %s:%s:%s]"
+                              yy mm dd
+                              hh MM ss))))))
+     
+     (defun qz/org-roam-node-updated-precedence (pt file)
+       (list (org-roam-get-keyword "UPDATED")
+             (let ((v (s-join " " (org-entry-get-multivalued-property pt "UPDATED"))))
+               (when (not (string-empty-p v)) v))
+             (format-time-string
+              "[%Y-%m-%d %H:%M:%S]"
+              (file-attribute-modification-time (file-attributes file)))))
+     
+     (defun qz/org-roam-node-created-precedence (pt file)
+       (list (org-roam-get-keyword "CREATED")
+             (let ((v (s-join " " (org-entry-get-multivalued-property pt "CREATED"))))
+               (when (not (string-empty-p v)) v))
+             (qz/file-created-as-timestamp file)))
+     
+     (defun qz/org-roam-node-date-precedence (node date-fn)
+       (save-excursion
+         (let* ((pt (org-roam-node-point node))
+                (file (org-roam-node-file node)))
+           (with-current-buffer (or (find-buffer-visiting file)
+                                    (find-file-noselect file))
+             (goto-char pt)
+             ;;(message "qz: getting node updated: %s" (org-roam-node-title node))
+             (org-with-wide-buffer
+              (car (remove nil (funcall date-fn pt file))))))))
+     
+     (defun qz/org-roam-node-updated-date (node)
+       (qz/org-roam-node-date-precedence
+        node
+        (lambda (pt file)
+          (append (qz/org-roam-node-updated-precedence pt file)
+                  (qz/org-roam-node-created-precedence pt file)))))
+     
+     (defun qz/org-roam-node-created-date (node)
+       (qz/org-roam-node-date-precedence
+        node
+        '(lambda (pt file)
+           (append (qz/org-roam-node-created-precedence pt file)
+                   (reverse (qz/org-roam-node-updated-precedence pt file))))))
+     
+     ;;(cl-subseq [1 2 3] 1 2)
+     ;;(car [1 2 3])
+     ;;(or (s-join "a" nil) "b")
+     
+     ;; (let ((node (org-roam-node-from-title-or-alias "wine")))
+     ;;   (list (qz/org-roam-node-updated-date node)
+     ;;         (qz/org-roam-node-created-date node)))
+     
+     ;;(funcall (lambda (a b c) (message "%s %s %s" a b c)) 1 2 3)
+     
+     (defun qz/do-migration--created-updated ()
+       (let ((org-mode-hook nil))
+         (cl-loop for node in (seq-map 'car (org-roam-db-query [:select id :from nodes]))
+                  ;;(org-roam-node-list) groups erroneously
+                  collect
+                  (let ((node (org-roam-populate (org-roam-node-create :id node))))
+                    (format "%s,%s,%s,%s,%s"
+                            ;;"%s:%s,%s,%s,%s" to show with point
+                            (org-roam-node-id node)
+                            ;;(org-roam-node-point node)
+                            (qz/org-roam-node-updated-date node)
+                            (qz/org-roam-node-created-date node)
+                            (org-roam-node-title node))
+                    (kill-buffer (get-file-buffer (org-roam-node-file node)))))))
+     (cl-defun qz/org-web-tools-read-url-as-org (url &key (show-buffer-function 'switch-to-buffer))
+       "Read URL's readable content in an Org buffer.
+     Buffer is displayed using SHOW-BUFFER-FUNCTION."
+       (interactive (list (org-web-tools--get-first-url)))
+       (let ((entry (org-web-tools--url-as-readable-org url)))
+         (when entry
+           (funcall show-buffer-function url)
+           (org-mode)
+           (insert entry)
+           ;; Set buffer title
+           (goto-char (point-min))
+           (rename-buffer (cdr (org-web-tools--read-org-bracket-link)))
+           (current-buffer))))
+     (cl-defun qz/org-web-tools-read-url-as-org (url &key (show-buffer-fn 'switch-to-buffer))
+       "Read URL's readable content in an Org buffer.
+     Buffer is displayed using SHOW-BUFFER-FN."
+       (interactive (list (org-web-tools--get-first-url)))
+       (let ((entry (org-web-tools--url-as-readable-org url)))
+         (when entry
+           (funcall show-buffer-fn url)
+           (org-mode)
+           (insert entry)
+           ;; Set buffer title
+           (goto-char (point-min))
+           (org-next-link)
+           (rename-buffer (format "*org-web [%s]*"
+                                  (cdr (qz/org-web-tools--read-org-bracket-link)))))))
+     
+     (defun qz/read-org-bracket-link (&optional link)
+       "Return (TARGET . DESCRIPTION) for Org bracket LINK or next link on current line."
+       ;; Searching to the end of the line seems the simplest way
+       (save-excursion
+         (when (org-in-regexp org-link-any-re)
+           (let* ((full (match-string-no-properties 0))
+                  (target (or (match-string-no-properties 2)
+                              (match-string-no-properties 0)))
+                  (description (match-string-no-properties 3)))
+             (cons target description)))))
+     
+     ;;(ignore-errors (call-interactively 'qz/org-web-tools-read-url-as-org))
+     ;;(concat org-directory "data/web/")
+     (defun qz/org-download-image-at-point ()
+       (interactive)
+       (when-let ((l (qz/read-org-bracket-link)))
+         (org-download-image l)))
      (with-eval-after-load 'slack
        (defun slack-conversations-list (team success-callback &optional types)
          (let ((lexical t)
@@ -4013,8 +3724,6 @@
                                   (and cursor (cons "cursor" cursor)))
                     :success 'on-success))))
              (request)))))
-     (when (fboundp 'adaptive-wrap-prefix-mode)
-       (add-hook 'org-mode-hook 'adaptive-wrap-prefix-mode))
      (setq org-tag-alist
            '(("@errand" . ?e)
              ("@work" . ?w)
@@ -4033,336 +3742,375 @@
              ("paper" . ?p)
              ("talk" . ?t)
              ("film" . ?f)))
-     (setq sentence-end-double-space t)
-     (defun qz/get-mail ()
-       (interactive)
-       (async-shell-command "mbsync -Va && notmuch new"))
-     (defun qz/rde-sanity ()
-       (interactive)
-       (async-shell-command
-        (concat "cd $HOME/git/sys/rde"
-                "&& guix repl -L src -L examples/src dev/sanity.scm")))
-     (setq qz/emacs/config "~/git/sys/rde/rde/examples/abcdw/configs.org"
-           qz/sh/tangle "make -C $HOME/git/sys/rde/rde/examples/abcdw tangle ")
+     (org-remark-global-tracking-mode +1)
      
-     (defun qz/tangle ()
-       (interactive)
-       (async-shell-command
-        (concat
-         "make -C $HOME/git/sys/rde/examples tangle"
-         " && echo 'tangle--ehg--di' | espeak --stdin")))
+     (with-eval-after-load 'eww
+       (org-remark-eww-mode +1))
      
-     (defun qz/suspend ()
-       (interactive)
-       (async-shell-command "loginctl suspend"))
+     (with-eval-after-load 'nov
+       (org-remark-nov-mode +1))
      
+     (with-eval-after-load 'info
+       (org-remark-info-mode +1))
      
-     (defun qz/redshift-fulldark ()
-       (interactive)
-       (async-shell-command "guix shell redshift-wayland -- redshift -O 1000K -r -b .4 "
-                            "*process:redshift*"))
+     (define-key global-map (kbd "s-i") 'org-remark-mark)
+     (define-key global-map (kbd "s-I") 'org-remark-line)
      
-     (defun qz/redshift-full ()
-       (interactive)
-       (async-shell-command "guix shell redshift-wayland -- redshift -O 1000K -r -b .7 "
-                            "*process:redshift*"))
+     (define-key global-map (kbd "C-c n m") 'org-remark-mark)
+     (define-key global-map (kbd "C-c n l") 'org-remark-mark-line)
      
-     (defun qz/redshift-fullbright ()
-       (interactive)
-       (async-shell-command "guix shell redshift-wayland -- redshift -O 1000K -r -b 1 "
-                            "*process:redshift*"))
+     (with-eval-after-load 'org-remark
+       (define-key org-remark-mode-map (kbd "C-c n o") 'org-remark-open)
+       (define-key org-remark-mode-map (kbd "C-c n ]") 'org-remark-view-next)
+       (define-key org-remark-mode-map (kbd "C-c n [") 'org-remark-view-prev)
+       (define-key org-remark-mode-map (kbd "C-c n r") 'org-remark-remove)
+       (define-key org-remark-mode-map (kbd "C-c n d") 'org-remark-delete))
+     (setq qz/screenshot-tool "grim"
+           qz/screenshot-rect "screenshot") ;; grim -g \"$(slurp)\"
+     ;; ~/.local/bin/screenshot
      
-     (defun qz/redshift-mellow ()
-       (interactive)
-       (async-shell-command "guix shell redshift-wayland -- redshift -O 2000K -r -b .7 "
-                            "*process:redshift*"))
-     (defun qz/redshift-mellowbright ()
-       (interactive)
-       (async-shell-command "guix shell redshift-wayland -- redshift -O 2000K -r -b 1 "
-                            "*process:redshift*"))
+     (defun password-store-otp-append-from-image (entry)
+       "Check clipboard for an image and scan it to get an OTP URI, append it to ENTRY."
+       (interactive (list (read-string "Password entry: ")))
+       (let ((qr-image-filename (password-store-otp--get-qr-image-filename entry)))
+         (when (not (zerop
+                     (shell-command (format "%s %s" qz/screenshot-rect qr-image-filename))))
+           (error "Couldn't get image from clipboard"))
+         (with-temp-buffer
+           (condition-case nil
+               (call-process "zbarimg" nil t nil "-q" "--raw"
+                             qr-image-filename)
+             (error
+              (error "It seems you don't have `zbar-tools' installed")))
+           (password-store-otp-append
+            entry
+            (buffer-substring (point-min) (point-max))))
+         (when (not password-store-otp-screenshots-path)
+           (delete-file qr-image-filename))))
+     (global-hide-mode-line-mode)
+     (setq spacious-padding-widths
+           (list
+            :internal-border-width 30
+            :header-line-width 5
+            :mode-line-width 6
+            :tab-width 30
+            :right-divider-width 20
+            :scroll-bar-width 1))
      
-     (defun qz/dmesg ()
-       (interactive)
-       (async-shell-command
-        "sudo dmesg -w"
-        "*process:dmesg*"))
+     ;; (progn (spacious-padding-mode 0) (spacious-padding-mode 1))
+     (require 'spacious-padding)
      
-     (defun qz/reload-config-home ()
-       (interactive)
-       (save-some-buffers)
-       (async-shell-command
-        (concat
-         "make -C $HOME/git/qz/dotfiles home"
-         "&& echo 'home--bal-ehg--di' | espeak --stdin ")
-        "*process:dotfiles-reload*"))
-     
-     (defun qz/build-config-home ()
-       (interactive)
-       (save-some-buffers)
-       (async-shell-command
-        (concat
-         "make -C $HOME/git/qz/dotfiles hbuild"
-         "&& echo 'home--bal-ehg--di' | espeak --stdin ")
-        "*process:dotfiles-reload*"))
-     
-     (defun qz/reload-config-system ()
-       (interactive)
-       (async-shell-command
-        (concat
-         "make -C $HOME/git/qz/dotfiles tangle && sudo -E make -C $HOME/git/qz/dotfiles system"
-         "&& echo 'system--bal-ehg--di' | espeak --stdin")
-        "*process:dotfiles-reload*"))
-     
-     (defun qz/reload-config-all ()
-       (interactive)
-       (async-shell-command
-        (concat
-         "   make -C $HOME/git/qz/dotfiles -B guix"
-         "&& make -C $HOME/git/qz/dotfiles home"
-         "&& sudo -E make -C $HOME/git/qz/dotfiles system"
-         "&& echo 'do the do, like ooo; pull & home & system bal-ehg--di'"
-         "   | espeak --stdin")
-        "*process:dotfiles-reload*"))
-     
-     (defun qz/reload-config-emacs ()
-       (interactive)
-       (load-file "~/.config/emacs/init.el"))
-     
-     (defun qz/guix-pull ()
-       (interactive)
-       (async-shell-command
-        "make -C $HOME/git/qz/dotfiles -B guix"
-        "*process:dotfiles-reload*"))
-     (defun qz/guix-describe-lag ()
-       "
-     
-     "
-     
-     
-       (interactive))
-     
-     (defun qz/guix-upgrade ()
-       (interactive)
-       (async-shell-command
-        (s-join " "
-                '("make -C $HOME/git/sys/rde/examples -B guix"
-                  "&& make rde/channels/update-locked"
-                  "&& make rde/channels/pull-locked"
-                  "&& guix package -u"
-                  "&& guix upgrade"
-                  "&& make"))))
-     (defun qz/sway-choose-output-res (&optional display res)
-       (interactive)
-       (let* ((cur (s-trim (shell-command-to-string
-                            "swaymsg -t get_outputs | jq -r 'map( . | select(.focused == true) | .name) | first'")))
-              (cmd (format "swaymsg 'output %s enable res %s'"
-                           (or display
-                               (completing-read "display: "
-                                                '("DP-1" "DP-2"
-                                                  "eDP-1"
-                                                  "HDMI-1" "HDMI-2")
-                                                nil t cur))
-                           (or res
-                               (completing-read "resolution: "
-                                                '("1920x1080"
-                                                  "3840x1080"
-                                                  "5120x1440")
-                                                nil t)))))
-         (when (y-or-n-p (format "exec ~%s~?" cmd))
-           (shell-command cmd))))
-     
-     (defun qz/bt-connect (mac)
-       (interactive "saddress: ")
-       (async-shell-command
-        (format "bluetoothctl connect %s" mac)
-        "*bluetoothctl*"))
-     
-     
-     ;;  [AnnePro2 P4]# block 44:F0:9E:51:52:7B
-     ;; [CHG] Device 44:F0:9E:51:52:7B Blocked: yes
-     ;; Changing 44:F0:9E:51:52:7B block succeeded
-     ;; [CHG] Device 44:F0:9E:51:52:7B Connected: no
-     ;; [DEL] Transport /org/bluez/hci0/dev_44_F0_9E_51_52_7B/sep1/fd5
-     ;; [DEL] Endpoint /org/bluez/hci0/dev_44_F0_9E_51_52_7B/sep1
-     ;; [DEL] Endpoint /org/bluez/hci0/dev_44_F0_9E_51_52_7B/sep2
-     ;; [DEL] Endpoint /org/bluez/hci0/dev_44_F0_9E_51_52_7B/sep3
-     ;; [AnnePro2 P4]# disconnect 44:F0:9E:51:52:7B
-     
-     
-     (defun qz/bt-do (commands mac)
-       (interactive "saddress: ")
-       (mapcar (lambda (c) (async-shell-command
-                            (format "bluetoothctl %s %s" c mac)
-                            "*bluetoothctl*"))
-     
-               (qz/ensure-list command)))
-     
-     (defun qz/bt-ignore (mac)
-       (interactive "saddress: ")
-       (qz/bt-do '(block disconnect) mac))
-     
-     (defmacro qz/bt-ui (command-devices)
-       "A macro as a UI to manage bluetooth actions.
-     
-     Creates mapped commands against each named device."
-       (let ((f-name (lambda (e)
-                       (intern (format "qz/bt-%s--%s"
-                                       command device))))
-     
-         (mapcar (lambda ()
-     
-                   (defun ,TODO ()
-                     (qz/bt-, ,actions mac))
-     
-            (defun ,enable ()
-              (interactive)
-              (advice-add ',target-fn ,state ',advice-fn))
-     
-            (defun ,(funcall s-advice 'disable) ()
-              (interactive)
-              (advice-remove ',target-fn ',advice-fn))
-     
-            (,enable)
-            (list ',enable ',disable))))))
-     
-     (defvar qz/bluetooth-devices
-       '((airpods . "44:F0:9E:51:52:7B")
-         (boomzo . nil)
-         (aiaia . nil)
-         (ap2 . nil)))
-     
-     
-     (defun qz/bt-airpods ()
-       (interactive)
-       (qz/bt-connect "44:F0:9E:51:52:7B"))
-     
-     (defun qz/bt-aiaiai ()
-       (interactive)
-       (qz/bt-connect "44:F0:9E:51:52:7B"))
-     
-     (defun qz/bt-boomzo ()
-       (interactive)
-       (qz/bt-connect "44:F0:9E:51:52:7B"))
-     
-     ;; (setq minibuffer-mode-hook nil)
-     ;; (add-hook 'minibuffer-mode-hook 'olivetti-mode)
-     
-     (add-hook 'minibuffer-mode-hook
-               (lambda ()
-                 (setq-local olivetti-body-width 200)
-                 (olivetti-mode)))
-     
-     
-     (defun qz/big-mode ()
-       (interactive)
-       (call-interactively 'global-text-scale-adjust)
-       (setq olivetti-body-width 150)
-     
+     (with-eval-after-load 'spacious-padding
+       (spacious-padding-mode))
+     ;; NOWEB ES START
+     (with-eval-after-load 'restclient
+       (defun qz/es-choose-url (&optional url backend env)
+         (interactive)
+         (and qz/debug (message "DEBUG qz/es-choose-url: %s"
+                                (list url backend env)))
+         (let* ((backend (qz/es-choose-backend backend))
+                (url (or url
+                         (and backend env
+                              (qz/es-choose-env env)
+                              (format qz/newstore-es-string backend env)))))
+           (message "es-default-url: %s"
+                    (setq es-default-url
+                          (or url (completing-read
+                                   "es-url: " qz/newstore-es-urls)))))
+         es-default-url)
+       
+       (defun qz/es-choose-backend (&optional backend)
+         (interactive)
+         (and qz/debug (message "DEBUG qz/es-choose-backend: %s" backend))
+         (message "qz/newstore-es-backend-current: %s"
+                  (setq qz/newstore-es-backend-current
+                        (or backend (completing-read "es-backend: " qz/newstore-es-backends))))
+         qz/newstore-es-backend-current)
+       
+       (defun qz/es-choose-env (&optional env)
+         (interactive)
+         (and qz/debug (message "DEBUG qz/es-choose-env: %s" env))
+         (message "qz/newstore-es-env-current: %s"
+                  (setq qz/newstore-es-env-current
+                        (or env (completing-read "es-env: " qz/newstore-envs))))
+         qz/newstore-es-env-current)
+       
+       (defun qz/test-es-ui (&optional url backend env)
+         (setq qz/newstore-es-env-current nil
+               qz/newstore-es-backend-current nil)
+         (funcall-interactively 'qz/es-choose-url url backend env)
+         (list
+          qz/newstore-es-env-current
+          qz/newstore-es-backend-current
+          es-default-url))
+       
+       ;;(qz/test-es-ui)              ;; prompt, noset
+       ;;(qz/test-es-ui nil)          ;; prompt, noset
+       ;;(qz/test-es-ui nil nil)      ;; prompt, noset
+       ;;(qz/test-es-ui nil nil nil)  ;; prompt, noset
+       ;;(qz/test-es-ui nil 'kibana 'production)    ;; noprompt, set
+       
+       (defun qz/es-choose-cookie-headers ()
+         "TODO"
+         (interactive)
+         (message
+          "es-default-headers: %s"
+          (setq es-default-headers `(("Content-Type" . "application/json; charset=UTF-8")
+                                     ("Cookie" . ,(format "ACCEZZIOCOOKIE=%s"
+                                                          (read-from-minibuffer "es cookie: ")))))))
+       (setq es-default-url "https://elasticsearch-production.newstore.luminatesec.com"
+             es-current-url es-default-url
+             es-default-headers nil
+             es-always-pretty-print t
+             es-default-headers
+             `(("Content-Type" . "application/json; charset=UTF-8")
+               ("Cookie" . ,(format "ACCEZZIOCOOKIE=%s"
+                                    "11fdbe68-b0f3-4dd0-9894-f97afe3662dc"))))
+       
+       (setq qz/newstore-es-string "https://%s-%s.newstore.luminatesec.com"
+             qz/newstore-es-backends '(kibana elasticsearch)
+             qz/newstore-es-backend-current nil
+             qz/newstore-es-env-current nil
+             qz/newstore-es-urls (cl-loop for env in qz/newstore-envs
+                                          append (cl-loop for es-backend in qz/newstore-es-backends
+                                                          collect (format qz/newstore-es-string es-backend env))))
        )
+     ;; NOWEB ES END
+     (setq temp-buffer-show-function 'hkey-help-show
+           temp-buffer-show-hook (remove 'hkey-help-show
+                                         temp-buffer-show-hook))
+     (add-to-list 'auto-mode-alist
+                  '("\\.tml\\'" . yaml-mode))
+     ;; NOWEB GOLANG START
+     (with-eval-after-load 'go-mode
+       (setq gofmt-command "golines")
+       (add-hook 'go-mode-hook
+                 (lambda () (add-hook 'before-save-hook
+                                      'gofmt-before-save
+                                      nil 'local)))
+       )
+     ;; NOWEB GOLANG END
+     (setq js-indent-level 2)
+     (with-eval-after-load 'magit
+       (if (fboundp 'magit-todos-mode)
+           (funcall 'magit-todos-mode)
+         (message "qz: config :: magit-todos-mode is not loaded")))
+     (defun qz/add-pdb-py-debug ()
+       "add debug code and move line down"
+       (interactive)
+       (back-to-indentation)
+       (insert "import pdb; pdb.set_trace();\n"))
+     (setq org-babel-default-header-args:python
+           '((:session . "python")
+             (:results . "verbatim")
+             (:async ."yes")))
+     (custom-set-variables '(python-indent-offset 4))
+     (add-to-list 'auto-mode-alist
+                  '("\\.pyx\\'" . python-mode))
+     (with-eval-after-load 'python-black
+       (setq python-black--base-args '("--quiet" "-l 78" "--preview")))
+     ;; NOWEB RESTCLIENT START
+     (with-eval-after-load 'restclient
+       (defvar qz/restclient-env nil)
+       
+       (defun qz/restclient-choose-env (&optional env)
+         (interactive)
+         (message "qz/restclient-env: %s"
+                  (setq qz/restclient-env
+                        (cdr (assoc (intern (or env
+                                                (completing-read "restclient-env: " qz/newstore-envs)))
+                                    qz/newstore-envs-abbrev))))
+         qz/restclient-env)
+       (defvar qz/restclient-tenant nil)
+       
+       (defun qz/restclient-choose-tenant (&optional tenant)
+         (interactive)
+         (message "qz/restclient-tenant: %s"
+                  (setq qz/restclient-tenant
+                        (or tenant (completing-read
+                                    "restclient-tenant: " qz/newstore-tenants))))
+         qz/restclient-tenant)
+       (defvar qz/restclient-token nil)
+       (defvar qz/restclient-token-field 'access_token)
+       
+       (defun qz/restclient-hook ()
+         "Update token from a request."
+         ;; url is visible while the hook is running.
+         (let ((result))
+           (save-excursion
+             (cond
+              ((string-suffix-p "/token" url)
+               (condition-case nil
+                   (progn
+                     (setq result (cdr (assoc qz/restclient-token-field (json-read))))
+                     (when (stringp result)
+                       (progn
+                         (setq qz/restclient-token result)
+                         (message (concat "stored token: " qz/restclient-token)))))
+                 (error (message "That wasn't cleanly handled."))))))))
+       
+       (add-hook 'restclient-response-loaded-hook 'qz/restclient-hook)
+       (provide 'restclient-hooks)
+       )
+     ;; NOWEB RESTCLIENT END
      
-     ;; (require 'perfect-margin)
-     
-     ;; (perfect-margin-mode 1)
-     ;; (setq perfect-margin-ignore-regexps nil
-     ;;       perfect-margin-ignore-filters nil)
      (custom-set-variables
-      '(cursor-type 'bar))
-     (setq outline-default-state 'outline-show-only-headings)
-     (defun hi-lock-face-symbol-at-point ()
-       "Highlight each instance of the symbol at point.
-     Uses the next face from `hi-lock-face-defaults' without prompting,
-     unless you use a prefix argument.
-     Uses `find-tag-default-as-symbol-regexp' to retrieve the symbol at point.
+      '(sqlind-indentation-offsets-alist
+        '((syntax-error sqlind-report-sytax-error)
+          (in-string sqlind-report-runaway-string)
      
-     If REGEXP contains upper case characters (excluding those preceded by `\\')
-     and `search-upper-case' is non-nil, the matching is case-sensitive.
      
-     This uses Font lock mode if it is enabled; otherwise it uses overlays,
-     in which case the highlighting will not update as you type.  The Font
-     Lock mode is considered \"enabled\" in a buffer if its `major-mode'
-     causes `font-lock-specified-p' to return non-nil, which means
-     the major mode specifies support for Font Lock."
+          (comment-continuation sqlind-indent-comment-continuation)
+          (comment-start sqlind-indent-comment-start)
+          (toplevel 0)
+          (in-block +)
+          (in-begin-block +)
+          (block-start 0)
+          (block-end 0)
+          (declare-statement +)
+          (package ++)
+          (package-body 0)
+          (create-statement +)
+          (defun-start +)
+          (labeled-statement-start 0)
+          (statement-continuation +)
+          (nested-statement-open sqlind-use-anchor-indentation +)
+          (nested-statement-continuation sqlind-use-previous-line-indentation)
+          (nested-statement-close sqlind-use-anchor-indentation)
+          (with-clause sqlind-use-anchor-indentation)
+          (with-clause-cte +)
+          (with-clause-cte-cont ++)
+          (case-clause 0)
+          (case-clause-item sqlind-use-anchor-indentation +)
+          (case-clause-item-cont sqlind-right-justify-clause)
+          (select-clause sqlind-right-justify-clause)
+          (select-column sqlind-indent-select-column)
+          (select-column-continuation sqlind-indent-select-column +)
+          ;;(select-table-continuation 0)
+          ;; ((default . ++) (kinda . +) ( . sqlind-use-anchor-indentation))
+          (select-join-condition ++) ; this should wrap
+          (select-table sqlind-indent-select-table)
+          (select-table-continuation sqlind-indent-select-table +)
+          (in-select-clause sqlind-lineup-to-clause-end sqlind-right-justify-logical-operator)
+          (insert-clause sqlind-right-justify-clause)
+          (in-insert-clause sqlind-lineup-to-clause-end sqlind-right-justify-logical-operator)
+          (delete-clause sqlind-right-justify-clause)
+          (in-delete-clause sqlind-lineup-to-clause-end sqlind-right-justify-logical-operator)
+          (update-clause sqlind-right-justify-clause)
+          (in-update-clause sqlind-lineup-to-clause-end sqlind-right-justify-logical-operator))))
+     (custom-set-variables
+      '(sqlind-default-indentation-offsets-alist
+        '((syntax-error sqlind-report-sytax-error)
+          (in-string sqlind-report-runaway-string)
+          (comment-continuation sqlind-indent-comment-continuation)
+          (comment-start sqlind-indent-comment-start)
+          (toplevel 0)
+          (in-block +)
+          (in-begin-block +)
+          (block-start 0)
+          (block-end 0)
+          (declare-statement +)
+          (package ++)
+          (package-body 0)
+          (create-statement +)
+          (defun-start +)
+          (labeled-statement-start 0)
+          (statement-continuation +)
+          (nested-statement-open sqlind-use-anchor-indentation +)
+          (nested-statement-continuation sqlind-use-previous-line-indentation)
+          (nested-statement-close sqlind-use-anchor-indentation)
+          (with-clause sqlind-use-anchor-indentation)
+          (with-clause-cte +)
+          (with-clause-cte-cont ++)
+          (case-clause 0)
+          (case-clause-item sqlind-use-anchor-indentation +)
+          (case-clause-item-cont sqlind-right-justify-clause)
+          (select-clause sqlind-right-justify-clause)
+          (select-column sqlind-indent-select-column)
+          (select-column-continuation sqlind-indent-select-column +)
+          (select-join-condition -- --)
+          (select-table sqlind-indent-select-table)
+          ;;(select-table-continuation sqlind-indent-select-table +)
+          (select-table-continuation sqlind-lineup-joins-to-anchor)
+          (in-select-clause sqlind-lineup-to-clause-end sqlind-right-justify-logical-operator)
+          (insert-clause sqlind-right-justify-clause)
+          (in-insert-clause sqlind-lineup-to-clause-end sqlind-right-justify-logical-operator)
+          (delete-clause sqlind-right-justify-clause)
+          (in-delete-clause sqlind-lineup-to-clause-end sqlind-right-justify-logical-operator)
+          (update-clause sqlind-right-justify-clause)
+          (in-update-clause sqlind-lineup-to-clause-end sqlind-right-justify-logical-operator))))
+     (defun qz/sqlfluff-region (&optional beg end info)
+       "uses src block by default"
        (interactive)
-       (let* ((regexp (hi-lock-regexp-okay
-                       (find-tag-default-as-symbol-regexp)))
-              (hi-lock-auto-select-face t)
-              (face (hi-lock-read-face-name)))
-         (or (facep face)
-             (setq face (or (and hi-lock-auto-select-face (hi-lock-read-face-name))
-                            'hi-yellow)))
-         (unless hi-lock-mode (hi-lock-mode 1))
-         (hi-lock-set-pattern
-          regexp face nil nil
-          (if (and case-fold-search search-upper-case)
-              (isearch-no-upper-case-p regexp t)
-            case-fold-search))))
-     
-     (with-eval-after-load 'highlight-indent-guides
-       
-       ;; highlight-indent-guides-character
-       ;; 🐶
-       ;; 🐩
-       ;; |
-       ;; default (char-to-string 9474)
-       ;; default │
-       
-       (custom-set-variables '(highlight-indent-guides-method 'character)
-                             `(highlight-indent-guides-character 9474)
-                             '(highlight-indent-guides-auto-enabled nil)
-                             '(highlight-indent-guides-responsive 'top))
-       
-       ;; I don't use this AT ALL so give some ridulous defaults
-       (set-face-background 'highlight-indent-guides-odd-face "green")
-       (set-face-background 'highlight-indent-guides-even-face "red")
-       
-       ;; this is the /only/ based highlight-indent guide variety
-       (set-face-foreground 'highlight-indent-guides-character-face "#333")
-       (let ((accent "#555"))
-         (set-face-foreground 'highlight-indent-guides-stack-character-face accent)
-         (set-face-foreground 'highlight-indent-guides-top-character-face accent))
-       (defun qz/highlight-indent-toggle-responsive (&optional arg)
-         (interactive)
-         (let ((val (if (or (and arg (> 0 arg))
-                            (and (not arg) highlight-indent-guides-responsive))
-                        nil qz/highlight-indent-guides-responsive)))
-           (custom-set-variables
-            `(highlight-indent-guides-responsive ',val))
-           (highlight-indent-guides-mode)
-           val))
-       (defvar qz/lazy-last -1)
-       (defun qz/lazy-eyes (&optional arg)
-         (interactive)
-         (setq qz/lazy-last (if (> 0 qz/lazy-last) 1 -1))
-         (qz/highlight-indent-toggle-responsive qz/lazy-last)
-         (global-hl-line-mode qz/lazy-last))
-       )
-     
-     (defvar qz/font-initial-size (face-attribute 'default :height))
-     (defvar qz/resize-mini-windows-initial resize-mini-windows)
-     (defvar qz/max-mini-window-height-initial max-mini-window-height)
-     
-     (defun qz/reset-visual-initial ()
+       (let* ((info (or info (org-babel-get-src-block-info)))
+              (dialect (or (and info (cl-case
+                                         (intern (cdr (assoc :engine (nth 2 info))))
+                                       (bq "bigquery")
+                                       (postgres "postgresql")
+                                       (t (error "🙄 my lazy ass"))))
+                           ;; default
+                           "bigquery")))
+         (if info
+             (save-mark-and-excursion
+               (org-babel-mark-block))
+           ;; default
+           (unless (region-active-p)
+             (mark-whole-buffer)))
+         (cl-destructuring-bind
+             (beg end)
+             (or (and beg end (list beg end))
+                 (list (region-beginning) (region-end)))
+           (shell-command-on-region
+            beg end
+            (format "sqlfluff fix --FIX-EVEN-UNPARSABLE --force --disable-progress-bar --dialect %s -"
+                    dialect)
+            nil ;; no output buffer
+            'replace))))
+     (setq org-babel-default-header-args:sqlite '((:colnames . "yes")))
+     (defun qz/bq-consult-attrs ()
        (interactive)
-       (set-face-attribute 'default nil :height qz/font-initial-size)
-       (setq resize-mini-windows    qz/resize-mini-windows-initial
-             max-mini-window-height qz/max-mini-window-height-initial))
-     (defun qz/font-big-80 ()
+       (let ((d (mapcar
+                 (lambda (line) (s-split "::" line))
+                 ;; lines
+                 (s-split "\n"
+                          ;; remove last empty line
+                          (s-trim (with-temp-buffer
+                                    ;; TODO memoize
+                                    (mapc 'insert-file
+                                          '("~/.cache/bq-scrape-p-t-business-intelligence-0da1.txt"
+                                            "~/.cache/bq-scrape-p-t-order-management-svc-6996.txt"))
+                                    (buffer-string)))))))
+         (consult--read
+          d
+          :prompt "choose attr: "
+          :annotate
+          (lambda (c)
+            (concat
+             (propertize " " 'display '(space :align-to center))
+             (nth 1 (assoc c d))
+             (propertize " " 'display '(space))
+                                             ;(nth 2 (assoc c d))
+     
+             ))
+          :sort nil)))
+     
+     (defun qz/bq-read-attrs ()
        (interactive)
-       (set-face-attribute 'default nil :height 300)
-       (setq resize-mini-windows t
-             max-mini-window-height nil))
-     (defvar qz/unsplash-tags nil)
-     (defun qz/unsplash ()
-       "yet another lazy shell-command wrapper; wallpaper edition"
-       (interactive)
-       (let ((tag (read-from-minibuffer
-                   "unsplash tags: " (car qz/unsplash-tags))))
-         (async-shell-command
-          (format "TAGS='%s'
-     mv \"$XDG_CACHE_HOME/wallpaper.png\" \"$XDG_CACHE_HOME/$(date +%%Y-%%m-%%d--%%H-%%M-%%S)-wallpaper.png\"
-     curl -L \"https://source.unsplash.com/5120x1440?$TAGS\" -o \"$XDG_CACHE_HOME/wallpaper.png\"
-     swaymsg output \"*\" background ~/.cache/wallpaper.png fill" tag))
-         (setq qz/unsplash-tags (seq-uniq (cons tag qz/unsplash-tags)))))
+       (let ((d (mapcar
+                 (lambda (line) (s-split "::" line))
+                 ;; lines
+                 (s-split "\n"
+                          ;; remove last empty line
+                          (s-trim (with-temp-buffer
+                                    ;; TODO memoize
+                                    (insert-file "~/.cache/bq-schema.txt")
+                                    (buffer-string)))))))
+         (insert (completing-read
+                  "choose attr: "
+                  (mapcar 'car d))
+                 )))
+     
+     
      ;;; json-to-org-table.el --- Converts json string to linked org table -*- lexical-binding: t; -*-
      ;;
      ;; Copyright (C) 2020 Joshua Person
@@ -4564,6 +4312,384 @@
      (provide 'json-to-org-table)
      
      ;;; json-to-org-table.el ends here
+     ;; https://stackoverflow.com/questions/9547912/emacs-calendar-show-more-than-3-months
+     (defun farynaio/year-calendar (&optional year)
+       "Generate a one year calendar that can be scrolled by year in each direction.
+     This is a modification of:  http://homepage3.nifty.com/oatu/emacs/calendar.html
+     See also: https://stackoverflow.com/questions/9547912/emacs-calendar-show-more-than-3-months"
+       (interactive)
+       (require 'calendar)
+       (let* (
+              (current-year (number-to-string (nth 5 (decode-time (current-time)))))
+              (month 0)
+              (year (if year year (string-to-number (format-time-string "%Y" (current-time))))))
+         (switch-to-buffer (get-buffer-create calendar-buffer))
+         (when (not (eq major-mode 'calendar-mode))
+           (calendar-mode))
+         (setq displayed-month month)
+         (setq displayed-year year)
+         (setq buffer-read-only nil)
+         (erase-buffer)
+         ;; horizontal rows
+         (dotimes (j 4)
+           ;; vertical columns
+           (dotimes (i 3)
+             (calendar-generate-month
+              (setq month (+ month 1))
+              year
+              ;; indentation / spacing between months
+              (+ 5 (* 25 i))))
+           (goto-char (point-max))
+           (insert (make-string (- 10 (count-lines (point-min) (point-max))) ?\n))
+           (widen)
+           (goto-char (point-max))
+           (narrow-to-region (point-max) (point-max)))
+         (widen)
+         (goto-char (point-min))
+         (setq buffer-read-only t)))
+     
+     (defun farynaio/scroll-year-calendar-forward (&optional arg event)
+       "Scroll the yearly calendar by year in a forward direction."
+       (interactive (list (prefix-numeric-value current-prefix-arg)
+                          last-nonmenu-event))
+       (unless arg (setq arg 0))
+       (save-selected-window
+         (if (setq event (event-start event)) (select-window (posn-window event)))
+         (unless (zerop arg)
+           (let* (
+                  (year (+ displayed-year arg)))
+             (farynaio/year-calendar year)))
+         (goto-char (point-min))
+         (run-hooks 'calendar-move-hook)))
+     
+     (defun farynaio/scroll-year-calendar-backward (&optional arg event)
+       "Scroll the yearly calendar by year in a backward direction."
+       (interactive (list (prefix-numeric-value current-prefix-arg)
+                          last-nonmenu-event))
+       (farynaio/scroll-year-calendar-forward (- (or arg 1)) event))
+     
+     (define-key calendar-mode-map "<" 'farynaio/scroll-year-calendar-backward)
+     (define-key calendar-mode-map ">" 'farynaio/scroll-year-calendar-forward)
+     
+     (defalias 'qz/year-calendar 'farynaio/year-calendar)
+     
+     (defun qz/bt-connect (mac)
+       (interactive "saddress: ")
+       (async-shell-command
+        (format "bluetoothctl connect %s" mac)
+        "*bluetoothctl*"))
+     
+     
+     ;;  [AnnePro2 P4]# block 44:F0:9E:51:52:7B
+     ;; [CHG] Device 44:F0:9E:51:52:7B Blocked: yes
+     ;; Changing 44:F0:9E:51:52:7B block succeeded
+     ;; [CHG] Device 44:F0:9E:51:52:7B Connected: no
+     ;; [DEL] Transport /org/bluez/hci0/dev_44_F0_9E_51_52_7B/sep1/fd5
+     ;; [DEL] Endpoint /org/bluez/hci0/dev_44_F0_9E_51_52_7B/sep1
+     ;; [DEL] Endpoint /org/bluez/hci0/dev_44_F0_9E_51_52_7B/sep2
+     ;; [DEL] Endpoint /org/bluez/hci0/dev_44_F0_9E_51_52_7B/sep3
+     ;; [AnnePro2 P4]# disconnect 44:F0:9E:51:52:7B
+     
+     
+     (defun qz/bt-do (commands mac)
+       (interactive "saddress: ")
+       (mapcar (lambda (c) (async-shell-command
+                            (format "bluetoothctl %s %s" c mac)
+                            "*bluetoothctl*"))
+     
+               (qz/ensure-list command)))
+     
+     (defun qz/bt-ignore (mac)
+       (interactive "saddress: ")
+       (qz/bt-do '(block disconnect) mac))
+     
+     (defmacro qz/bt-ui (command-devices)
+       "A macro as a UI to manage bluetooth actions.
+     
+     Creates mapped commands against each named device."
+       (let ((f-name (lambda (e)
+                       (intern (format "qz/bt-%s--%s"
+                                       command device))))
+     
+         (mapcar (lambda ()
+     
+                   (defun ,TODO ()
+                     (qz/bt-, ,actions mac))
+     
+            (defun ,enable ()
+              (interactive)
+              (advice-add ',target-fn ,state ',advice-fn))
+     
+            (defun ,(funcall s-advice 'disable) ()
+              (interactive)
+              (advice-remove ',target-fn ',advice-fn))
+     
+            (,enable)
+            (list ',enable ',disable))))))
+     
+     (defvar qz/bluetooth-devices
+       '((airpods . "44:F0:9E:51:52:7B")
+         (boomzo . nil)
+         (aiaia . nil)
+         (ap2 . nil)))
+     
+     
+     (defun qz/bt-airpods ()
+       (interactive)
+       (qz/bt-connect "44:F0:9E:51:52:7B"))
+     
+     (defun qz/bt-aiaiai ()
+       (interactive)
+       (qz/bt-connect "44:F0:9E:51:52:7B"))
+     
+     (defun qz/bt-boomzo ()
+       (interactive)
+       (qz/bt-connect "44:F0:9E:51:52:7B"))
+     (defun qz/get-mail ()
+       (interactive)
+       (async-shell-command "mbsync -Va && notmuch new"))
+     (defun qz/rde-sanity ()
+       (interactive)
+       (async-shell-command
+        (concat "cd $HOME/git/sys/rde"
+                "&& guix repl -L src -L examples/src dev/sanity.scm")))
+     (setq qz/emacs/config "~/.files/config.org"
+           qz/sh/tangle "make -C $HOME/.files tangle ")
+     
+     (defun qz/tangle ()
+       (interactive)
+       (async-shell-command
+        (concat
+         "make -C ~/.files tangle"
+         " && echo 'tangle--ehg--di' | espeak --stdin")))
+     
+     (defun qz/suspend ()
+       (interactive)
+       (async-shell-command "sync && loginctl suspend && sync"))
+     
+     
+     (defun qz/redshift-fulldark ()
+       (interactive)
+       (async-shell-command "guix shell redshift-wayland -- redshift -O 1000K -r -b .4 "
+                            "*process:redshift*"))
+     
+     (defun qz/redshift-full ()
+       (interactive)
+       (async-shell-command "guix shell redshift-wayland -- redshift -O 1000K -r -b .7 "
+                            "*process:redshift*"))
+     
+     (defun qz/redshift-fullbright ()
+       (interactive)
+       (async-shell-command "guix shell redshift-wayland -- redshift -O 1000K -r -b 1 "
+                            "*process:redshift*"))
+     
+     (defun qz/redshift-mellow ()
+       (interactive)
+       (async-shell-command "guix shell redshift-wayland -- redshift -O 2000K -r -b .7 "
+                            "*process:redshift*"))
+     (defun qz/redshift-mellowbright ()
+       (interactive)
+       (async-shell-command "guix shell redshift-wayland -- redshift -O 2000K -r -b 1 "
+                            "*process:redshift*"))
+     
+     (defun qz/dmesg ()
+       (interactive)
+       (async-shell-command
+        "sudo dmesg -w"
+        "*process:dmesg*"))
+     
+     (defun qz/reload-config-home ()
+       (interactive)
+       (save-some-buffers)
+       (async-shell-command
+        (concat
+         "make -C $HOME/git/qz/dotfiles tangle reconfigure/local/home/ixy"
+         "&& echo 'home--bal-ehg--di' | espeak --stdin ")
+        "*process:dotfiles-reload*"))
+     
+     (defun qz/build-config-home ()
+       (interactive)
+       (save-some-buffers)
+       (async-shell-command
+        (concat
+         "make -C $HOME/git/qz/dotfiles tangle build/local/ixy"
+         "&& echo 'home--bal-ehg--di' | espeak --stdin ")
+        "*process:dotfiles-reload*"))
+     
+     (defun qz/reload-config-system ()
+       (interactive)
+       (async-shell-command
+        (concat
+         "make -C $HOME/git/qz/dotfiles tangle && sudo -E make -C $HOME/git/qz/dotfiles reconfigure/local/system/ixy"
+         "&& echo 'system--bal-ehg--di' | espeak --stdin")
+        "*process:dotfiles-reload*"))
+     
+     (defun qz/reload-config-all ()
+       (interactive)
+       (async-shell-command
+        (concat
+         "guix pull &; "
+         "sudo su root -c 'guix pull' &;"
+         "   make -C $HOME/.files -B guix-local"
+         "&& make -C $HOME/.files reconfigure/local/home/ixy"
+         "&& sudo -E make -C $HOME/.files reconfigure/local/system/ixy"
+         "&& echo 'do the do, like ooo; pull & home & system bal-ehg--di'"
+         "   | espeak --stdin")
+        "*process:dotfiles-reload*"))
+     
+     (defun qz/reload-config-emacs ()
+       (interactive)
+       (load-file "~/.config/emacs/init.el"))
+     
+     (defun qz/guix-pull ()
+       (interactive)
+       (async-shell-command
+        "make -C $HOME/.files -B guix-local"
+        "*process:dotfiles-reload*"))
+     (defun qz/guix-describe-lag ()
+       "
+     
+     "
+     
+     
+       (interactive))
+     
+     (defun qz/guix-upgrade ()
+       (interactive)
+       (async-shell-command
+        (s-join " "
+                '("make -C $HOME/git/sys/rde/examples -B guix"
+                  "&& make rde/channels/update-locked"
+                  "&& make rde/channels/pull-locked"
+                  "&& guix package -u"
+                  "&& guix upgrade"
+                  "&& make"))))
+     (defun qz/sway-choose-output-res (&optional display res)
+       (interactive)
+       (let* ((cur (s-trim (shell-command-to-string
+                            "swaymsg -t get_outputs | jq -r 'map( . | select(.focused == true) | .name) | first'")))
+              (cmd (format "swaymsg 'output %s enable res %s'"
+                           (or display
+                               (completing-read "display: "
+                                                '("DP-1" "DP-2"
+                                                  "eDP-1"
+                                                  "HDMI-1" "HDMI-2")
+                                                nil t cur))
+                           (or res
+                               (completing-read "resolution: "
+                                                '("1920x1080"
+                                                  "3840x1080"
+                                                  "5120x1440")
+                                                nil t)))))
+         (when (y-or-n-p (format "exec ~%s~?" cmd))
+           (shell-command cmd))))
+     (custom-set-variables
+      '(cursor-type 'bar))
+     
+     (with-eval-after-load 'highlight-indent-guides
+       
+       ;; highlight-indent-guides-character
+       ;; 🐶
+       ;; 🐩
+       ;; |
+       ;; default (char-to-string 9474)
+       ;; default │
+       
+       (custom-set-variables '(highlight-indent-guides-method 'character)
+                             `(highlight-indent-guides-character 9474)
+                             '(highlight-indent-guides-auto-enabled nil)
+                             '(highlight-indent-guides-responsive 'top))
+       
+       ;; I don't use this AT ALL so give some ridulous defaults
+       (set-face-background 'highlight-indent-guides-odd-face "green")
+       (set-face-background 'highlight-indent-guides-even-face "red")
+       
+       ;; this is the /only/ based highlight-indent guide variety
+       (set-face-foreground 'highlight-indent-guides-character-face "#333")
+       (let ((accent "#555"))
+         (set-face-foreground 'highlight-indent-guides-stack-character-face accent)
+         (set-face-foreground 'highlight-indent-guides-top-character-face accent))
+       (defun qz/highlight-indent-toggle-responsive (&optional arg)
+         (interactive)
+         (let ((val (if (or (and arg (> 0 arg))
+                            (and (not arg) highlight-indent-guides-responsive))
+                        nil qz/highlight-indent-guides-responsive)))
+           (custom-set-variables
+            `(highlight-indent-guides-responsive ',val))
+           (highlight-indent-guides-mode)
+           val))
+       (defvar qz/lazy-last -1)
+       (defun qz/lazy-eyes (&optional arg)
+         (interactive)
+         (setq qz/lazy-last (if (> 0 qz/lazy-last) 1 -1))
+         (qz/highlight-indent-toggle-responsive qz/lazy-last)
+         (global-hl-line-mode qz/lazy-last))
+       )
+     
+     ;; (require 'perfect-margin)
+     
+     ;; (perfect-margin-mode 1)
+     ;; (setq perfect-margin-ignore-regexps nil
+     ;;       perfect-margin-ignore-filters nil)
+     (defun hi-lock-face-symbol-at-point ()
+       "Highlight each instance of the symbol at point.
+     Uses the next face from `hi-lock-face-defaults' without prompting,
+     unless you use a prefix argument.
+     Uses `find-tag-default-as-symbol-regexp' to retrieve the symbol at point.
+     
+     If REGEXP contains upper case characters (excluding those preceded by `\\')
+     and `search-upper-case' is non-nil, the matching is case-sensitive.
+     
+     This uses Font lock mode if it is enabled; otherwise it uses overlays,
+     in which case the highlighting will not update as you type.  The Font
+     Lock mode is considered \"enabled\" in a buffer if its `major-mode'
+     causes `font-lock-specified-p' to return non-nil, which means
+     the major mode specifies support for Font Lock."
+       (interactive)
+       (let* ((regexp (hi-lock-regexp-okay
+                       (find-tag-default-as-symbol-regexp)))
+              (hi-lock-auto-select-face t)
+              (face (hi-lock-read-face-name)))
+         (or (facep face)
+             (setq face (or (and hi-lock-auto-select-face (hi-lock-read-face-name))
+                            'hi-yellow)))
+         (unless hi-lock-mode (hi-lock-mode 1))
+         (hi-lock-set-pattern
+          regexp face nil nil
+          (if (and case-fold-search search-upper-case)
+              (isearch-no-upper-case-p regexp t)
+            case-fold-search))))
+     
+     ;; (setq minibuffer-mode-hook nil)
+     ;; (add-hook 'minibuffer-mode-hook 'olivetti-mode)
+     
+     (add-hook 'minibuffer-mode-hook
+               (lambda ()
+                 (setq-local olivetti-body-width 200)
+                 (olivetti-mode)))
+     
+     
+     (defun qz/big-mode ()
+       (interactive)
+       (call-interactively 'global-text-scale-adjust)
+       (setq olivetti-body-width 150)
+     
+       )
+     
+     (setq outline-default-state 'outline-show-only-headings)
+     (defvar qz/unsplash-tags nil)
+     (defun qz/unsplash ()
+       "yet another lazy shell-command wrapper; wallpaper edition"
+       (interactive)
+       (let ((tag (read-from-minibuffer
+                   "unsplash tags: " (car qz/unsplash-tags))))
+         (async-shell-command
+          (format "TAGS='%s'
+     mv \"$XDG_CACHE_HOME/wallpaper.png\" \"$XDG_CACHE_HOME/$(date +%%Y-%%m-%%d--%%H-%%M-%%S)-wallpaper.png\"
+     curl -L \"https://source.unsplash.com/5120x1440?$TAGS\" -o \"$XDG_CACHE_HOME/wallpaper.png\"
+     swaymsg output \"*\" background ~/.cache/wallpaper.png fill" tag))
+         (setq qz/unsplash-tags (seq-uniq (cons tag qz/unsplash-tags)))))
+     (setq sentence-end-double-space t)
      ;; NOWEB CONF END (three parens and  terminate the file)
      )))
 

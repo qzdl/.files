@@ -7,20 +7,29 @@
   #:use-module (gnu bootloader grub)
 
   #:use-module (gnu home services) ; nope
-  #:use-module (gnu home-services shells)
+  ;; #:use-module (gnu home-services shells) ;; error [2024-04-23 Tue 12:26] -> (rde home services shells)
   #:use-module (gnu home-services ssh)
 
+  #:use-module (gnu packages cmake)
   #:use-module (gnu packages emacs-xyz)
   #:use-module (gnu packages fonts)
+  #:use-module (gnu packages freedesktop)
+  #:use-module (gnu packages linux)
+  #:use-module (gnu packages pkg-config)
   #:use-module (gnu packages video)
   #:use-module (gnu packages wm)
+
   #:use-module (gnu packages)
 
+  #:use-module (gnu services)
+  #:use-module (gnu services admin)
   #:use-module (gnu services base)
+  #:use-module (gnu services cups)
   #:use-module (gnu services desktop)
+  #:use-module (gnu services nfs)
+  #:use-module (gnu services samba)
   #:use-module (gnu services ssh)
   #:use-module (gnu services xorg)
-  #:use-module (gnu services nfs)
 
   #:use-module (gnu system file-systems)
   #:use-module (gnu system keyboard)
@@ -40,6 +49,7 @@
   #:use-module (rde features bittorrent)
   #:use-module (rde features bluetooth)
   #:use-module (rde features clojure)
+  #:use-module (rde features containers)
   #:use-module (rde features docker)
   #:use-module (rde features emacs)
   #:use-module (rde features emacs-xyz)
@@ -68,12 +78,13 @@
   #:use-module (rde features wm)
   #:use-module (rde features xdg)
   #:use-module (rde features xdisorg)
-  ;;#:use-module (rde features irc)
+  #:use-module (rde features irc)
 
   #:use-module (rde gexp)
 
   #:use-module (rde home services i2p)
   #:use-module (rde home services emacs)
+  #:use-module (rde home services shells)
 
   #:use-module (rde packages emacs)
   #:use-module (rde packages emacs-xyz)
@@ -83,23 +94,23 @@
 
   ;;#:use-module (gnu home-services shellutils)
 
-  #:use-module (nongnu packages nvidia)
-  #:use-module (nongnu services nvidia)
-
-  ;;#:use-module (rde features bluetooth) ;; TODO qzdl
+  #:use-module ((nongnu packages linux) #:prefix nongnu-pkg-linux:)
+  #:use-module ((nongnu packages linux) #:prefix nongnu-pkg-nvidia:)
+  #:use-module ((nongnu services nvidia) #:prefix nongnu-nvidia-svc:)
+  #:use-module ((nongnu system linux-initrd) #:prefix nongnu-sys:)
 
   #:use-module (srfi srfi-1))
 (use-modules (rde features mail))
 
 (define bravehost-folder-mapping
-  '(("inbox"  . "INBOX")
+  '(("inbox"    . "INBOX")
     ("accounts" . "INBOX/Accounts")
-    ("cv" . "INBOX/CV")
-    ("info" . "INBOX/info")
-    ("sent"   . "Sent")
-    ("drafts" . "Drafts")
-    ("trash"  . "Deleted Items")
-    ("spam"   . "Junk")))
+    ("cv"       . "INBOX/CV")
+    ("info"     . "INBOX/info")
+    ("sent"    . "Sent")
+    ("drafts"  . "Drafts")
+    ("trash"   . "Deleted Items")
+    ("spam"    . "Junk")))
 
 ;; https://wiki.bravenet.com/Using_your_Bravenet_e-mail_account
 (define bravehost-isync-settings
@@ -115,11 +126,23 @@
 
 (define gmail-tls-isync-settings
   (generate-isync-serializer "imap.gmail.com" gmail-tls-folder-mapping))
-(define %thinkpad-layout
-  (keyboard-layout
-   "us" "altgr-intl"
-   #:model "thinkpad"
-   #:options '("ctrl:nocaps")))
+(define* (pkgs #:rest lst)
+  (map specification->package+output lst))
+
+(define* (pkgs-vanilla #:rest lst)
+  "Packages from guix channel."
+  (define channel-guix
+    (list (channel
+           (name 'guix)
+           (url "https://git.savannah.gnu.org/git/guix.git")
+           ;;;; [2023-07-13 Thu 09:46]
+           (commit "2794caed7c813f2ec4249236de36eaccafee8361"))))
+
+  (define inferior (inferior-for-channels channel-guix))
+  (define (get-inferior-pkg pkg-name)
+    (car (lookup-inferior-packages inferior pkg-name)))
+
+  (map get-inferior-pkg lst))
 (define %extra-zshrc
   (list ;; XXX higher level category
    ;; something which evals equiv to following for each promptline "PS1=\"[$(date -u '+%Y-%m-%d | %H:%M')] $PS1\""
@@ -144,31 +167,12 @@
    "_gsP() { . $GUIX_EXTRA_PROFILES/$1/$1 ; }"
    "gsP=_gsP"
    ))
-(define my-org-directory "~/life")
-(define my-notes-directory
-  (string-append my-org-directory "/roam"))
 (define gaming? #f)
-
-;;; Generic features should be applicable for various hosts/users/etc
-
-(define* (pkgs #:rest lst)
-  (map specification->package+output lst))
-
-(define* (pkgs-vanilla #:rest lst)
-  "Packages from guix channel."
-  (define channel-guix
-    (list (channel
-           (name 'guix)
-           (url "https://git.savannah.gnu.org/git/guix.git")
-           ;;;; [2023-07-13 Thu 09:46]
-           (commit "2794caed7c813f2ec4249236de36eaccafee8361"))))
-
-  (define inferior (inferior-for-channels channel-guix))
-  (define (get-inferior-pkg pkg-name)
-    (car (lookup-inferior-packages inferior pkg-name)))
-
-  (map get-inferior-pkg lst))
-
+(define %thinkpad-layout
+  (keyboard-layout
+   "us" "altgr-intl"
+   #:model "thinkpad"
+   #:options '("ctrl:nocaps")))
 (use-modules
  (gnu packages)
  (guix packages)
@@ -180,6 +184,7 @@
  (gnu packages emacs-xyz)
  (guix build-system emacs)
  (guix build-system gnu)
+ (guix build-system meson)
  ((guix licenses) #:prefix license:))
 
 (define-public emacs-sql-indent
@@ -248,62 +253,62 @@ https://github.com/ndwarshuis/org-ml")
    (license license:gpl3+)))
 (define-public emacs-moldable-emacs
   (package
-    (name "emacs-moldable-emacs")
-    (version "20220825.0037")
-    (source
-     (origin
-       (method git-fetch)
-       (uri (git-reference
-             (url "https://github.com/ag91/moldable-emacs")
-             (commit "53f8b3af4572ab12be9f1f96da848278507ef350")))
-       (sha256
-        (base32 "1jcac4hiyh98q8cvim6yjaw1xihsy3r5lnjhijr3p89z2bv481xl"))))
-    (arguments
-     (list
-      ;; #:tests? #true
-      ;; #:test-command
-      ;; #~(list "emacs" "-Q" "--batch"
-      ;;         "-L" "test"
-      ;;         "--load" "test/testein-loader.el")
-      #:phases
-      #~(modify-phases %standard-phases
-          (add-after 'unpack 'install-molds
-            (lambda _
-              (for-each
-               (lambda (f)
-                 (install-file
-                  f (string-append (elpa-directory #$output)
-                                   "/molds")))
-               (find-files "./molds" ".*"))
-              (for-each
-               (lambda (f)
-                 (install-file
-                  f (string-append (elpa-directory #$output)
-                                   "/tutorials")))
-               (find-files "./tutorials" ".*")))))))
-    (build-system emacs-build-system)
+   (name "emacs-moldable-emacs")
+   (version "20220825.0037")
+   (source
+    (origin
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/ag91/moldable-emacs")
+           (commit "53f8b3af4572ab12be9f1f96da848278507ef350")))
+     (sha256
+      (base32 "1jcac4hiyh98q8cvim6yjaw1xihsy3r5lnjhijr3p89z2bv481xl"))))
+   (arguments
+    (list
+     ;; #:tests? #true
+     ;; #:test-command
+     ;; #~(list "emacs" "-Q" "--batch"
+     ;;         "-L" "test"
+     ;;         "--load" "test/testein-loader.el")
+     #:phases
+     #~(modify-phases %standard-phases
+                      (add-after 'unpack 'install-molds
+                                 (lambda _
+                                   (for-each
+                                    (lambda (f)
+                                      (install-file
+                                       f (string-append (elpa-directory #$output)
+                                                        "/molds")))
+                                    (find-files "./molds" ".*"))
+                                   (for-each
+                                    (lambda (f)
+                                      (install-file
+                                       f (string-append (elpa-directory #$output)
+                                                        "/tutorials")))
+                                    (find-files "./tutorials" ".*")))))))
+   (build-system emacs-build-system)
    ;;; propagated (external)
-    ;; (check these via the mold “WhatMoldsCanIUse?”)
-    ;; graph-cli
-    ;; graphviz
-    ;; imgclip
-    ;; emacs-csv-mode OPTIONAL (buffer size to bar chart)
-    (propagated-inputs
-     (list emacs-dash
-           emacs-s
-           emacs-async
-           ;; emacs-thunk builtin
-           emacs-esxml
-           emacs-org-ql
-           ;; emacs-tree-sitter
-           ;; emacs-code-compass
-           ))
-    (home-page "https://github.com/ag91/moldable-emacs")
+   ;; (check these via the mold “WhatMoldsCanIUse?”)
+   ;; graph-cli
+   ;; graphviz
+   ;; imgclip
+   ;; emacs-csv-mode OPTIONAL (buffer size to bar chart)
+   (propagated-inputs
+    (list emacs-dash
+          emacs-s
+          emacs-async
+          ;; emacs-thunk builtin
+          emacs-esxml
+          emacs-org-ql
+          ;; emacs-tree-sitter
+          ;; emacs-code-compass
+          ))
+   (home-page "https://github.com/ag91/moldable-emacs")
 
-    (synopsis "TODO")
-    (description
-     "TODO")
-    (license license:gpl3+)))
+   (synopsis "TODO")
+   (description
+    "TODO")
+   (license license:gpl3+)))
 
 (define-public emacs-ob-go
   (package
@@ -386,8 +391,8 @@ JIRA issues.")
                   "^doc/[^/]+.info$"
                   "^doc/[^/]+.texi$"
                   "^doc/[^/]+.texinfo$")
-                #:exclude '("^.dir-locals.el$" "^test.el$" "^tests.el$" "^[^/]+-test.el$"
-                            "^[^/]+-tests.el$" "^kubernetes-evil.el$")))
+      #:exclude '("^.dir-locals.el$" "^test.el$" "^tests.el$" "^[^/]+-test.el$"
+                  "^[^/]+-tests.el$" "^kubernetes-evil.el$")))
    (home-page "https://github.com/kubernetes-el/kubernetes-el")
    (synopsis "Magit-like porcelain for Kubernetes")
    (description
@@ -443,151 +448,140 @@ independently.  Clock instances ared updated automatically.  Their resources
    (license license:gpl3+)))
 (define-public emacs-consult-recoll
   (package
-    (name "emacs-consult-recoll")
-    (version "0.8")
-    (source (origin
-              (method url-fetch)
-              (uri (string-append
-                    "https://elpa.gnu.org/packages/consult-recoll-" version
-                    ".tar"))
-              (sha256
-               (base32
-                "02vg1rr2fkcqrrivqgggdjdq0ywvlyzazwq1xd02yah3j4sbv4ag"))))
-    (build-system emacs-build-system)
-    (propagated-inputs (list emacs-consult))
-    (home-page "https://codeberg.org/jao/consult-recoll")
-    (synopsis "Recoll queries using consult")
-    (description "This package provides an emacs interface to perform recoll queries, and display its results, via consult. It is also recommened that you use a a package for vertical display of completions that works well with consult, such as vertico.")
-    (license license:gpl3+)))
+   (name "emacs-consult-recoll")
+   (version "0.8")
+   (source (origin
+            (method url-fetch)
+            (uri (string-append
+                  "https://elpa.gnu.org/packages/consult-recoll-" version
+                  ".tar"))
+            (sha256
+             (base32
+              "02vg1rr2fkcqrrivqgggdjdq0ywvlyzazwq1xd02yah3j4sbv4ag"))))
+   (build-system emacs-build-system)
+   (propagated-inputs (list emacs-consult))
+   (home-page "https://codeberg.org/jao/consult-recoll")
+   (synopsis "Recoll queries using consult")
+   (description "This package provides an emacs interface to perform recoll queries, and display its results, via consult. It is also recommened that you use a a package for vertical display of completions that works well with consult, such as vertico.")
+   (license license:gpl3+)))
 ;; :var props=guix-bq() :noweb yes
 ;; ^^ wow
 
 (define-public emacs-bigquery-mode
   (package
-    (name "emacs-bigquery-mode")
-    (version "20200412.155")
-    (source
-     (origin
-       (method git-fetch)
-       (uri (git-reference
-             (url "https://github.com/christophstockhusen/bigquery-mode")
-             (commit "308bdccf194f1bca230de3a070459836e30b502a")))
-       (file-name (git-file-name name version))
-       (sha256
-        (base32 "0w1b2d64hdzxk58lq0zfpfavmi8w80lmgqybvgfkl7l3mhnwzgj2"))))
-    (propagated-inputs
-     (list emacs-sql-indent))
-    (build-system emacs-build-system)
-    (home-page "https://github.com/christophstockhusen/bigquery-mode")
-    (synopsis "Major mode for interacting with Google Cloud Platform's BigQuery")
-    (description "Major mode for interacting with Google Cloud Platform's BigQuery")
-    (license license:gpl3+)))
+   (name "emacs-bigquery-mode")
+   (version "20200412.155")
+   (source
+    (origin
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/christophstockhusen/bigquery-mode")
+           (commit "308bdccf194f1bca230de3a070459836e30b502a")))
+     (file-name (git-file-name name version))
+     (sha256
+      (base32 "0w1b2d64hdzxk58lq0zfpfavmi8w80lmgqybvgfkl7l3mhnwzgj2"))))
+   (propagated-inputs
+    (list emacs-sql-indent))
+   (build-system emacs-build-system)
+   (home-page "https://github.com/christophstockhusen/bigquery-mode")
+   (synopsis "Major mode for interacting with Google Cloud Platform's BigQuery")
+   (description "Major mode for interacting with Google Cloud Platform's BigQuery")
+   (license license:gpl3+)))
 
 (define-public emacs-dogears
   (package
-  (name "emacs-dogears")
-  (version "20220829.441")
-  (source (origin
-            (method git-fetch)
-            (uri (git-reference
-                  (url "https://github.com/alphapapa/dogears.el.git")
-                  (commit "5b8a85d03ca17d8b8185868fdbacf320784026d5")))
-            (sha256
-             (base32
-              "0h4gh4ja9dnslj286skc8nzp9dvpyp53ig9y4kniq5lji6gn3r1f"))))
-  (build-system emacs-build-system)
-  (propagated-inputs (list emacs-map))
-  (arguments
-   '(#:include '("^[^/]+.el$" "^[^/]+.el.in$"
-                 "^dir$"
-                 "^[^/]+.info$"
-                 "^[^/]+.texi$"
-                 "^[^/]+.texinfo$"
-                 "^doc/dir$"
-                 "^doc/[^/]+.info$"
-                 "^doc/[^/]+.texi$"
-                 "^doc/[^/]+.texinfo$")
-     #:exclude '("^.dir-locals.el$" "^test.el$" "^tests.el$" "^[^/]+-test.el$"
-                 "^[^/]+-tests.el$" "^helm-dogears.el$")))
-  (home-page "https://github.com/alphapapa/dogears.el")
-  (synopsis "Never lose your place again")
-  (description
-   "This library automatically and smartly remembers where you've been, in and
-across buffers, and helps you quickly return to any of those places.  It uses
-the Emacs bookmarks system internally (but without modifying the
-bookmarks-alist) to save and restore places with mode-specific functionality.")
-  (license license:gpl3+)))
+   (name "emacs-dogears")
+   (version "20240412.850")
+   (source
+    (origin
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/alphapapa/dogears.el.git")
+           (commit
+            "162671e66cac601f1cfd5d22f7da2671af2e9866")))
+     (sha256
+      (base32
+       "1n0yhs4vcl9h10slqck1zd5h2p34lim3xrra9zcj1pa6qp5a2i56"))))
+   (build-system emacs-build-system)
+   (arguments
+    '(#:exclude '("helm-dogears.el")))
+   (home-page
+    "https://github.com/alphapapa/dogears.el")
+   (synopsis "Never lose your place again")
+   (description
+    "Documentation at https://melpa.org/#/dogears")
+   (license #f)))
 (define-public emacs-chatgpt-shell
   (package
-    (name "emacs-chatgpt-shell")
-    (version "2023-04-21")
-    (source
-     (origin
-       (method git-fetch)
-       (uri (git-reference
-             (url "https://github.com/xenodium/chatgpt-shell")
-             (commit "0ae307045fdad451f7a6e2a56ffec70c6300b8da")))
-       (sha256
-        (base32 "1s7pn8v79x2l02cj41z89f8rda2xd3naq6yv8vjzd0z4kag3jmzv"))))
-    (build-system emacs-build-system)
-    (home-page "")
-    (synopsis "A minimal ChatGPT Emacs shel")
-    (description
-     "A minimal ChatGPT Emacs shell")
-    (license license:gpl3+)))
+   (name "emacs-chatgpt-shell")
+   (version "2023-04-21")
+   (source
+    (origin
+     (method git-fetch)
+     (uri (git-reference
+           (url "https://github.com/xenodium/chatgpt-shell")
+           (commit "0ae307045fdad451f7a6e2a56ffec70c6300b8da")))
+     (sha256
+      (base32 "1s7pn8v79x2l02cj41z89f8rda2xd3naq6yv8vjzd0z4kag3jmzv"))))
+   (build-system emacs-build-system)
+   (home-page "")
+   (synopsis "A minimal ChatGPT Emacs shel")
+   (description
+    "A minimal ChatGPT Emacs shell")
+   (license license:gpl3+)))
 (define-public emacs-ytdl-next
   (package
-    (name "emacs-ytdl")
-    (version "20230331.1804")
-    (source (origin
-              (method git-fetch)
-              (uri (git-reference
-                    (url "https://gitlab.com/tuedachu/ytdl.git")
-                    (commit "2ea3daf2f6aa9d18b71fe3e15f05c30a56fca228")))
-              (sha256
-               (base32
-                "0y62lkgsg19j05dpd6sp6zify8vq8xvpc8caqiy4rwi7p4ahacsf"))))
-    (build-system emacs-build-system)
-    (propagated-inputs (list emacs-async emacs-transient emacs-dash))
-    (home-page "https://gitlab.com/tuedachu/ytdl")
-    (synopsis "Emacs Interface for youtube-dl")
-    (description
-     "ytdl.el is an Emacs-based interface for youtube-dl, written in emacs-lisp.
+   (name "emacs-ytdl")
+   (version "20230331.1804")
+   (source (origin
+            (method git-fetch)
+            (uri (git-reference
+                  (url "https://gitlab.com/tuedachu/ytdl.git")
+                  (commit "2ea3daf2f6aa9d18b71fe3e15f05c30a56fca228")))
+            (sha256
+             (base32
+              "0y62lkgsg19j05dpd6sp6zify8vq8xvpc8caqiy4rwi7p4ahacsf"))))
+   (build-system emacs-build-system)
+   (propagated-inputs (list emacs-async emacs-transient emacs-dash))
+   (home-page "https://gitlab.com/tuedachu/ytdl")
+   (synopsis "Emacs Interface for youtube-dl")
+   (description
+    "ytdl.el is an Emacs-based interface for youtube-dl, written in emacs-lisp.
 youtube-dl is a command-line program to download videos from YouTube and a few
 more sites.  More information at https://yt-dl.org.  youtube-dl supports many
 more sites: PeerTube, BBC, IMDB, InternetVideoArchive (non-exhaustive list) *
 Setup Add \"(require ytdl)\" to your \"init.el\" file.  Further customization can be
 found in the documentation online.")
-    (license license:gpl3+)))
+   (license license:gpl3+)))
 (define-public emacs-selectric-mode
   (package
-    (name "emacs-selectric-mode")
-    (version "20200209.2107")
-    (source (origin
-              (method git-fetch)
-              (uri (git-reference
-                    (url "https://github.com/rbanffy/selectric-mode.git")
-                    (commit "1840de71f7414b7cd6ce425747c8e26a413233aa")))
-              (sha256 (base32
-                       "1aabqqqcafkqmyarf5kb1k0gglmlpn6kr3h3x0yph5gd6sk3l4ll"))))
-    (build-system emacs-build-system)
-    (arguments '(#:include '("^[^/]+.el$" "^[^/]+.el.in$"
-                             "^dir$"
-                             "^[^/]+.info$"
-                             "^[^/]+.texi$"
-                             "^[^/]+.texinfo$"
-                             "^doc/dir$"
-                             "^doc/[^/]+.info$"
-                             "^doc/[^/]+.texi$"
-                             "^doc/[^/]+.texinfo$"
-                             "^[^/]+.wav$")
-                 #:exclude '("^.dir-locals.el$" "^test.el$" "^tests.el$"
-                             "^[^/]+-test.el$" "^[^/]+-tests.el$")))
-    (home-page "https://github.com/rbanffy/selectric-mode")
-    (synopsis "IBM Selectric mode for Emacs")
-    (description
-     "This minor mode plays the sound of an IBM Selectric typewriter as you type.")
-    (license license:gpl3+)))
+   (name "emacs-selectric-mode")
+   (version "20200209.2107")
+   (source (origin
+            (method git-fetch)
+            (uri (git-reference
+                  (url "https://github.com/rbanffy/selectric-mode.git")
+                  (commit "1840de71f7414b7cd6ce425747c8e26a413233aa")))
+            (sha256 (base32
+                     "1aabqqqcafkqmyarf5kb1k0gglmlpn6kr3h3x0yph5gd6sk3l4ll"))))
+   (build-system emacs-build-system)
+   (arguments '(#:include '("^[^/]+.el$" "^[^/]+.el.in$"
+                            "^dir$"
+                            "^[^/]+.info$"
+                            "^[^/]+.texi$"
+                            "^[^/]+.texinfo$"
+                            "^doc/dir$"
+                            "^doc/[^/]+.info$"
+                            "^doc/[^/]+.texi$"
+                            "^doc/[^/]+.texinfo$"
+                            "^[^/]+.wav$")
+                #:exclude '("^.dir-locals.el$" "^test.el$" "^tests.el$"
+                            "^[^/]+-test.el$" "^[^/]+-tests.el$")))
+   (home-page "https://github.com/rbanffy/selectric-mode")
+   (synopsis "IBM Selectric mode for Emacs")
+   (description
+    "This minor mode plays the sound of an IBM Selectric typewriter as you type.")
+   (license license:gpl3+)))
 (define-public emacs-atomic-chrome
   (package
    (name "emacs-atomic-chrome")
@@ -749,22 +743,22 @@ EPUB books and Info documentation using Org mode.")
 
 (define-public python-keyring-pass
   (package
-    (name "python-keyring-pass")
-    (version "0.7.0")
-    (source
-      (origin
-        (method url-fetch)
-        (uri (pypi-uri "keyring_pass" version))
-        (sha256
-          (base32 "0rqrsm0gxxvv6vkqyg3snf29m8q44ljsz63f3j2rkizry9csd1fl"))))
-    (build-system python-build-system)
-    (propagated-inputs (list python-keyring))
-    (home-page "https://github.com/nazarewk/keyring_pass")
-    (synopsis
-      "https://www.passwordstore.org/ backend for https://pypi.org/project/keyring/")
-    (description
-      "https://www.passwordstore.org/ backend for https://pypi.org/project/keyring/")
-    (license license:expat)))
+   (name "python-keyring-pass")
+   (version "0.7.0")
+   (source
+    (origin
+     (method url-fetch)
+     (uri (pypi-uri "keyring_pass" version))
+     (sha256
+      (base32 "0rqrsm0gxxvv6vkqyg3snf29m8q44ljsz63f3j2rkizry9csd1fl"))))
+   (build-system python-build-system)
+   (propagated-inputs (list python-keyring))
+   (home-page "https://github.com/nazarewk/keyring_pass")
+   (synopsis
+    "https://www.passwordstore.org/ backend for https://pypi.org/project/keyring/")
+   (description
+    "https://www.passwordstore.org/ backend for https://pypi.org/project/keyring/")
+   (license license:expat)))
 
 ;; TODO upgrade to 0.8.0 (needs jaraco-classes==4.0.0)
 ;; (define-public python-keyring-pass
@@ -785,6 +779,30 @@ EPUB books and Info documentation using Org mode.")
 ;;   (description
 ;;    "https://www.passwordstore.org/ backend for https://pypi.org/project/keyring/")
 ;;   (license license:expat)))
+(define-public mpvpaper
+  (package
+   (name "mpvpaper")
+   (version "1.6")
+   (source (origin
+            (method git-fetch)
+            (uri (git-reference
+                  (url "https://github.com/GhostNaN/mpvpaper")
+                  (commit "d8164bb6bd2960d2f7f6a9573e086d07d440f037" ;;(string-append "v" version)
+                          )))
+            (file-name (git-file-name name version))
+            (sha256
+             (base32 "0iid3ml36kc4mzcfqkylml5wv2k3ysn7kkyx713fagz07vlq43gw"))))
+   (build-system meson-build-system)
+   (inputs (list cmake pkg-config))
+   ;;(propated-inputs (list ))
+   (native-inputs
+    (list mpv
+          wayland
+          wayland-protocols))
+   (home-page "https://github.com/GhostNaN/mpvpaper")
+   (synopsis "Audio and video player")
+   (description "A video wallpaper program for wlroots based wayland compositors. ")
+   (license license:gpl3+)))
 (define %user-features
   (remove
    unspecified?
@@ -913,6 +931,7 @@ EPUB books and Info documentation using Org mode.")
                      (list "$PATH"
                            "$HOME/go/bin"
                            "$HOME/.local/bin"
+                           "$HOME/.cargos/bin"
                            "$HOME/.krew/bin"
                            "${XDG_CACHE_HOME}/npm/bin")
                      ":"))))
@@ -942,17 +961,15 @@ EPUB books and Info documentation using Org mode.")
        'home-jobs (@ (gnu home services mcron) home-mcron-service-type)
        (list
              ;;; job: commit my notes
-        #~(job '(next-minute '(15))
-               ;;(lambda ()
-                 ;; (system*
-                 ;;  (format #f "~a add . && ~a commit -m \"auto-commit | $( ~a -uIs )\""
-                 ;;          #$(file-append (@ (gnu packages version-control) git) "/bin/git")
-                 ;;          #$(file-append (@ (gnu packages version-control) git) "/bin/git")
-                 ;;          #$(file-append (@ (gnu packages base) coreutils) "/bin/date"))))
-                 "cd life \\
-        && echo job: note-commit \\
-        && git add . \\
-        && git commit -m \"auto-commit | $(date -uIs)\""
+        #~(job '(next-minute (range 0 60 15))
+               (lambda ()
+                 (chdir "/home/samuel/life")
+                 (system*
+                  (format #f "~a add . && ~a commit -m \"auto-commit | $( ~a -uIs )\""
+                          #$(file-append (@ (gnu packages version-control) git) "/bin/git")
+                          #$(file-append (@ (gnu packages version-control) git) "/bin/git")
+                          #$(file-append (@ (gnu packages base) coreutils) "/bin/date"))))
+               ;; "(cd ~/life && echo job: note-commit && git add . && git commit -m \"auto-commit | $(date -uIs)\") &>> ~/.local/var/lib/log/mcron.notes-commit.log"
                "backup: notes-commit"
                #:user #$my-user)
         
@@ -972,7 +989,7 @@ EPUB books and Info documentation using Org mode.")
         ;;                          ;;(file-append #$(@ (gnu packages version-control) git) "/bin/git")
         ;;                          ;;(file-append #$(@ (gnu packages base) coreutils) "/bin/date")
         ;;                          ))
-               ;;                 port)))))))
+        ;;                 port)))))))
         ;;   (f))
         
         ;; (call-with-output-file "/tmp/commit.log"
@@ -980,13 +997,13 @@ EPUB books and Info documentation using Org mode.")
         ;;   (display
         ;;    (system "git status")
         ;;    port)))
-                 ;;; job: fulltext index the universe
-        #~(job '(next-hour)
-               (lambda ()
-                 (system*
-                  #$(file-append (@ (gnu packages search) recoll) "/bin/recollindex")))
-               "index: recollindex"
-               #:user #$my-user)
+        ;;; job: fulltext index the universe
+        ;; #~(job '(next-hour)
+        ;;        (lambda ()
+        ;;          (system*
+        ;;           #$(file-append (@ (gnu packages search) recoll) "/bin/recollindex")))
+        ;;        "index: recollindex"
+        ;;        #:user #$my-user)
                  ;;; job: generate tags
         ;; ref :: https://guix.gnu.org/en/manual/devel/en/html_node/Scheduled-Job-Execution.html
         #~(job '(next-hour '(12 0)) ;; every 12 hours
@@ -995,11 +1012,23 @@ EPUB books and Info documentation using Org mode.")
                   #$(file-append (@ (gnu packages idutils) idutils) "/bin/mkid") "git"))
                "index: idutils"
                #:user #$my-user)
-        ;;; job: generate tags
+        ;;; job:  hourly reminder
         ;; ref :: https://guix.gnu.org/en/manual/devel/en/html_node/Scheduled-Job-Execution.html
         #~(job '(next-hour) ;; every hour
-               "aplay ~/vids/gong-cut.wav &>/dev/null; shuf -n1 ~/.config/cron/humanity | espeak -s 150"
+               ;;; hit a gong
+               "aplay ~/vids/gong-cut.wav &>/dev/null;"
+               ;;; robot affirmations
+               ;; "shuf -n1 ~/.config/cron/humanity | espeak -s 150"
                "gong"
+               #:user #$my-user)
+        ;;; job: mail-pull
+        ;; ref :: https://guix.gnu.org/en/manual/devel/en/html_node/Scheduled-Job-Execution.html
+        #~(job '(next-minute (range 0 60 15)) ;; every 15 mins
+               ;;"(mbsync -Va && notmuch new) &>> ~/.local/var/lib/log/mcron.mail-pull.log"
+               (lambda ()
+                 (system* "mbsync" "-Va")
+                 (system* "notmuch" "new"))
+               "mail-pull"
                #:user #$my-user)
         )
        )
@@ -1021,104 +1050,111 @@ EPUB books and Info documentation using Org mode.")
                       (home-emacs-extension
                        (elisp-packages
                         (append
-                          (list
-                           ;;emacs-consult-dir
-                           
-                           ;;; QZDL
-                           emacs-sql-indent
-                           emacs-ob-go
-                           emacs-org-ml
-                           emacs-ox-jira
-                           emacs-moldable-emacs
-                           emacs-kubernetes
-                           python-pylsp-mypy
-                           emacs-ox-slack
-                           emacs-svg-clock
-                           emacs-consult-recoll
-                           emacs-bigquery-mode
-                           
-                           ;; emacs-dogears ;; TODO broken [2024-03-31 Sun 16:08].  consider taking a "no logic in capture approach" anywy.  prescribing / filtering the list vs logging is not a robust thing.
-                           ;; emacs-chatgpt-shell (superseded by upstream)
-                           emacs-selectric-mode
-                           emacs-atomic-chrome
-                           emacs-spacious-padding
-                           
-                           ;;
-                           ;; emacs-code-review    ; TODO qzdl pkg
-                           )
-                          (pkgs
-                           "emacs-adaptive-wrap" ;; TODO feature-olivetti
-                           "emacs-calfw"
-                           "emacs-calibredb"
-                           "emacs-chatgpt-shell"
-                           "emacs-chess"
-                           "emacs-company"
-                           "emacs-consult-org-roam"
-                           "emacs-crdt"
-                           "emacs-csv-mode"
-                           "emacs-debbugs"
-                           "emacs-dimmer"
-                           "emacs-edit-server"
-                           "emacs-eglot"
-                           "emacs-elfeed"
-                           "emacs-eros"
-                           ;; "emacs-ess" ;; TODO broken [2024-04-01 Mon 02:55]
-                           "emacs-forge"
-                           "emacs-fountain-mode" ;; TODO feature-emacs-fountain-mode
-                           "emacs-ggtags"
-                           "emacs-gnuplot"
-                           "emacs-go-mode"
-                           "emacs-gptel"
-                           "emacs-highlight-indent-guides"
-                           "emacs-hl-todo"
-                           "emacs-htmlize" ;; ement: - ox-export html: org src blocks
-                           "emacs-hyperbole"
-                           "emacs-jq-mode"
-                           "emacs-json-snatcher"
-                           "emacs-jupyter"
-                           "emacs-ligature"
-                           "emacs-logview" ;; https://github.com/doublep/logview
-                           "emacs-lsp-mode"
-                           "emacs-lsp-ui"
-                           "emacs-lua-mode"
-                           "emacs-magit-todos"  ;; TODO feature-version-control
-                           "emacs-ob-async"
-                           "emacs-org-download"
-                           "emacs-org-edit-latex"
-                           "emacs-org-fragtog"
-                           "emacs-org-jira"
-                           "emacs-org-ql"
-                           "emacs-org-reveal"
-                           "emacs-org-roam-ui"
-                           "emacs-org-super-agenda"
-                           "emacs-org-transclusion"
-                           "emacs-org-tree-slide"
-                           "emacs-org-web-tools"
-                           "emacs-orgit"        ;; TODO feature-version-control
-                           "emacs-ox-hugo"
-                           "emacs-ox-pandoc"
-                           "emacs-paredit"
-                           "emacs-plantuml-mode"
-                           "emacs-protobuf-mode"
-                           "emacs-py-isort"
-                           "emacs-python-black"
-                           "emacs-restart-emacs"
-                           "emacs-slime"
-                           "emacs-slime-repl-ansi-color"
-                           "emacs-slime-volleyball"
-                           "emacs-string-inflection"
-                           "emacs-terraform-mode"
-                           "emacs-yaml-mode"
-                           ;; "emacs-explain-pause-mode" ;; FIXME upon reload, check fails :: https://ci.guix.gnu.org/search?query=emacs-explain-pause-mode%20spec:master
-                           ;; "emacs-impostman"
-                           ;; "emacs-org-autotangle"
-                           ;; TODO feature-emacs-lsp
-                           ;;"emacs-artbollocks"
-                           ;;"emacs-repology"
-                           ;;"emacs-vlf" ;; TODO guix: package emacs-vlf
-                           )))))
+                         (list
+                          ;;emacs-consult-dir
+                          
+                          ;;; QZDL
+                          emacs-sql-indent
+                          emacs-ob-go
+                          emacs-org-ml
+                          emacs-ox-jira
+                          emacs-moldable-emacs
+                          emacs-kubernetes
+                          python-pylsp-mypy
+                          emacs-ox-slack
+                          emacs-svg-clock
+                          emacs-consult-recoll
+                          emacs-bigquery-mode
+                          
+                          ;; emacs-dogears ;; TODO broken [2024-03-31 Sun 16:08].  consider taking a "no logic in capture approach" anywy.  prescribing / filtering the list vs logging is not a robust thing.
+                          ;; emacs-chatgpt-shell (superseded by upstream)
+                          emacs-selectric-mode
+                          emacs-atomic-chrome
+                          emacs-spacious-padding
+                          emacs-org-noter
+                          emacs-org-remark
+                          ;;
+                          ;; emacs-code-review    ; TODO qzdl pkg
+                          )
+                         (pkgs
+                          "emacs-adaptive-wrap" ;; TODO feature-olivetti
+                          "emacs-calfw"
+                          "emacs-calibredb"
+                          "emacs-chatgpt-shell"
+                          "emacs-chess"
+                          "emacs-company"
+                          "emacs-consult-org-roam"
+                          "emacs-crdt"
+                          "emacs-csv-mode"
+                          "emacs-debbugs"
+                          "emacs-dimmer"
+                          "emacs-edit-server"
+                          "emacs-elfeed"
+                          "emacs-eros"
+                          "emacs-forge"
+                          "emacs-fountain-mode" ;; TODO feature-emacs-fountain-mode
+                          "emacs-ggtags"
+                          "emacs-gnuplot"
+                          "emacs-go-mode"
+                          "emacs-gptel"
+                          "emacs-highlight-indent-guides"
+                          "emacs-hl-todo"
+                          "emacs-htmlize" ;; ement: - ox-export html: org src blocks
+                          "emacs-hyperbole"
+                          "emacs-jq-mode"
+                          "emacs-json-snatcher"
+                          "emacs-jupyter"
+                          "emacs-ein"
+                          "emacs-ligature"
+                          "emacs-logview" ;; https://github.com/doublep/logview
+                          "emacs-lsp-mode"
+                          "emacs-lsp-ui"
+                          "emacs-lua-mode"
+                          "emacs-magit-todos"  ;; TODO feature-version-control
+                          "emacs-ob-async"
+                          "emacs-org-brain"
+                          "emacs-org-download"
+                          "emacs-org-edit-latex"
+                          "emacs-org-fragtog"
+                          "emacs-org-jira"
+                          "emacs-org-ql"
+                          "emacs-org-reveal"
+                          "emacs-org-roam-ui"
+                          "emacs-org-sidebar"
+                          "emacs-org-super-agenda"
+                          "emacs-org-transclusion"
+                          "emacs-org-tree-slide"
+                          "emacs-org-web-tools"
+                          "emacs-orgit"        ;; TODO feature-version-control
+                          "emacs-ox-hugo"
+                          "emacs-ox-pandoc"
+                          "emacs-paredit"
+                          "emacs-plantuml-mode"
+                          "emacs-protobuf-mode"
+                          "emacs-py-isort"
+                          "emacs-python-black"
+                          "emacs-restart-emacs"
+                          "emacs-rust-mode"
+                          "emacs-rustic"
+                          "emacs-scala-mode"
+                          "emacs-slime"
+                          "emacs-slime-repl-ansi-color"
+                          "emacs-slime-volleyball"
+                          "emacs-string-inflection"
+                          "emacs-terraform-mode"
+                          "emacs-yaml-mode"
+                          ;; "emacs-ess" ;; TODO broken [2024-04-01 Mon 02:55]
+                          ;; "emacs-explain-pause-mode" ;; FIXME upon reload, check fails :: https://ci.guix.gnu.org/search?query=emacs-explain-pause-mode%20spec:master
+                          ;; "emacs-impostman"
+                          ;; "emacs-org-autotangle"
+                          ;; TODO feature-emacs-lsp
+                          ;;"emacs-artbollocks"
+                          ;;"emacs-repology"
+                          ;;"emacs-vlf" ;; TODO guix: package emacs-vlf
+                          
+                          )))))
         ;;; not exposed!!!!   such folly!!!
-    )
+      )
      #:system-services
      (remove
       unspecified?
@@ -1128,6 +1164,12 @@ EPUB books and Info documentation using Org mode.")
                (service (@ (gnu services monitoring)
                            prometheus-node-exporter-service-type))
                
+               (simple-service
+                'my-rottlog
+                rottlog-service-type
+                (list (log-rotation
+                       (frequency 'daily)
+                       (files '("/var/log/*.log")))))
                (simple-service
                 'system-jobs (@ (gnu services mcron) mcron-service-type)
                 ;; ref :: https://guix.gnu.org/en/manual/devel/en/html_node/Scheduled-Job-Execution.html
@@ -1198,28 +1240,14 @@ EPUB books and Info documentation using Org mode.")
                   "SUBSYSTEMS==\"usb\", ATTRS{idVendor}==\"3297\", MODE:=\"0666\", SYMLINK+=\"ignition_dfu\""
                   )))
                (udev-rules-service
-                     'ydotool
-                     (udev-rule
-                      "80-uinput.rules"
-                      ;; TODO: Take it from ydotool package
-                      (string-append
-                       "KERNEL==\"uinput\", MODE==\"0660\", "
-                       "GROUP=\"input\", OPTIONS+=\"static_node=uinput\"")))
+                'ydotool
+                (udev-rule
+                 "80-uinput.rules"
+                 ;; TODO: Take it from ydotool package
+                 (string-append
+                  "KERNEL==\"uinput\", MODE==\"0660\", "
+                  "GROUP=\"input\", OPTIONS+=\"static_node=uinput\"")))
                
-               (unless #t ;;gaming?
-                 (service postgresql-service-type
-                          (postgresql-configuration
-                           (config-file
-                            (postgresql-config-file
-                             (hba-file
-                              (plain-file "pg_hba.conf"
-                                          "
-               local	all	all			trust
-               host	all	all	127.0.0.1/32    md5
-               host	all	all	0.0.0.0/0       md5
-               "
-                                          ))))
-                           (postgresql (@ (gnu packages databases) postgresql-10)))))
                ;; analytics ; timescaledb
                ;; (unless gaming?
                ;;   (service postgresql-service-type
@@ -1254,12 +1282,9 @@ EPUB books and Info documentation using Org mode.")
                          ;;  `(("hww" ,(local-file "hww.pub"))
                          ;;    ))
                          ))
-               ;; (gnu services nfs)
-               (service nfs-service-type
-                        (nfs-configuration
-                               (exports
-                                '(("/export"
-                                   "*(ro,insecure,no_subtree_check,crossmnt,fsid=0)")))))
+               (service cups-service-type
+                        (cups-configuration
+                         (web-interface? #t)))
                ))))
     (unless gaming?
       (feature-base-services
@@ -1279,7 +1304,6 @@ EPUB books and Info documentation using Org mode.")
     (unless gaming? (feature-desktop-services))
     (feature-docker)
     (feature-qemu)
-    (feature-backlight #:step 5)
     (unless gaming? (feature-pipewire))
     (feature-fonts
      #:font-monospace
@@ -1289,16 +1313,14 @@ EPUB books and Info documentation using Org mode.")
       (size 14)
       (weight 'light)))
     (feature-vterm)
-    (feature-bash)
-    (feature-direnv)
     (feature-zsh
      #:enable-zsh-autosuggestions? #t)
+    (feature-bash)
     (feature-ssh
      #:ssh-configuration
      (home-ssh-configuration
-      ;; (default-options
-      ;;   '((hostkey-algorithms . "+ssh-rsa")
-      ;;     (pubkey-accepted-algorithms "+ssh-rsa")))
+      (default-options
+        '((identities-only . "yes")))
       (extra-config
        (list (ssh-host
               (host "qz")
@@ -1314,11 +1336,11 @@ EPUB books and Info documentation using Org mode.")
                          (port . 2222)
                          (identity-file . "~/.ssh/ko"))))
              (ssh-host
-              (host "yoho")
-              (options '((user . "yoho")
-                         (hostname . "192.168.0.12")
+              (host "pi")
+              (options '((user . "tiny")
+                         (hostname . "pi.local")
                          (port . 22)
-                         (identity-file . "~/.ssh/yoho"))))
+                         (identity-file . "~/.ssh/ixy-debpi"))))
              (ssh-host
               (host "boggartonius")
               (options '((user . "chopi")
@@ -1331,20 +1353,6 @@ EPUB books and Info documentation using Org mode.")
                          (hostname . "192.168.1.118")
                          (port . 22)
                          (identity-file . "~/.ssh/ixy-medmac"))))))))
-    (feature-git
-     #:extra-config
-     '((pull
-        ((rebase . #t)))
-       (diff
-        ((context . 4)  ;; magit default=3;  4 shows org prop-drawer & heading.
-         ))
-       ;; (slurp-file-like (local-file "./etc/git/work_config"))
-       ;; '(#~"[includeIf \"gitdir:~/git/ns\"]
-       ;;     [user]
-       ;;         signingkey = \"290D5A69F2021C4E\"
-       ;;         email = \"sculpepper@newstore.com\"
-       ;; ")
-       ))
     (feature-bluetooth)
     ;;(feature-ssh-socks-proxy
     ;; #:host "204:cbf:3e07:e67a:424f:93bc:fc5c:b3dc")
@@ -1353,6 +1361,7 @@ EPUB books and Info documentation using Org mode.")
     ;; ;; 'purokishi.i2p
     ;; #:less-anonymous? #t)
     (feature-transmission #:auto-start? #f)
+    (feature-backlight #:step 5)
     (unless gaming?
       (feature-sway
        ;;#:sway (replace-mesa sway)
@@ -1361,14 +1370,15 @@ EPUB books and Info documentation using Org mode.")
        ;; #:wallpaper "$HOME/.cache/wallpaper.png" ;; TODO qzdl
        #:extra-config
        `(
-         ;;(include ,(local-file "./config/sway/config"))
-    
-         ;; TODO sway: toggle opacity for WINDOW
+         ;;; Toggle Waybar
+         (bindsym $mod+Shift+b exec killall -SIGUSR1 waybar)
+         (bindsym $mod+Shift+v gaps inner current set 0)
+         (bindsym $mod+v gaps inner current set 10)
     
          (,#~"output * bg ~/.cache/wallpaper.png fill")
-         ;;(,#~"output eDP-1 bg ~/.cache/wallpaper.png fill")
-         (,#~"output DP-2 res 3840x1080")
-         (,#~"output DP-1 res 3840x1080")
+    
+         (,#~"output DP-2 res 5120x1440")
+         (,#~"output DP-1 res 5120x1440")
     
          ;; TODO sway: wacom input rotation matrix
          (,#~"input \"*\" tool_mode \"*\" relative calibration_matrix 0.0 -1.0 1.0 1.0 0.0 0.0")
@@ -1378,16 +1388,13 @@ EPUB books and Info documentation using Org mode.")
          (for_window "[app_id=\"pinentry-qt\"]" floating enable, border pixel)
     
          (for_window "[title=\"Nightly - Sharing Indicator\"]" floating enable, border pixel)
-         ;; (for_window "[title=\"Emacs (Client) [pass]\"]" floating enable, border pixel)
-         ;; (for_window "[title=\"Application Launcher - Emacs Client\"]" floating enable, border pixel)
-         ;; (for_window "[title=\"pass - Emacs Client\"]" floating enable, border pixel)
     
          (bindsym $mod+Ctrl+o opacity set 1)
-         (bindsym $mod+Ctrl+p opacity minus 0.1)
+         (bindsym $mod+Ctrl+p opacity minus 0.05)
     
          ;;(bindsym $mod+x exec $menu)
     
-         (gaps inner 20)
+         (gaps inner 10)
     
          ;;; Mousepad sensitivity & behaviorr
          (input type:touchpad
@@ -1402,6 +1409,13 @@ EPUB books and Info documentation using Org mode.")
                 ((pointer_accel "0.2")
                  (accel_profile flat)))
     
+         ;;; MacOS has no moat
+         (bindgesture swipe:up scratchpad show)
+         (bindgesture swipe:right workspace prev)
+         (bindgesture swipe:left workspace next)
+    
+         (bindsym XF86Display "output eDP-1 toggle; output eDP-2 toggle")
+    
          ;;; Middle Mouse.
          (bindsym $mod+button2 "[con_mark=_prev]" focus)
     
@@ -1410,7 +1424,6 @@ EPUB books and Info documentation using Org mode.")
          (bindsym $mod+bracketleft exec "pactl set-sink-volume @DEFAULT_SINK@ -5%")
          (bindsym $mod+Ctrl+bracketright exec "pactl set-sink-mute @DEFAULT_SINK@ toggle")
          (bindsym $mod+Ctrl+bracketleft exec "pactl set-source-mute @DEFAULT_SOURCE@ toggle")
-         ;; alsa_input.usb-TEAC_Corporation_TASCAM_DR_Series-00.analog-stereo
          )))
     (feature-sway-run-on-tty
      #:sway-tty-number 2
@@ -1442,11 +1455,26 @@ EPUB books and Info documentation using Org mode.")
                         (image . "~/.cache/wallpaper.png")
                         (scale . fill)
                         (clock))))
-    ;;(feature-swaynotificationcenter)
+    (feature-swaynotificationcenter)
     
     ;; not found...
     ;; (feature-redshift
     ;;  #:redshift redshift-wayland)
+    (feature-direnv)
+    (feature-git
+     #:extra-config
+     '((pull
+        ((rebase . #t)))
+       (diff
+        ((context . 4)  ;; magit default=3;  4 shows org prop-drawer & heading.
+         ))
+       ;; (slurp-file-like (local-file "./etc/git/work_config"))
+       ;; '(#~"[includeIf \"gitdir:~/git/ns\"]
+       ;;     [user]
+       ;;         signingkey = \"290D5A69F2021C4E\"
+       ;;         email = \"sculpepper@newstore.com\"
+       ;; ")
+       ))
     (feature-python)
     ;;(feature-clojure)
     (feature-plantuml)
@@ -1457,6 +1485,7 @@ EPUB books and Info documentation using Org mode.")
      ;; #:emacs emacs-next-pgtk
      ;; #:emacs emacs-pgtk
      #:native-comp? #f
+     ;; #:org-appear #f
      )
     (feature-emacs-modus-themes)
     ;; TODO extra-modus-theme-overrides
@@ -1487,8 +1516,8 @@ EPUB books and Info documentation using Org mode.")
     ;; (feature-emacs-message) ;; TODO compose mail.  broken with emacs-feature-portableu
     (feature-emacs-smartparens
      #:show-smartparens? #t)
-    (feature-emacs-corfu
-     #:corfu-doc-auto #f)
+    (feature-emacs-eglot)
+    ;; (feature-emacs-corfu)
     (feature-emacs-help)
     (feature-emacs-info)
     (feature-emacs-tempel
@@ -1497,10 +1526,51 @@ EPUB books and Info documentation using Org mode.")
                    ,#~""
                    (t (format-time-string "%Y-%m-%d"))
                    (ielisp (elisp "src_emacs-lisp{ " r> " }"))))
+    (feature-irc-settings
+     #:irc-accounts (list
+                     (irc-account
+                      (id 'libera)
+                      (network "irc.libera.chat")
+                      (nick "qzdl"))
+                     (irc-account
+                      (id 'oftc)
+                      (network "irc.oftc.net")
+                      (nick "qzdl"))))
+    (feature-emacs-erc
+     ;; #:erc-kill-buffers-on-quit #t
+     #:erc-nick "qzdl"
+     ;; #:align-nicknames? #f
+     #:erc-autojoin-channels-alist
+     '((Libera.Chat "#guix" "#emacs" "#tropin" "#rde" "#sway")
+       (OFTC        "#pipewire" "#wayland"))
+     ;; #:erc-server "chat.sr.ht"
+     #:erc-log? #t
+     ;; #:extra-config
+     ;; `((setq rde-bouncer-network-alist
+     ;;         `((irc.libera.chat . "qzdl")
+     ;;           (irc.oftc.net . "qzdl")))
+     ;;   (setq rde-bouncer-nick "qzdl")
+    
+     ;;   ;; Rename server buffers to reflect the current network name instead
+     ;;   ;; of SERVER:PORT (e.g., "freenode" instead of "irc.freenode.net:6667").
+     ;;   ;; This is useful when using a bouncer like ZNC where you have multiple
+     ;;   ;; connections to the same server.
+     ;;   (setq erc-rename-buffers t)
+    
+     ;;   (defun rde-erc-connect-bouncer-oftc ()
+     ;;     (interactive)
+     ;;     (setq erc-email-userid "qzdl/irc.oftc.net")
+     ;;     (erc-tls :server "chat.sr.ht" :nick rde-bouncer-nick))
+     ;;   (defun rde-erc-connect-bouncer-libera ()
+     ;;     (interactive)
+     ;;     (setq erc-email-userid "qzdl/irc.libera.chat")
+     ;;     (erc-tls :server "chat.sr.ht" :nick rde-bouncer-nick))))
+    
+     )
     (feature-emacs-elpher)
     ;;(feature-emacs-ement) ;; TODO qzdl
-    ;; (feature-emacs-pdf-tools) ;; TODO broken [2024-04-01 Mon 02:19] portable emacs
-    ;; (feature-emacs-nov-el) ;; TODO broken [2024-04-01 Mon 02:19] portable emacs
+    (feature-emacs-pdf-tools)
+    (feature-emacs-nov-el) ;; TODO broken [2024-04-01 Mon 02:19] portable emacs
     ;;     ;; TODO: Revisit <https://en.wikipedia.org/wiki/Git-annex>
     (feature-emacs-git)
     (feature-emacs-org
@@ -1513,27 +1583,34 @@ EPUB books and Info documentation using Org mode.")
      #:org-agenda-files '("~/life/roam/inbox.org"))
     ;; TODO: <https://www.labri.fr/perso/nrougier/GTD/index.html#table-of-contents>
     (feature-emacs-org-roam
-     ;; TODO: Rewrite to states
      #:org-roam-directory my-notes-directory
      #:org-roam-todo? #f
      ;;#:org-roam-dailies-directory (string-append my-notes-directory "/daily")) ;; TODO qzdl
      )
     ;; FIXME guix: org-roam-ui: httpd communication problem (endemic to guix)
     ;; (feature-emacs-org-roam-ui)
-    ;; (feature-emacs-ref
-    ;;  ;; why error with nil for reftex-default-bibliography
-    ;;  ;; TODO: Rewrite to states
-    ;;  #:bibliography-paths
-    ;;  (list (string-append my-org-directory "/tex.bib"))
-    ;;  #:bibliography-notes
-    ;;  (list(string-append my-org-directory "/bib.org")
-    ;;       #:bibliography-directory my-notes-directory)
+    (feature-emacs-citation
+     #:citar-library-paths (list "~/life/data/docs"
+                                 "~/docs/work"
+                                 "~/life/calib")
+     #:global-bibliography (list "~/life/tex.bib"))
     ;;     ;; TODO qzdl (2) es/rest
     ;;     ;; (feature-emacs-es-mode
     ;;     ;;  #:package emacs-es-mode-latest)
     ;;     ;; (feature-emacs-restclient
     ;;     ;;  #:package-ob emacs-ob-restclient-latest)
-    ;; (feature-mpv)
+    (feature-emacs-dashboard
+     #:show-on-startup? #f)
+    ;; (feature-emacs-ednc) ;; TODO [2024-04-23 Tue 12:53] no libnotify to config?
+    (feature-emacs-pulseaudio-control)
+    (feature-emacs-geiser)
+    (feature-emacs-guix)
+    (feature-emacs-elisp)
+    (feature-emacs-emms)
+    (feature-emacs-flymake)
+    (feature-emacs-org-protocol)
+    (feature-emacs-spelling)
+    (feature-mpv)
     (feature-isync
      #:isync-verbose #t
      #:isync-serializers
@@ -1559,7 +1636,7 @@ EPUB books and Info documentation using Org mode.")
      #:notmuch-saved-searches
      (cons*
       '(:name "Inbox :: Personal"  :key "P"
-        :query "tag:unread and tag:inbox and tag:personal")
+        :query "tag:unread and tag:inbox and tag:personal thread:{tag:personal}")
       '(:name "Inbox :: Work"      :key "Ww"
         :query "tag:unread and tag:inbox and tag:/work/")
       '(:name "Inbox :: Guix Home" :key "H"
@@ -1588,13 +1665,15 @@ EPUB books and Info documentation using Org mode.")
       (list
        ;; python-keyring-pass ;; TODO broken [2024-03-31 Sun 16:24]soehitng
        ;; perl-graph-easy
+       mpvpaper
        )
     
       (pkgs
     
        "figlet" ;; TODO: Move to emacs-artist-mode
        ;;"calibre"
-       "utox" "qtox" "jami"
+       "utox" "qtox"
+       ;; "jami"
     
        "vim"
     
@@ -1618,7 +1697,6 @@ EPUB books and Info documentation using Org mode.")
        "thunar"
        ;; "glib:bin"
     
-       ;; TODO: Fix telega package!
        "ffmpeg"
     
        "ripgrep" "curl" "make"
@@ -1653,17 +1731,14 @@ EPUB books and Info documentation using Org mode.")
     
        "v4l-utils"
        "qmk-udev-rules"
+       "espeak" ;; for notifying the user
        ))
      #:system-packages
      (pkgs "fwupd-nonfree")
      )
     (feature-yt-dlp
      #:emacs-ytdl emacs-ytdl-next)
-    ;;(feature-nyxt)
-    (feature-emacs-dashboard
-     #:show-on-startup? #f)
-    (feature-emacs-ednc)
-    (feature-emacs-pulseaudio-control)
+    ;; (feature-nyxt)
     (feature-emacs-display-wttr)
     (feature-slack-settings
      #:slack-accounts (list (slack-account
@@ -1677,56 +1752,85 @@ EPUB books and Info documentation using Org mode.")
                               (id "@sculp-ns:matrix.org")
                               (server "localhost:8009"))))
     (feature-emacs-ement)
-    (feature-emacs-geiser)
-    (feature-emacs-guix)
-    (feature-emacs-elisp)
-    (feature-emacs-emms)
-    (feature-emacs-flymake)
-    (feature-emacs-org-protocol)
-    (feature-emacs-spelling)
     ;;; END; main
     )))
+
+
+(define* (host
+          #:key
+          user-info
+          mapped-devices
+          file-systems
+          (bootloader (feature-bootloader
+                       #:bootloader-configuration
+                       (bootloader-configuration
+                        (bootloader grub-efi-removable-bootloader)
+                        (targets '("/boot/efi")))))
+          (kernel
+           (feature-kernel
+            #:kernel nongnu-pkg-linux:linux
+            #:kernel-arguments '("quiet" "ipv6.disable=1"
+                                 "net.ifnames=0" "nouveau.modeset=1")
+            #:firmware (list nongnu-pkg-linux:linux-firmware
+                             nongnu-pkg-linux:sof-firmware
+                             intel-vaapi-driver)
+            #:initrd nongnu-sys:microcode-initrd
+            #:kernel-loadable-modules (list v4l2loopback-linux-module)))
+          (networking (feature-networking #:mdns? #t))
+          (other-file-systems '())
+          (other-system-services '()))
+  (define config
+    (rde-config
+     (features (append %user-features %main-features
+                       (list user-info
+                             (feature-file-systems
+                              #:mapped-devices mapped-devices
+                              #:file-systems (append file-systems
+                                                     other-file-systems))
+                             bootloader kernel
+                             networking)
+                       other-system-services))))
+  `((config . ,config)
+    (os     . ,(rde-config-operating-system config))
+    (he     . ,(rde-config-home-environment config))))
 
 (define ixy-mapped-devices
   (list (mapped-device
          (source (uuid "cb453366-cc17-4742-ada1-91f7f569103f"))
          (target "sys-root")
          (type luks-device-mapping))))
+(define host-ixy
+  (host #:user-info (feature-host-info
+                     #:host-name "ixy"
+                     #:timezone  my-timezone)
+        #:mapped-devices ixy-mapped-devices
+        #:file-systems (list
+                        (file-system
+                          (device (file-system-label "sys-root"))
+                          (mount-point "/")
+                          (type "ext4")
+                          (dependencies ixy-mapped-devices))
+                        (file-system
+                          (device "/dev/nvme0n1p1")
+                          (mount-point "/boot/efi")
+                          (type "vfat")))))
+(pretty-print "ixy")
+(define ixy-mapped-devices
+  (list (mapped-device
+         (source (uuid "cb453366-cc17-4742-ada1-91f7f569103f"))
+         (target "sys-root")
+         (type luks-device-mapping))))
 (define ixy-file-systems
-  (list (file-system
-          (device (file-system-label "sys-root"))
-          (mount-point "/")
-          (type "ext4")
-          (dependencies ixy-mapped-devices))
-        (file-system
-          (device "/dev/nvme0n1p1")
-          (mount-point "/boot/efi")
-          (type "vfat"))))
-;; (define ixy-file-systems
-;;   (append
-;;    (map (match-lambda
-;;        ((subvol . mount-point)
-;;         (file-system
-;;           (type "btrfs")
-;;           (device "/dev/mapper/enc")
-;;           (mount-point mount-point)
-;;           (options (format #f "subvol=~a" subvol))
-;;           (dependencies ixy-mapped-devices))))
-;;      '((root . "/")
-;;        (boot . "/boot")
-;;        (gnu  . "/gnu")
-;;        (home . "/home")
-;;        (data . "/data")
-;;        (log  . "/var/log")))
-;;    (list
-;;     (file-system
-;;       (mount-point "/boot/efi")
-;;       (type "vfat")
-;;       (device (uuid "8C99-0704" 'fat32))))))
-(use-modules
- (gnu packages linux)
- ((nongnu packages linux) #:prefix nongnu:)
- ((nongnu system linux-initrd) #:prefix nongnu-sys:))
+  (list
+   (file-system
+    (device (file-system-label "sys-root"))
+    (mount-point "/")
+    (type "ext4")
+    (dependencies ixy-mapped-devices))
+   (file-system
+    (device "/dev/nvme0n1p1")
+    (mount-point "/boot/efi")
+    (type "vfat"))))
 (define %ixy-features
   (list
    (feature-host-info
@@ -1741,13 +1845,12 @@ EPUB books and Info documentation using Org mode.")
      (targets '("/boot/efi"))))
    ;; os
    (feature-kernel
-    ;;#:kernel nongnu:linux-lts ;;; NVIDIA
-    #:kernel nongnu:linux ;;; DEFAULT
+    ;;#:kernel nongnu-pkg-linux:linux-lts ;;; NVIDIA
+    #:kernel nongnu-pkg-linux:linux ;;; DEFAULT
     #:kernel-arguments
     '("quiet" "ipv6.disable=1" "net.ifnames=0"
-
       ;;; DEFAULT
-       "nouveau.modeset=1"
+      "nouveau.modeset=1"
 
       ;;; FORUM NVIDIA ATTEMPT https://forums.developer.nvidia.com/t/nvidia-495-on-sway-tutorial-questions-arch-based-distros/192212
       ;;"nvidia-drm.modeset=1" "nouveau.blacklist=1" "modprobe.blacklist=nouveau"
@@ -1762,8 +1865,8 @@ EPUB books and Info documentation using Org mode.")
       ;;"modprobe.blacklist=nouveau"
       )
     ;; removed "modprobe.blacklist=snd_hda_intel,snd_soc_skl"
-    #:firmware (list nongnu:linux-firmware
-                     nongnu:sof-firmware
+    #:firmware (list nongnu-pkg-linux:linux-firmware
+                     nongnu-pkg-linux:sof-firmware
                      intel-vaapi-driver)
     #:initrd nongnu-sys:microcode-initrd
     #:kernel-loadable-modules (list v4l2loopback-linux-module
@@ -1773,36 +1876,32 @@ EPUB books and Info documentation using Org mode.")
     #:mapped-devices ixy-mapped-devices
     #:file-systems ixy-file-systems)
    ;;(feature-hidpi)
-   (feature-networking)))
+   (feature-networking #:mdns? #t)))
 
 (pretty-print "post-%ixy-features")
-
-;;; rde-config and helpers for generating home-environment and
-;;; operating-system records.
-
 (define-public ixy-config
   (rde-config
    (features
-    (append
-     %user-features
-     %main-features
-     %ixy-features
-     ))))
+    (append %user-features
+            %main-features
+            %ixy-features))))
+(pretty-print "ixy-config")
 ;; (map pretty-print
 ;;      (append %user-features
 ;;              %main-features
 ;;              %ixy-features))
 (define-public ixy-os
   (rde-config-operating-system ixy-config))
+(pretty-print "ixy-os")
 (define ixy-he
   (rde-config-home-environment ixy-config))
 (use-modules (gnu system file-systems))
 
 (define live-file-systems
   (list (file-system
-          (mount-point "/")
-          (device (file-system-label "Guix_image"))
-          (type "ext4"))
+         (mount-point "/")
+         (device (file-system-label "Guix_image"))
+         (type "ext4"))
 
         ;; Make /tmp a tmpfs instead of keeping the overlayfs.  This
         ;; originally was used for unionfs because FUSE creates
@@ -1811,10 +1910,10 @@ EPUB books and Info documentation using Org mode.")
         ;; <http://bugs.gnu.org/23056>).  We keep this for overlayfs to be
         ;; on the safe side.
         (file-system
-          (mount-point "/tmp")
-          (device "none")
-          (type "tmpfs")
-          (check? #f))
+         (mount-point "/tmp")
+         (device "none")
+         (type "tmpfs")
+         (check? #f))
 
         ;; XXX: This should be %BASE-FILE-SYSTEMS but we don't need
         ;; elogind's cgroup file systems.
@@ -1862,10 +1961,10 @@ EPUB books and Info documentation using Org mode.")
 (define (dispatcher)
   (let ((rde-target (getenv "RDE_TARGET")))
     (match rde-target
-      ("ixy-home" ixy-he)
-      ("ixy-system" ixy-os)
-      ("bogg-home" bogg-he)
-      ("bogg-system" bogg-os)
+      ("ixy-home"   (assq-ref host-ixy 'he))
+      ("ixy-system" (assq-ref host-ixy 'os))
+      ;; ("bogg-home"   (assq-ref host-bogg 'he))
+      ;; ("bogg-system" (assq-ref host-bogg 'os))
       ("live-system" live-os)
-      (_ ixy-he))))
+      (_ (assq-ref host-ixy 'he)))))
 (dispatcher)

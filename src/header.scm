@@ -2,6 +2,7 @@
   #:use-module (rde features mail)
   #:use-module (rde features base)
   #:use-module (rde features gnupg)
+  #:use-module (gnu system file-systems)
   )
 
 ;; NOWEB HEADER
@@ -20,9 +21,33 @@
   ;; live
   )
 
-
 (define-public my-user "samuel")
 (define-public my-timezone "Europe/Berlin")
+
+(define-public my-org-directory "~/life")
+(define-public my-notes-directory
+  (string-append my-org-directory "/roam"))
+
+(define-public fs-chopi
+  (file-system
+   (device (uuid "06FA631CFA630771" 'ntfs))
+   (mount-point "/mnt/chopi")
+   (mount? #f)
+   (type "ntfs-3g")))
+
+(define-public fs-zv
+  (file-system
+   (device (uuid "3735-3131" 'fat))
+   (mount-point "/mnt/zv")
+   (mount? #f)
+   (type "fat")))
+
+(define-public my-common-filesystems
+  (list fs-chopi
+        fs-zv
+        ;; fs-nikon
+        ;; fz-xhdd
+        ))
 
 (define-public my-feature-mail-settings
   (feature-mail-settings
