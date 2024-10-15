@@ -4777,7 +4777,7 @@ emacs-org-remark
 :ROAM_EXCLUDE: t
 :END:
 #+begin_src scheme :noweb-ref main
-(feature-emacs-org-protocol)
+;; (feature-emacs-org-protocol) ;; [2024-10-15 Tue 20:57]
 #+end_src
 
 ****** emacs-spelling
