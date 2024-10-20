@@ -20077,35 +20077,35 @@ eval "docker run --rm --volumes-from gcloud-config gcr.io/google.com/cloudsdktoo
 :PROPERTIES:
 :ID:       09a964e2-400a-4fd0-b379-d5acf0e1933f
 :CREATED:  [2023-04-03 Mon 13:05]
-:UPDATED:  [2024-01-19 Fri 12:12]
+:UPDATED:  [2024-10-15 Tue 17:20]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src shell :tangle ~/.local/bin/gcloud
 #!/usr/bin/env sh
 
-eval "docker run --rm --volumes-from gcloud-config -v $PWD:/home/cloudsdk -w  /home/cloudsdk gcr.io/google.com/cloudsdktool/google-cloud-cli gcloud" "$@"
+eval "docker run --rm -v $HOME/.config/gcloud:/root/.config/gcloud -v $PWD:/home/cloudsdk -w /home/cloudsdk gcr.io/google.com/cloudsdktool/google-cloud-cli gcloud" "$@"
 #+end_src
 
 **** gsutil
 :PROPERTIES:
 :ID:       ba39068b-5e0d-49a3-83e3-2ac05eab3ef7
 :CREATED:  [2023-07-18 Tue 12:11]
-:UPDATED:  [2024-01-15 Mon 19:35]
+:UPDATED:  [2024-10-15 Tue 17:20]
 :ROAM_EXCLUDE: t
 :END:
 
 #+begin_src shell :tangle ~/.local/bin/gsutil
 #!/usr/bin/env sh
 
-eval "docker run --rm --volumes-from gcloud-config -v $PWD:/home/cloudsdk -w  /home/cloudsdk gcr.io/google.com/cloudsdktool/google-cloud-cli gsutil" "$@"
+eval "docker run --rm -v $HOME/.config/gcloud:/root/.config/gcloud -v $PWD:/home/cloudsdk -w /home/cloudsdk gcr.io/google.com/cloudsdktool/google-cloud-cli gsutil" "$@"
 #+end_src
 
 **** bq
 :PROPERTIES:
 :ID:       13367261-6c04-4004-8a8b-45a5323035cc
 :CREATED:  [2023-04-03 Mon 13:05]
-:UPDATED:  [2023-11-15 Wed 14:44]
+:UPDATED:  [2024-10-15 Tue 17:19]
 :ROAM_EXCLUDE: t
 :END:
 
@@ -20120,7 +20120,7 @@ qargs=$( printf ' %q' "$@" | sed -e 's/\\n/ /g' -e "s/\$'/'/g")
 
 #echo $qargs > $HOME/.cache/bq.out
 
-cmd='docker run --rm --volumes-from gcloud-config -v $HOME/tmp/ns:/tmp gcr.io/google.com/cloudsdktool/google-cloud-cli bq'
+cmd='docker run --rm -v $HOME/.config/gcloud:/root/.config/gcloud -v $HOME/tmp/ns:/tmp gcr.io/google.com/cloudsdktool/google-cloud-cli bq'
 
 echo "$cmd" "$qargs" > $HOME/.cache/bq.in
 
