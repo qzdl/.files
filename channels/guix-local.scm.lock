@@ -2,10 +2,10 @@
 
 (list (channel
         (name 'guix)
-        (url "file:///home/samuel/git/qz/dotfiles/guix")
+        (url "file:///home/samuel/.files/guix")
         (branch "master")
         (commit
-          "377359315fbb0e1414354910ba3a14c145fdc519")
+          "ba0340eec2e50439cfd94e85b40bf41c2d488a74")
         (introduction
           (make-channel-introduction
             "9edb3f66fd807b096b48283debdcddccfea34bad"
@@ -13,7 +13,7 @@
               "BBB0 2DDF 2CEA F6A8 0D1D  E643 A2A0 6DF2 A33A 54FA"))))
       (channel
         (name 'rde)
-        (url "file:///home/samuel/git/qz/dotfiles/rde")
+        (url "file:///home/samuel/.files/rde")
         (branch "master")
         (commit
           "f7986741d8f718c2062cbe03f843ed7702c7d25f")
@@ -24,7 +24,7 @@
               "2841 9AC6 5038 7440 C7E9  2FFA 2208 D209 58C1 DEB0"))))
       (channel
         (name 'nonguix)
-        (url "file:///home/samuel/git/qz/dotfiles/nonguix")
+        (url "file:///home/samuel/.files/nonguix")
         (branch "master")
         (commit
           "e355a2ff675abd48f671a867c211c98707ca1e82")
