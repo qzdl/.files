@@ -3838,8 +3838,9 @@ host	all	all	0.0.0.0/0       md5
 
      (for_window "[title=\"Nightly - Sharing Indicator\"]" floating enable, border pixel)
 
-     (bindsym $mod+Ctrl+o opacity set 1)
-     (bindsym $mod+Ctrl+p opacity minus 0.05)
+     (unbindsym --to-code $mod+Ctrl+p)
+     (bindsym --to-code $mod+Ctrl+o opacity set 1)
+     (bindsym --to-code $mod+Ctrl+p opacity minus 0.05)
 
      ;;(bindsym $mod+x exec $menu)
 
