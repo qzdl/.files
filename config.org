@@ -3530,21 +3530,33 @@ host	all	all	0.0.0.0/0       md5
 :ROAM_EXCLUDE: t
 :END:
 #+begin_src scheme :noweb-ref main
-(unless gaming?
-  (feature-base-services
-   #:guix-substitute-urls '("https://substitutes.nonguix.org")
-   #:guix-authorized-keys
-   (list
+(feature-base-services
+ #:guix-substitute-urls '("https://substitutes.nonguix.org"
+                          ;; TODO SSL
+                          "http://boggartonius.local:8080"
+                          "http://ixy.local:8080")
+ #:guix-authorized-keys
+ (list
      ;;; https://substitutes.nonguix.org/signing-key.pub
-    ;; see also https://guix.gnu.org/manual/en/html_node/Substitutes.html
-    (plain-file "nonguix.pub" "
+  ;; see also https://guix.gnu.org/manual/en/html_node/Substitutes.html
+  (plain-file "nonguix.pub" "
 (public-key
  (ecc
   (curve Ed25519)
-  (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)
-  )
- )
-"))))
+  (q #C1FD53E5D4CE971933EC50C9F307AE2171A2D3B52C804642A7A35F84F3A4EA98#)))
+")
+  (plain-file "boggartonius.pub" "
+(public-key
+ (ecc
+  (curve Ed25519)
+  (q #19835D910DAFFD9E1161EC600EAE3033422A6F73096A79C37FC9E6A423EEBF42#)))
+")
+  (plain-file "ixy.pub" "
+(public-key
+ (ecc
+  (curve Ed25519)
+  (q #C9CC9EA98891D5AEF0E52DDEC4B6B0B512C493BC4300E934527D643BE794A99B#)))
+")))
 #+end_src
 
 ****** desktop-services
